@@ -14,7 +14,13 @@ import {
  * 2:拖拽的图片 v
  * 3:删除图片 v
  * 4:编辑属性 v
- * 5:选中位置
+ * 5:选中位置 v
+ * 6:标准组件模板HOC x
+ * 7:组件间通讯 x
+ * 8:绘制(data=>view) x
+ * 9:区分选中与拖拽区别 v
+ * 10:事件DOWN MOVE UP v
+ * 11:容器导出快照与图片 x
  */
 
 /**
@@ -91,6 +97,7 @@ class ASheet {
   constructor(prev = true, nameSpace = "app") {
     this[_targets] = [];
     this[_container] = undefined;
+    this.events = [];
     this[_display] = 'block'
     this[_bodyUp] = undefined;
     this[_close] = false;
@@ -120,6 +127,15 @@ class ASheet {
     this[$itemBindEvent]();
     this[$optionStream]();
     return this;
+  }
+  /**
+   * 
+   * @param {*} events 原生事件们。目前只支持copydom的down事件
+   * 例子 $.bindEvent({down:(event)=>{...}})
+   */
+  registryEvents(events) {
+    this.events = events
+    return this
   }
   /**
    * @param identifier string 待编辑的html的id，
@@ -191,7 +207,7 @@ class ASheet {
    * @param {} upFn 鼠标抬起回调 参数为event当前触发事件对象, current: 当前操作片
    * @returns 当前实例
    */
-  mouseUp(upFn, filterFn = () => this.startByDraging()) {
+   dragStartOnUp(upFn, filterFn = () => this.startByDraging()) {
     this[$blocking](filterFn, upFn);
     return this;
   }
@@ -224,11 +240,12 @@ class ASheet {
     return this;
   }
   /**
+   * 仅仅在触发移动后执行，如果你想操作组件的mousedown请前去registryEvents方法内传入down方法
    * @param {*} filterFn 片筛选，函数 ，参数为片集合迭代项目，即再所有片集合中筛选指定的满足条件的片
    * @param {*} downFn 鼠标按下回调 参数为event当前触发事件对象, current: 当前操作片
    * @returns 当前实例
    */
-  mouseDown(filterFn, downFn) {
+  dragStartOnDown(filterFn, downFn) {
     this[$downStart](filterFn, downFn);
     return this;
   }
@@ -238,7 +255,7 @@ class ASheet {
    * @param {*} moveFn 鼠标移动回调 参数为event当前触发事件对象, current: 当前操作片
    * @returns 当前实例
    */
-  mouseMove(moveFn, triggerFn = () => this.startByDraging() && !this[_close]) {
+   dragStartOnMove(moveFn, triggerFn = () => this.startByDraging() && !this[_close]) {
     this[$blockingMove](triggerFn, moveFn);
     return this;
   }
@@ -614,7 +631,13 @@ class ASheet {
                 x: initX,
                 y: initX,
               };
-              !res.target.getAttribute("fixed") && res.preventDefault();
+              res.target.getAttribute("fixed") !== 'true' && res.preventDefault();
+              const {
+                down
+              } = this.events
+              if (isFunction(down)) {
+                down.call(this, res)
+              }
               return this[_bodyMove].pipe(takeUntil(this[_bodyUp]));
             }),
             concatAll(),

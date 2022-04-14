@@ -9,10 +9,10 @@
         background: #1990ff;
         display: flex;
         justify-content: center;
-        padding:20px
+        padding: 20px;
       "
     >
-        <tables />
+      <tables @click="ccc" />
     </div>
     <img
       id="dragImageId"
@@ -41,6 +41,11 @@ export default {
   data: () => {
     return {};
   },
+  methods: {
+    ccc() {
+      console.log("组件的click");
+    },
+  },
   mounted() {
     console.log(
       new ASheet(true, "container")
@@ -51,16 +56,21 @@ export default {
           { templateId: "dragSlot", slot: "dragImageId" },
           { name: "arron", age: 24 }
         )
-        .mouseDown(
+        .registryEvents({
+          down: (event) => {
+            console.log("按下了", event);
+          },
+        })
+        .dragStartOnDown(
           () => true,
           (i) => {
             console.log(i, "down");
           }
         )
-        .mouseMove((i) => {
+        .dragStartOnMove((i) => {
           console.log(i, "move");
         })
-        .mouseUp(
+        .dragStartOnUp(
           (i) => {
             console.log(i, "up");
           },
