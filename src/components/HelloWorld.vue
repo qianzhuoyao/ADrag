@@ -1,30 +1,46 @@
 <template>
-  <div id="container" style="width: 1000px; height: 400px; background: bisque">
-    <div style="width: 100px; height: 150px; background: #1990ff">不是</div>
+  <div id="container" style="display: flex">
+    <div>
+      <div style="width: 100px; height: 150px; background: #1990ff">
+        正常元素，无拖拽
+      </div>
+      <div
+        id="dragSlot"
+        style="
+          width: 400px;
+          height: 200px;
+          background: #1990ff;
+          display: flex;
+          justify-content: center;
+          padding: 20px;
+        "
+      >
+        <tables @click="ccc" />
+      </div>
+      <img
+        id="dragImageId"
+        :src="require('@/image.jpg')"
+        alt=""
+        style="width: 200px; height: 200px"
+      />
+      <div id="drag" style="width: 100px; height: 100px; background: #42b983">
+        拖拽我可以拉出solt并放置在黄色容器区域
+      </div>
+      <div id="dragd" style="width: 100px; height: 100px; background: #42b983">
+        拖拽我可以把我放置在黄色容器区域
+      </div>
+    </div>
     <div
-      id="dragSlot"
+      id="provider"
       style="
-        width: 400px;
-        height: 200px;
-        background: #1990ff;
-        display: flex;
-        justify-content: center;
-        padding: 20px;
+        width: 1000px;
+        height: 400px;
+        background: bisque;
+        left:200px;
+        position: absolute;
       "
     >
-      <tables @click="ccc" />
-    </div>
-    <img
-      id="dragImageId"
-      :src="require('@/image.jpg')"
-      alt=""
-      style="width: 200px; height: 200px"
-    />
-    <div id="drag" style="width: 100px; height: 100px; background: #42b983">
-      测
-    </div>
-    <div id="dragd" style="width: 100px; height: 100px; background: #42b983">
-      实
+      容器
     </div>
   </div>
 </template>
@@ -49,7 +65,7 @@ export default {
   mounted() {
     console.log(
       new ASheet(true, "container")
-        .container("container")
+        .container("provider")
         .trigger(["drag", "dragd"])
         .instanceBindData(
           (i) => i.id === "drag",

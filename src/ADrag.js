@@ -158,11 +158,15 @@ class ASheet {
     return this;
   }
   /**
-   * 容器
+   * 容器,必须为 position: absolute;，否则会校准不对容器
    * @param identifier 容器id
    */
   container(identifier) {
     const DOM = document.getElementById(identifier);
+    console.log(DOM.style, 'ds')
+    if (DOM.style.position !== 'absolute') {
+      throw Error('已中止元素构建,container函数接收id的dom的position属性必须为absolute,否则无法生成确认的位置')
+    }
     if (DOM) {
       const {
         offsetLeft,
@@ -207,7 +211,7 @@ class ASheet {
    * @param {} upFn 鼠标抬起回调 参数为event当前触发事件对象, current: 当前操作片
    * @returns 当前实例
    */
-   dragStartOnUp(upFn, filterFn = () => this.startByDraging()) {
+  dragStartOnUp(upFn, filterFn = () => this.startByDraging()) {
     this[$blocking](filterFn, upFn);
     return this;
   }
@@ -255,7 +259,7 @@ class ASheet {
    * @param {*} moveFn 鼠标移动回调 参数为event当前触发事件对象, current: 当前操作片
    * @returns 当前实例
    */
-   dragStartOnMove(moveFn, triggerFn = () => this.startByDraging() && !this[_close]) {
+  dragStartOnMove(moveFn, triggerFn = () => this.startByDraging() && !this[_close]) {
     this[$blockingMove](triggerFn, moveFn);
     return this;
   }
