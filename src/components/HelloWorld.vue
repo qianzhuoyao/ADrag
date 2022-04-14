@@ -36,7 +36,7 @@
         width: 1000px;
         height: 400px;
         background: bisque;
-        left:200px;
+        left: 200px;
         position: absolute;
       "
     >
@@ -72,6 +72,7 @@ export default {
           { templateId: "dragSlot", slot: "dragImageId" },
           { name: "arron", age: 24 }
         )
+        .zIndexChange("dragd", 999, true)
         .registryEvents({
           down: (event) => {
             console.log("按下了", event);

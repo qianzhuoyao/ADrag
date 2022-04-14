@@ -137,12 +137,16 @@ class ASheet {
     this.events = events
     return this
   }
-  /**
-   * @param identifier string 待编辑的html的id，
-   */
-  zIndexChange(identifier, zIndex) {
+ /**
+  * 
+  * @param {*} identifier id
+  * @param {*} zIndex  新的index
+  * @param {*} force 强制更改
+  * @returns 
+  */
+  zIndexChange(identifier, zIndex,force = false) {
     const willEdit = document.getElementById(identifier);
-    if (willEdit.getAttribute("copyBy")) {
+    if (willEdit.getAttribute("copyBy")||force) {
       willEdit.style.zIndex = zIndex || willEdit.style.zIndex;
     }
     return this;
