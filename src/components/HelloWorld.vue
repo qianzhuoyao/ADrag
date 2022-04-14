@@ -16,7 +16,7 @@
     </div>
     <img
       id="dragImageId"
-      src="../image.jpg"
+      :src="require('@/image.jpg')"
       alt=""
       style="width: 200px; height: 200px"
     />

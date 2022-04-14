@@ -195,25 +195,26 @@ class ASheet {
     this[$blocking](filterFn, upFn);
     return this;
   }
-  click(event) {
+  over(event) {
     const id = event.target.id;
     this[_targets].map((i) => {
       i.childs &&
         i.childs.map((j) => {
           if (j.id === id) {
-            if (j.DOM.getAttribute("resizing") === "true") {
-              j.DOM.setAttribute("resizing", false);
+            if (j.DOM.getAttribute("fixed") === "true") {
+              j.DOM.setAttribute("fixed", false);
               j.DOM.style.resize = "none";
               j.DOM.style.overflow = "auto";
               j.DOM.style.border = 'none'
             } else {
-              j.DOM.setAttribute("resizing", true);
+              j.DOM.setAttribute("fixed", true);
               j.DOM.style.resize = "both";
               j.DOM.style.overflow = "auto";
-              j.DOM.style.border = '2px solid black'
+              //j.DOM.style.border = '2px solid black'
+              j.DOM.style.border = `${i.tempateStyle.fixedBorderWidth||'2px'} ${i.tempateStyle.fixedBorderStyle==='solid'?'solid':'dashed'} ${i.tempateStyle.fixedBorderColor||'black'}`
             }
           } else {
-            j.DOM.setAttribute("resizing", false);
+            j.DOM.setAttribute("fixed", false);
             j.DOM.style.resize = "none";
             j.DOM.style.overflow = "auto";
             j.DOM.style.border = 'none'
@@ -285,7 +286,9 @@ class ASheet {
    * @param {
    *     offsetX:number 鼠标偏移x
    *     offsetY:number 鼠标偏移y
-   *     resize:boolean dom可移动
+   *     fixedBorderWidth string 当copyDom 固定时的框粗度
+   *     fixedBorderColor string 当copyDom 固定时的框颜色
+   *     fixedBorderStyle string 当copyDom 固定时的框类型。虚线或者solid
    *     slot:HTMLid move模替换插槽 会替换掉trigger的html
    *    templateId:HTMLid up模替换插槽 会替换掉trigger的html、
    * 注2：透明度什么的,请在slot里写好
@@ -301,6 +304,11 @@ class ASheet {
           if (show.slot) {
             k.slotDOM = document.getElementById(show.slot);
             k.tempateDOM = document.getElementById(show.templateId);
+            const {
+              fixedBorderWidth,
+              fixedBorderColor,
+              fixedBorderStyle
+            } = show
             if (k.tempateDOM) {
               this[_display] = k.tempateDOM.style.display || this[_display]
               k.tempateDOM.style.display = "none";
@@ -312,6 +320,11 @@ class ASheet {
             k.slotDOM.style.zIndex = 999;
             k.slotDOM.style.cursor = "pointer";
             k.childs = k.childs || [];
+            k.tempateStyle = {
+              fixedBorderWidth,
+              fixedBorderColor,
+              fixedBorderStyle
+            }
             k.__slotDownObservable = fromEvent(k.slotDOM, "mousedown");
           }
           k.data = k.data || data;
@@ -390,6 +403,7 @@ class ASheet {
       DOM: dup,
       stream,
       copyBy: node.id,
+      tempateStyle: node.tempateStyle,
       id: dup.id,
       isChildren: true,
     });
@@ -464,7 +478,7 @@ class ASheet {
         this[_currentItem].slotDOM &&
         (this[_currentItem].slotDOM.style.display = "none");
       this[_currentItem] = undefined;
-      this.click(res);
+      this.over(res);
     });
   }
   /**
@@ -600,14 +614,14 @@ class ASheet {
                 x: initX,
                 y: initX,
               };
-              !res.target.getAttribute("resizing") && res.preventDefault();
+              !res.target.getAttribute("fixed") && res.preventDefault();
               return this[_bodyMove].pipe(takeUntil(this[_bodyUp]));
             }),
             concatAll(),
             withLatestFrom(p, (move, down) => {
               //当触发的是children而不是tempalte 的 copy元素的话（children的子dom下），禁止移动（避免事件冲突）
               if (isChildren && childrenNode.id !== down.target.id) {
-                childrenNode.DOM.setAttribute("resizing", true)
+                childrenNode.DOM.setAttribute("fixed", true)
               }
               const {
                 pageX,
@@ -619,8 +633,6 @@ class ASheet {
               } = down;
               console.log(down, move, "down");
               return {
-                downEvent: down,
-                moveEvent: move,
                 button: down.button,
                 x: pageX - offsetX,
                 y: pageY - offsetY,
@@ -636,7 +648,7 @@ class ASheet {
                 "isChildrenisSlot"
               );
               if (isChildren) {
-                if (childrenNode.DOM.getAttribute("resizing") === "false") {
+                if (childrenNode.DOM.getAttribute("fixed") === "false") {
                   childrenNode.DOM.style.position = "absolute";
                   childrenNode.DOM.style.left = res.x + "px";
                   childrenNode.DOM.style.top = res.y + "px";
