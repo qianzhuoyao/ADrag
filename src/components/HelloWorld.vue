@@ -38,7 +38,7 @@ export default {
         .trigger(["drag", "dragd"])
         .instanceBindData(
           (i) => i.id === "drag",
-          { templateId: "dragSlot", slot: "dragImageId" ,forceSlot:true},
+          { templateId: "dragSlot", slot: "dragImageId"},
           { name: "arron", age: 24 }
         )
         .mouseDown(
