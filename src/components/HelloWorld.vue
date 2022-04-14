@@ -1,8 +1,18 @@
 <template>
   <div id="container" style="width: 1000px; height: 400px; background: bisque">
     <div style="width: 100px; height: 150px; background: #1990ff">不是</div>
-    <div id="dragSlot" style="width: 400px;height:200px">
-      <tables />
+    <div
+      id="dragSlot"
+      style="
+        width: 400px;
+        height: 200px;
+        background: #1990ff;
+        display: flex;
+        justify-content: center;
+        padding:20px
+      "
+    >
+        <tables />
     </div>
     <img
       id="dragImageId"
@@ -38,7 +48,7 @@ export default {
         .trigger(["drag", "dragd"])
         .instanceBindData(
           (i) => i.id === "drag",
-          { templateId: "dragSlot", slot: "dragImageId"},
+          { templateId: "dragSlot", slot: "dragImageId" },
           { name: "arron", age: 24 }
         )
         .mouseDown(

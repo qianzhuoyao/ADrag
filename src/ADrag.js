@@ -1,5 +1,12 @@
-import { fromEvent } from "rxjs";
-import { map, concatAll, takeUntil, withLatestFrom } from "rxjs/operators";
+import {
+  fromEvent
+} from "rxjs";
+import {
+  map,
+  concatAll,
+  takeUntil,
+  withLatestFrom
+} from "rxjs/operators";
 
 /**
  * TODO:
@@ -17,6 +24,7 @@ import { map, concatAll, takeUntil, withLatestFrom } from "rxjs/operators";
  */
 const _private = {
   _ASheet: {
+    _display: Symbol("dispaly"),
     _targets: Symbol("targets"),
     _close: Symbol("close"),
     _bodyUp: Symbol("bodyUp"),
@@ -50,10 +58,13 @@ class AScene {
   paint() {}
 }
 
-const { _ASheet } = _private;
+const {
+  _ASheet
+} = _private;
 const {
   _targets,
   _container,
+  _display,
   _bodyUp,
   _close,
   _bodyMove,
@@ -80,6 +91,7 @@ class ASheet {
   constructor(prev = true, nameSpace = "app") {
     this[_targets] = [];
     this[_container] = undefined;
+    this[_display] = 'block'
     this[_bodyUp] = undefined;
     this[_close] = false;
     this.nameSpace = checkTruth(nameSpace) ? nameSpace : "app";
@@ -136,8 +148,14 @@ class ASheet {
   container(identifier) {
     const DOM = document.getElementById(identifier);
     if (DOM) {
-      const { offsetLeft, offsetTop } = DOM;
-      const { width, height } = DOM.getBoundingClientRect();
+      const {
+        offsetLeft,
+        offsetTop
+      } = DOM;
+      const {
+        width,
+        height
+      } = DOM.getBoundingClientRect();
       this[_container] = {
         x: offsetLeft,
         y: offsetTop,
@@ -186,16 +204,19 @@ class ASheet {
             if (j.DOM.getAttribute("resizing") === "true") {
               j.DOM.setAttribute("resizing", false);
               j.DOM.style.resize = "none";
-              j.DOM.style.overflow = "unset";
+              j.DOM.style.overflow = "auto";
+              j.DOM.style.border = 'none'
             } else {
               j.DOM.setAttribute("resizing", true);
               j.DOM.style.resize = "both";
               j.DOM.style.overflow = "auto";
+              j.DOM.style.border = '2px solid black'
             }
           } else {
             j.DOM.setAttribute("resizing", false);
             j.DOM.style.resize = "none";
-            j.DOM.style.overflow = "unset";
+            j.DOM.style.overflow = "auto";
+            j.DOM.style.border = 'none'
           }
         });
     });
@@ -239,7 +260,12 @@ class ASheet {
       "this[_container] && this[_currentItem]"
     );
     if (this[_container] && this[_currentItem]) {
-      const { x, y, width, height } = this[_currentItem];
+      const {
+        x,
+        y,
+        width,
+        height
+      } = this[_currentItem];
       const txmin = x;
       const txmax = x + width;
       const tymax = y + height;
@@ -260,7 +286,7 @@ class ASheet {
    *     offsetX:number 鼠标偏移x
    *     offsetY:number 鼠标偏移y
    *     resize:boolean dom可移动
-   *     slot:HTMLid move模替换插槽 会替换掉trigger的html:::
+   *     slot:HTMLid move模替换插槽 会替换掉trigger的html
    *    templateId:HTMLid up模替换插槽 会替换掉trigger的html、
    * 注2：透明度什么的,请在slot里写好
    * } show 被绑定的数据,它会被展示出来
@@ -276,15 +302,16 @@ class ASheet {
             k.slotDOM = document.getElementById(show.slot);
             k.tempateDOM = document.getElementById(show.templateId);
             if (k.tempateDOM) {
+              this[_display] = k.tempateDOM.style.display || this[_display]
               k.tempateDOM.style.display = "none";
               k.tempateDOM.style.position = "absolute";
               k.tempateDOM.style.cursor = "pointer";
             }
             k.slotDOM.style.display = "none";
-            k.childs = k.childs || [];
             k.slotDOM.style.position = "absolute";
             k.slotDOM.style.zIndex = 999;
             k.slotDOM.style.cursor = "pointer";
+            k.childs = k.childs || [];
             k.__slotDownObservable = fromEvent(k.slotDOM, "mousedown");
           }
           k.data = k.data || data;
@@ -315,8 +342,14 @@ class ASheet {
    */
   [$updateTarget]() {
     this[_targets] = this[_targets].map((i) => {
-      const { offsetLeft, offsetTop } = i.DOM;
-      const { width, height } = i.DOM.style;
+      const {
+        offsetLeft,
+        offsetTop
+      } = i.DOM;
+      const {
+        width,
+        height
+      } = i.DOM.style;
       return {
         ...i,
         x: offsetLeft,
@@ -345,7 +378,7 @@ class ASheet {
   [$copy](node, key) {
     const dup = node.cloneNode(true);
     dup.id = `${node.id}${key}`;
-    dup.style.display = "block";
+    dup.style.display = this[_display];
     dup.style.zIndex = 10;
     // dup.style.resize = 'both'
     // dup.style.overflow = 'auto'
@@ -385,23 +418,26 @@ class ASheet {
       console.log(this[_currentItem], "up_currentItem");
       if (this[$checkTarget]()) {
         if (isFunction(triggerFn) && triggerFn.call(this, this[_currentItem])) {
-          const { isChildren } = this[_currentItem];
-          if (this[_currentItem].slotDOM) {
+          const {
+            isChildren,
+            tempateDOM,
+            slotDOM,
+            childs
+          } = this[_currentItem];
+          if (slotDOM) {
             if (!isChildren) {
-              if (this[_currentItem].tempateDOM) {
-                this[_currentItem].tempateDOM.style.display = "none";
-                this[_currentItem].tempateDOM.style.left =
-                  this[_currentItem].slotDOM.style.left;
-                this[_currentItem].tempateDOM.style.top =
-                  this[_currentItem].slotDOM.style.top;
+              if (tempateDOM) {
+                tempateDOM.style.display = "none";
+                tempateDOM.style.left = slotDOM.style.left;
+                tempateDOM.style.top = slotDOM.style.top;
                 this[$copy](
-                  this[_currentItem].tempateDOM,
-                  this[_currentItem].childs.length
+                  tempateDOM,
+                  childs.length
                 );
               } else {
                 this[$copy](
-                  this[_currentItem].slotDOM,
-                  this[_currentItem].childs.length
+                  slotDOM,
+                  childs.length
                 );
               }
               this[$optionStream]();
@@ -415,7 +451,11 @@ class ASheet {
         }
         if (this[_currentItem] && this[_currentItem].isChildren) {
           this[_close] = true;
-          const { initX, initY, current } = this[_currentItem];
+          const {
+            initX,
+            initY,
+            current
+          } = this[_currentItem];
           current.style.left = initX + "px";
           current.style.top = initY + "px";
         }
@@ -478,13 +518,11 @@ class ASheet {
    */
   [$itemBindEvent]() {
     this[_targets] = this[_targets].map((i) => {
-      return i
-        ? {
-            ...i,
-            __itemDOM: i,
-            __itemDownObservable: fromEvent(i.DOM, "mousedown"),
-          }
-        : {};
+      return i ? {
+        ...i,
+        __itemDOM: i,
+        __itemDownObservable: fromEvent(i.DOM, "mousedown"),
+      } : {};
     });
   }
   /**
@@ -523,7 +561,10 @@ class ASheet {
         height;
       const childsStream = i.childs ? i.childs.map((h) => h.stream) : [];
       console.log(i, "iut");
-      const { __slotDownObservable, __itemDownObservable } = i;
+      const {
+        __slotDownObservable,
+        __itemDownObservable
+      } = i;
       const observable = [
         __slotDownObservable,
         __itemDownObservable,
@@ -564,10 +605,22 @@ class ASheet {
             }),
             concatAll(),
             withLatestFrom(p, (move, down) => {
-              const { pageX, pageY } = move;
-              const { offsetX, offsetY } = down;
-              console.log(down, "down");
+              //当触发的是children而不是tempalte 的 copy元素的话（children的子dom下），禁止移动（避免事件冲突）
+              if (isChildren && childrenNode.id !== down.target.id) {
+                childrenNode.DOM.setAttribute("resizing", true)
+              }
+              const {
+                pageX,
+                pageY
+              } = move;
+              const {
+                offsetX,
+                offsetY
+              } = down;
+              console.log(down, move, "down");
               return {
+                downEvent: down,
+                moveEvent: move,
                 button: down.button,
                 x: pageX - offsetX,
                 y: pageY - offsetY,
@@ -575,8 +628,7 @@ class ASheet {
             })
           ).subscribe((res) => {
             if (res.button === 0) {
-              console.log(
-                {
+              console.log({
                   isChildren,
                   isSlot,
                   isTemplate,
@@ -591,9 +643,11 @@ class ASheet {
                 }
               } else if (isSlot) {
                 i.slotDOM.style.display = "block";
-                const { offsetX, offsetY } = i.show;
-                console.log(
-                  {
+                const {
+                  offsetX,
+                  offsetY
+                } = i.show;
+                console.log({
                     offsetX,
                     offsetY,
                   },
@@ -635,4 +689,7 @@ class ASheet {
   }
 }
 
-export { AScene, ASheet };
+export {
+  AScene,
+  ASheet
+};
