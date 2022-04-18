@@ -47,6 +47,7 @@ const _private = {
     $blockingMove: Symbol("blockingMove"),
     $callback: Symbol("callback"),
     $updateTarget: Symbol("updateTarget"),
+    $bindChildrenStream: Symbol('bindChildrenStream'),
     $checkTarget: Symbol("checkTarget"),
   },
   _AScene: {},
@@ -80,6 +81,7 @@ const {
   $bodyBindEvent,
   $updateTarget,
   $copy,
+  $bindChildrenStream,
   $itemBindEvent,
   $optionStream,
   $checkTarget,
@@ -194,14 +196,48 @@ class ASheet {
    *
    * @returns 获取所有片(最新的)
    */
-  getTargets(fn) {
+  exportTarget(fn) {
     if (isFunction(fn)) {
       this[$updateTarget]();
-      fn.call(this, this[_targets])
+      const p = this.parseTarget()
+      console.log(p, 'ppp')
+      fn.call(this, p)
     }
     return this;
   }
-
+  /**
+   * 解析exportTarget导出的数据
+   */
+  compile(p) {
+    this[$assemble](p.map(i => i.initID));
+    console.log(this[_targets],'p')
+    this[$bodyBindEvent]();
+    this[$itemBindEvent]();
+    this[$optionStream]();
+    this[$bindChildrenStream](p.initID,p.children);
+    return this
+  }
+  /**
+   * 格式解析
+   */
+  parseTarget() {
+    const v = this[_targets].map(i => {
+      const o = {}
+      o.initID = i.id
+      o.slotID = i.show ? i.show.slot : undefined
+      o.templateID = i.show ? i.show.templateId : undefined
+      o.children = i.childs.map(i => i.id)
+      o.data = i.data
+      o.tempateStyle = {
+        fixedBorderWidth: i.show ? i.show.fixedBorderWidth : undefined,
+        fixedBorderColor: i.show ? i.show.fixedBorderColor : undefined,
+        fixedBorderStyle: i.show ? i.show.fixedBorderStyle : undefined
+      }
+      o.data = i.data
+      return o
+    })
+    return v
+  }
   /**
    *
    * @param {*} fn  筛选条件
@@ -423,6 +459,15 @@ class ASheet {
         });
     }
     return this;
+  }
+  //绑定子流
+  [$bindChildrenStream](targetId,children) {
+    console.log(targetId,children,'targetId,children,')
+    // this[_targets].map(i=>{
+    //    if(i.id===targetId){
+
+    //    }
+    // })
   }
   /**
    * private
