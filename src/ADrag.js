@@ -137,16 +137,16 @@ class ASheet {
     this.events = events
     return this
   }
- /**
-  * 
-  * @param {*} identifier id
-  * @param {*} zIndex  新的index
-  * @param {*} force 强制更改
-  * @returns 
-  */
-  zIndexChange(identifier, zIndex,force = false) {
+  /**
+   * 
+   * @param {*} identifier id
+   * @param {*} zIndex  新的index
+   * @param {*} force 强制更改
+   * @returns 
+   */
+  zIndexChange(identifier, zIndex, force = false) {
     const willEdit = document.getElementById(identifier);
-    if (willEdit.getAttribute("copyBy")||force) {
+    if (willEdit.getAttribute("copyBy") || force) {
       willEdit.style.zIndex = zIndex || willEdit.style.zIndex;
     }
     return this;
@@ -194,9 +194,12 @@ class ASheet {
    *
    * @returns 获取所有片(最新的)
    */
-  getTargets() {
-    this[$updateTarget]();
-    return this[_targets];
+  getTargets(fn) {
+    if (isFunction(fn)) {
+      this[$updateTarget]();
+      fn.call(this, this[_targets])
+    }
+    return this;
   }
 
   /**
@@ -219,6 +222,53 @@ class ASheet {
     this[$blocking](filterFn, upFn);
     return this;
   }
+  /**
+   * 渲染字符串到HTML
+   */
+  renderBy() {
+    //TODO
+  }
+  /**
+   * 在渲染成功后的html上绑定属性
+   */
+  callAttribute(asheetTargets) {
+    this[_targets] = asheetTargets
+    return this
+  }
+  /**
+   * 导出HTML 自namespace下
+   * @param {*} idFn 操作的函数
+   */
+  exportHTML(idFn) {
+    if (isFunction(idFn) && isString(this.nameSpace)) {
+      const output = document.getElementById(this.nameSpace).outerHTML
+      idFn.call(this, output)
+    }
+  }
+  /**
+   * 
+   * @returns 导出的类
+   */
+  exportClass() {
+    const classList = []
+    const reg = /class=['|"]?([\w+\s+-]+)['|"]?/g
+    this.exportHTML((output) => {
+      output.replace(reg, (_, item) => {
+        const itemDOM = document.getElementsByClassName(item)
+        console.log(item, itemDOM)
+        const style = window.getComputedStyle([...itemDOM][0], null)
+        classList.push({
+          name: item,
+          class: style
+        })
+      })
+    })
+    return classList
+  }
+
+  // parseClassInHtmlToStyle(HTML, class) {
+
+  // }
   over(event) {
     const id = event.target.id;
     this[_targets].map((i) => {
