@@ -1,12 +1,5 @@
-import {
-  fromEvent
-} from "rxjs";
-import {
-  map,
-  concatAll,
-  takeUntil,
-  withLatestFrom
-} from "rxjs/operators";
+import { fromEvent } from "rxjs";
+import { map, concatAll, takeUntil, withLatestFrom } from "rxjs/operators";
 
 /**
  * TODO:
@@ -43,11 +36,10 @@ const _private = {
     $optionStream: Symbol("optionStream"),
     $blocking: Symbol("blocking"),
     $copy: Symbol("copy"),
-    $downStart: Symbol("downStart"),
     $blockingMove: Symbol("blockingMove"),
+    $parseTarget: Symbol("parseTarget"),
     $callback: Symbol("callback"),
     $updateTarget: Symbol("updateTarget"),
-    $bindChildrenStream: Symbol('bindChildrenStream'),
     $checkTarget: Symbol("checkTarget"),
   },
   _AScene: {},
@@ -65,9 +57,7 @@ class AScene {
   paint() {}
 }
 
-const {
-  _ASheet
-} = _private;
+const { _ASheet } = _private;
 const {
   _targets,
   _container,
@@ -81,13 +71,12 @@ const {
   $bodyBindEvent,
   $updateTarget,
   $copy,
-  $bindChildrenStream,
   $itemBindEvent,
   $optionStream,
   $checkTarget,
   $callback,
   $blocking,
-  $downStart,
+  $parseTarget,
 } = _ASheet;
 
 class ASheet {
@@ -99,8 +88,8 @@ class ASheet {
   constructor(prev = true, nameSpace = "app") {
     this[_targets] = [];
     this[_container] = undefined;
-    this.events = [];
-    this[_display] = 'block'
+    this.events = {};
+    this[_display] = "block";
     this[_bodyUp] = undefined;
     this[_close] = false;
     this.nameSpace = checkTruth(nameSpace) ? nameSpace : "app";
@@ -131,20 +120,11 @@ class ASheet {
     return this;
   }
   /**
-   * 
-   * @param {*} events 原生事件们。目前只支持copydom的down事件
-   * 例子 $.bindEvent({down:(event)=>{...}})
-   */
-  registryEvents(events) {
-    this.events = events
-    return this
-  }
-  /**
-   * 
+   *
    * @param {*} identifier id
    * @param {*} zIndex  新的index
    * @param {*} force 强制更改
-   * @returns 
+   * @returns
    */
   zIndexChange(identifier, zIndex, force = false) {
     const willEdit = document.getElementById(identifier);
@@ -169,19 +149,14 @@ class ASheet {
    */
   container(identifier) {
     const DOM = document.getElementById(identifier);
-    console.log(DOM.style, 'ds')
-    if (DOM.style.position !== 'absolute') {
-      throw Error('已中止元素构建,container函数接收id的dom的position属性必须为absolute,否则无法生成确认的位置')
+    if (DOM.style.position !== "absolute") {
+      throw Error(
+        "已中止元素构建,container函数接收id的dom的position属性必须为absolute,否则无法生成确认的位置"
+      );
     }
     if (DOM) {
-      const {
-        offsetLeft,
-        offsetTop
-      } = DOM;
-      const {
-        width,
-        height
-      } = DOM.getBoundingClientRect();
+      const { offsetLeft, offsetTop } = DOM;
+      const { width, height } = DOM.getBoundingClientRect();
       this[_container] = {
         x: offsetLeft,
         y: offsetTop,
@@ -194,49 +169,66 @@ class ASheet {
 
   /**
    *
-   * @returns 获取所有片(最新的)
+   * @returns 获取所有容器内元素
    */
   exportTarget(fn) {
     if (isFunction(fn)) {
       this[$updateTarget]();
-      const p = this.parseTarget()
-      console.log(p, 'ppp')
-      fn.call(this, p)
+      const p = this[$parseTarget]();
+      fn.call(this, p, this[_targets]);
     }
     return this;
   }
   /**
    * 解析exportTarget导出的数据
    */
-  compile(p) {
-    this[$assemble](p.map(i => i.initID));
-    console.log(this[_targets],'p')
-    this[$bodyBindEvent]();
-    this[$itemBindEvent]();
-    this[$optionStream]();
-    this[$bindChildrenStream](p.initID,p.children);
-    return this
+  compile(children) {
+    children.map((i, index) => {
+      this[_targets].map((k) => {
+        if (k.id === i.parentId) {
+          const tem = document.getElementById(i.templateId);
+          const nam = document.getElementById(this.nameSpace);
+          const rem = document.getElementById(i.selfId);
+          this[_currentItem] = k;
+          nam.removeChild(rem);
+          this[$copy](tem, index);
+          this[$optionStream]();
+        }
+      });
+    });
+    return this;
   }
   /**
-   * 格式解析
+   * 置换元素
    */
-  parseTarget() {
-    const v = this[_targets].map(i => {
-      const o = {}
-      o.initID = i.id
-      o.slotID = i.show ? i.show.slot : undefined
-      o.templateID = i.show ? i.show.templateId : undefined
-      o.children = i.childs.map(i => i.id)
-      o.data = i.data
-      o.tempateStyle = {
-        fixedBorderWidth: i.show ? i.show.fixedBorderWidth : undefined,
-        fixedBorderColor: i.show ? i.show.fixedBorderColor : undefined,
-        fixedBorderStyle: i.show ? i.show.fixedBorderStyle : undefined
-      }
-      o.data = i.data
-      return o
-    })
-    return v
+  reRender() {}
+  /**
+   * 容器内容格式解析
+   */
+  [$parseTarget]() {
+    const result = [];
+    isArray(this[_targets]) &&
+      this[_targets].map((i) => {
+        i.childs &&
+          i.childs.map((k) => {
+            const o = {};
+            const { width, height, left, top } = window.getComputedStyle(
+              k.DOM,
+              null
+            );
+            o.slotId = i.show ? i.show.slot : undefined;
+            o.templateId = i.show ? i.show.templateId : undefined;
+            o.selfId = k.id;
+            o.parentId = i.id;
+            o.x = getNumberFromString(left);
+            o.y = getNumberFromString(top);
+            o.width = getNumberFromString(width);
+            o.height = getNumberFromString(height);
+            o.zIndex = Number(k.DOM.style.zIndex);
+            result.push(o);
+          });
+      });
+    return result;
   }
   /**
    *
@@ -268,8 +260,8 @@ class ASheet {
    * 在渲染成功后的html上绑定属性
    */
   callAttribute(asheetTargets) {
-    this[_targets] = asheetTargets
-    return this
+    this[_targets] = asheetTargets;
+    return this;
   }
   /**
    * 导出HTML 自namespace下
@@ -277,29 +269,28 @@ class ASheet {
    */
   exportHTML(idFn) {
     if (isFunction(idFn) && isString(this.nameSpace)) {
-      const output = document.getElementById(this.nameSpace).outerHTML
-      idFn.call(this, output)
+      const output = document.getElementById(this.nameSpace).outerHTML;
+      idFn.call(this, output);
     }
   }
   /**
-   * 
+   *
    * @returns 导出的类
    */
   exportClass() {
-    const classList = []
-    const reg = /class=['|"]?([\w+\s+-]+)['|"]?/g
+    const classList = [];
+    const reg = /class=['|"]?([\w+\s+-]+)['|"]?/g;
     this.exportHTML((output) => {
       output.replace(reg, (_, item) => {
-        const itemDOM = document.getElementsByClassName(item)
-        console.log(item, itemDOM)
-        const style = window.getComputedStyle([...itemDOM][0], null)
+        const itemDOM = document.getElementsByClassName(item);
+        const style = window.getComputedStyle([...itemDOM][0], null);
         classList.push({
           name: item,
-          class: style
-        })
-      })
-    })
-    return classList
+          class: style,
+        });
+      });
+    });
+    return classList;
   }
 
   // parseClassInHtmlToStyle(HTML, class) {
@@ -314,33 +305,43 @@ class ASheet {
             if (j.DOM.getAttribute("fixed") === "true") {
               j.DOM.setAttribute("fixed", false);
               j.DOM.style.resize = "none";
-              j.DOM.style.overflow = "auto";
-              j.DOM.style.border = 'none'
+              j.DOM.style.overflow = i.show
+                ? i.show.overflow || "auto"
+                : "auto";
+              j.DOM.style.border = "none";
             } else {
               j.DOM.setAttribute("fixed", true);
               j.DOM.style.resize = "both";
-              j.DOM.style.overflow = "auto";
+              j.DOM.style.overflow == i.show
+                ? i.show.overflow || "auto"
+                : "auto";
               //j.DOM.style.border = '2px solid black'
-              j.DOM.style.border = `${i.tempateStyle.fixedBorderWidth||'2px'} ${i.tempateStyle.fixedBorderStyle==='solid'?'solid':'dashed'} ${i.tempateStyle.fixedBorderColor||'black'}`
+              j.DOM.style.border = `${
+                i.tempateStyle.fixedBorderWidth || "2px"
+              } ${
+                i.tempateStyle.fixedBorderStyle === "solid" ? "solid" : "dashed"
+              } ${i.tempateStyle.fixedBorderColor || "black"}`;
             }
           } else {
             j.DOM.setAttribute("fixed", false);
             j.DOM.style.resize = "none";
-            j.DOM.style.overflow = "auto";
-            j.DOM.style.border = 'none'
+            j.DOM.style.overflow = i.show ? i.show.overflow || "auto" : "auto";
+            j.DOM.style.border = "none";
           }
         });
     });
     return this;
   }
   /**
-   * 仅仅在触发移动后执行，如果你想操作组件的mousedown请前去registryEvents方法内传入down方法
+   * 仅仅在触发元移动后执行
    * @param {*} filterFn 片筛选，函数 ，参数为片集合迭代项目，即再所有片集合中筛选指定的满足条件的片
    * @param {*} downFn 鼠标按下回调 参数为event当前触发事件对象, current: 当前操作片
    * @returns 当前实例
    */
   dragStartOnDown(filterFn, downFn) {
-    this[$downStart](filterFn, downFn);
+    if (isFunction(filterFn) && filterFn()) {
+      this.events.down = downFn;
+    }
     return this;
   }
 
@@ -349,7 +350,10 @@ class ASheet {
    * @param {*} moveFn 鼠标移动回调 参数为event当前触发事件对象, current: 当前操作片
    * @returns 当前实例
    */
-  dragStartOnMove(moveFn, triggerFn = () => this.startByDraging() && !this[_close]) {
+  dragStartOnMove(
+    moveFn,
+    triggerFn = () => this.startByDraging() && !this[_close]
+  ) {
     this[$blockingMove](triggerFn, moveFn);
     return this;
   }
@@ -367,17 +371,8 @@ class ASheet {
    */
   [$checkTarget]() {
     let result = false;
-    console.log(
-      this[_container] && this[_currentItem],
-      "this[_container] && this[_currentItem]"
-    );
     if (this[_container] && this[_currentItem]) {
-      const {
-        x,
-        y,
-        width,
-        height
-      } = this[_currentItem];
+      const { x, y, width, height } = this[_currentItem];
       const txmin = x;
       const txmax = x + width;
       const tymax = y + height;
@@ -400,8 +395,10 @@ class ASheet {
    *     fixedBorderWidth string 当copyDom 固定时的框粗度
    *     fixedBorderColor string 当copyDom 固定时的框颜色
    *     fixedBorderStyle string 当copyDom 固定时的框类型。虚线或者solid
+   *     overflow :style的overflow 影响child
    *     slot:HTMLid move模替换插槽 会替换掉trigger的html
-   *    templateId:HTMLid up模替换插槽 会替换掉trigger的html、
+   *     templateId:HTMLid up模替换插槽 会替换掉trigger的html、
+   *
    * 注2：透明度什么的,请在slot里写好
    * } show 被绑定的数据,它会被展示出来
    * @param {*} data 被绑定的数据,会被绑在data键上
@@ -415,13 +412,10 @@ class ASheet {
           if (show.slot) {
             k.slotDOM = document.getElementById(show.slot);
             k.tempateDOM = document.getElementById(show.templateId);
-            const {
-              fixedBorderWidth,
-              fixedBorderColor,
-              fixedBorderStyle
-            } = show
+            const { fixedBorderWidth, fixedBorderColor, fixedBorderStyle } =
+              show;
             if (k.tempateDOM) {
-              this[_display] = k.tempateDOM.style.display || this[_display]
+              this[_display] = k.tempateDOM.style.display || this[_display];
               k.tempateDOM.style.display = "none";
               k.tempateDOM.style.position = "absolute";
               k.tempateDOM.style.cursor = "pointer";
@@ -434,8 +428,8 @@ class ASheet {
             k.tempateStyle = {
               fixedBorderWidth,
               fixedBorderColor,
-              fixedBorderStyle
-            }
+              fixedBorderStyle,
+            };
             k.__slotDownObservable = fromEvent(k.slotDOM, "mousedown");
           }
           k.data = k.data || data;
@@ -460,29 +454,14 @@ class ASheet {
     }
     return this;
   }
-  //绑定子流
-  [$bindChildrenStream](targetId,children) {
-    console.log(targetId,children,'targetId,children,')
-    // this[_targets].map(i=>{
-    //    if(i.id===targetId){
-
-    //    }
-    // })
-  }
   /**
    * private
    * 更新target位置坐标
    */
   [$updateTarget]() {
     this[_targets] = this[_targets].map((i) => {
-      const {
-        offsetLeft,
-        offsetTop
-      } = i.DOM;
-      const {
-        width,
-        height
-      } = i.DOM.style;
+      const { offsetLeft, offsetTop } = i.DOM;
+      const { width, height } = i.DOM.style;
       return {
         ...i,
         x: offsetLeft,
@@ -509,10 +488,16 @@ class ASheet {
    * 复制节点
    */
   [$copy](node, key) {
+    console.log(node, "nmodecopy");
     const dup = node.cloneNode(true);
     dup.id = `${node.id}${key}`;
-    dup.style.display = this[_display];
+    dup.style.display = [undefined, "none", ""].includes(this[_display])
+      ? "block"
+      : this[_display];
     dup.style.zIndex = 10;
+    dup.style.overflow = this[_currentItem].show
+      ? this[_currentItem].show.overflow || "auto"
+      : "auto";
     // dup.style.resize = 'both'
     // dup.style.overflow = 'auto'
     dup.setAttribute("copyBy", node.id);
@@ -522,26 +507,17 @@ class ASheet {
     this[_currentItem].childs.push({
       DOM: dup,
       stream,
+      data: this[_currentItem].data,
       copyBy: node.id,
       tempateStyle: node.tempateStyle,
       id: dup.id,
+      index: key,
       isChildren: true,
     });
   }
-  /**
-   * private
-   * 事件流按下
-   */
-  [$downStart](filterFn, fn) {
-    if (isFunction(filterFn)) {
-      this[_targets]
-        .filter((i) => filterFn.call(this, i))
-        .map((f) => {
-          f.__itemDownObservable.subscribe((res) => {
-            this[$callback](fn, res);
-          });
-        });
-    }
+  onResize(fn) {
+    this.events.resize = fn;
+    return this;
   }
   /**
    * private
@@ -552,27 +528,17 @@ class ASheet {
       console.log(this[_currentItem], "up_currentItem");
       if (this[$checkTarget]()) {
         if (isFunction(triggerFn) && triggerFn.call(this, this[_currentItem])) {
-          const {
-            isChildren,
-            tempateDOM,
-            slotDOM,
-            childs
-          } = this[_currentItem];
+          const { isChildren, tempateDOM, slotDOM, childs } =
+            this[_currentItem];
           if (slotDOM) {
             if (!isChildren) {
               if (tempateDOM) {
                 tempateDOM.style.display = "none";
                 tempateDOM.style.left = slotDOM.style.left;
                 tempateDOM.style.top = slotDOM.style.top;
-                this[$copy](
-                  tempateDOM,
-                  childs.length
-                );
+                this[$copy](tempateDOM, childs.length);
               } else {
-                this[$copy](
-                  slotDOM,
-                  childs.length
-                );
+                this[$copy](slotDOM, childs.length);
               }
               this[$optionStream]();
             }
@@ -585,11 +551,7 @@ class ASheet {
         }
         if (this[_currentItem] && this[_currentItem].isChildren) {
           this[_close] = true;
-          const {
-            initX,
-            initY,
-            current
-          } = this[_currentItem];
+          const { initX, initY, current } = this[_currentItem];
           current.style.left = initX + "px";
           current.style.top = initY + "px";
         }
@@ -652,11 +614,13 @@ class ASheet {
    */
   [$itemBindEvent]() {
     this[_targets] = this[_targets].map((i) => {
-      return i ? {
-        ...i,
-        __itemDOM: i,
-        __itemDownObservable: fromEvent(i.DOM, "mousedown"),
-      } : {};
+      return i
+        ? {
+            ...i,
+            __itemDOM: i,
+            __itemDownObservable: fromEvent(i.DOM, "mousedown"),
+          }
+        : {};
     });
   }
   /**
@@ -694,11 +658,7 @@ class ASheet {
         childrenNode,
         height;
       const childsStream = i.childs ? i.childs.map((h) => h.stream) : [];
-      console.log(i, "iut");
-      const {
-        __slotDownObservable,
-        __itemDownObservable
-      } = i;
+      const { __slotDownObservable, __itemDownObservable } = i;
       const observable = [
         __slotDownObservable,
         __itemDownObservable,
@@ -714,7 +674,7 @@ class ASheet {
               width = getNumberFromString(res.target.style.width);
               height = getNumberFromString(res.target.style.height);
               current = res.target;
-              console.log(i, index - 2, "ct");
+              // console.log(i, index - 2, "ct");
               isChildren =
                 index >= 2 ? i.childs && i.childs[index - 2].isChildren : false;
               childrenNode = isChildren ? i.childs[index - 2] : {};
@@ -734,12 +694,11 @@ class ASheet {
                 x: initX,
                 y: initX,
               };
-              res.target.getAttribute("fixed") !== 'true' && res.preventDefault();
-              const {
-                down
-              } = this.events
+              res.target.getAttribute("fixed") !== "true" &&
+                res.preventDefault();
+              const { down } = this.events;
               if (isFunction(down)) {
-                down.call(this, res)
+                down.call(this, this[_currentItem], res);
               }
               return this[_bodyMove].pipe(takeUntil(this[_bodyUp]));
             }),
@@ -747,17 +706,11 @@ class ASheet {
             withLatestFrom(p, (move, down) => {
               //当触发的是children而不是tempalte 的 copy元素的话（children的子dom下），禁止移动（避免事件冲突）
               if (isChildren && childrenNode.id !== down.target.id) {
-                childrenNode.DOM.setAttribute("fixed", true)
+                childrenNode.DOM.setAttribute("fixed", true);
               }
-              const {
-                pageX,
-                pageY
-              } = move;
-              const {
-                offsetX,
-                offsetY
-              } = down;
-              console.log(down, move, "down");
+              const { pageX, pageY } = move;
+              const { offsetX, offsetY } = down;
+              // console.log(down, move, "down");
               return {
                 button: down.button,
                 x: pageX - offsetX,
@@ -766,13 +719,14 @@ class ASheet {
             })
           ).subscribe((res) => {
             if (res.button === 0) {
-              console.log({
-                  isChildren,
-                  isSlot,
-                  isTemplate,
-                },
-                "isChildrenisSlot"
-              );
+              // console.log(
+              //   {
+              //     isChildren,
+              //     isSlot,
+              //     isTemplate,
+              //   },
+              //   "isChildrenisSlot"
+              // );
               if (isChildren) {
                 if (childrenNode.DOM.getAttribute("fixed") === "false") {
                   childrenNode.DOM.style.position = "absolute";
@@ -781,16 +735,7 @@ class ASheet {
                 }
               } else if (isSlot) {
                 i.slotDOM.style.display = "block";
-                const {
-                  offsetX,
-                  offsetY
-                } = i.show;
-                console.log({
-                    offsetX,
-                    offsetY,
-                  },
-                  "offsetX,offsetY"
-                );
+                const { offsetX, offsetY } = i.show;
                 if (offsetX || offsetY) {
                   i.slotDOM.style.left = res.x + offsetX || 0 + "px";
                   i.slotDOM.style.top = res.y + offsetY || 0 + "px";
@@ -804,7 +749,7 @@ class ASheet {
                 i.DOM.style.top = res.y + "px";
               }
             } else if (res.button === 2) {
-              console.log(2);
+              // console.log(2);
             }
             this[_currentItem] = {
               ...i,
@@ -827,7 +772,4 @@ class ASheet {
   }
 }
 
-export {
-  AScene,
-  ASheet
-};
+export { AScene, ASheet };

@@ -1,5 +1,41 @@
 ### ADRAG
+#### 實現：
+先引入所有的item组件模板
+[
+     {
+          title:xxx,
+          x:xxxx,
+          y:xxxx,
+          id:xxx,
+          width:xxxx,
+          height:xxxx,
+          type:xxxx,
+          container:xxxx,
+          data:xxxx
+     }
+]
 
+tips:clone 類
+需要实现一个衍生vue组件具备原vue组件的一切方法
+ 0：數據類型=>{
+      id:xxx,
+      data:xxx,
+      currentDom:xxx,
+      selected:xxx,
+      style:xxx,
+      fromDomId:xxx,
+      templateDomId:xxx,
+      draggingDomId:xxx,
+      containerId:xxx
+ }
+ 0：一個構造函數，參數draggingDomId，templateDomId fromDomId 生成一個clone,並綁定在鼠標上
+ 1：一個sync方法 更新視圖綁定新的數據 即所有的涉及視圖更新的都需要 因爲數據與試圖需要同步 參數為應該更新的id
+ 2：一個downOnElement方法 拖拽開始 應該回調 參數為當前元素id與綁定的數據
+ 3：一個moveOnElement方法 拖拽中 應該回調 參數為當前元素id與綁定的數據
+ 4：一個upOnElement方法 拖拽結束 應該回調 參數為當前元素id與綁定的數據
+ 5：一個更新視圖的方法 updateView 參數為id x,y,width,height,zindex style 更新視圖（位置，此方法應該調用asyn與copy）
+ 6：一個更新數據的方法 updateData 參數為id data 更新數據（數據，此方法需要asyn）
+ 7：一個複製方法 copy 參數為id 複製操作事件與數據
 #### 介绍:
 
 这是一个渐进的可视化拖拽库，通过绑定id来操作

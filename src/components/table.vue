@@ -1,17 +1,46 @@
 <template>
-  <el-table :data="tableData" style="width: 100%;
-    min-width: 400px;">
-    <el-table-column prop="date" label="Date" width="180" />
-    <el-table-column prop="name" label="Name" width="180" />
-    <el-table-column prop="address" label="Address" />
-  </el-table>
+  <div class='pss' :style="{top:y,left:x}" @click="clickss">{{ titles }}</div>
 </template>
 
 <script>
 export default {
   name: "Table-s",
+  props: {
+    title: {
+      type: String,
+      default: () => {
+        return "标题s";
+      },
+    },
+    x: {
+      type: String,
+      default: () => {
+        return "0px";
+      },
+    },
+    y: {
+      type: String,
+      default: () => {
+        return "0px";
+      },
+    },
+  },
+  watch: {
+    title: {
+      handler(n) {
+        this.titles = n;
+      },
+      immediate: true,
+    },
+  },
+  methods: {
+    clickss() {
+      console.log("click");
+    },
+  },
   data: () => {
     return {
+      titles: "dsd",
       tableData: [
         {
           date: "2016-05-03",
@@ -40,6 +69,13 @@ export default {
 </script>
 
 <style>
+.pss{
+  width: 100px; 
+  height: 100px;
+  background: #2c3e50;
+  position: absolute;
+  z-index: 999;
+}
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
