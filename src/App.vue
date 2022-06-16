@@ -32,7 +32,6 @@
             @dragging="acrossFunction(k.draggingCallback,k)"
             @dragstop="acrossFunction(k.dragStopCallback,k)"
         >
-          {{ k.attribute.position.y }}
           <component
               v-if="k.visisble"
               :is="k.attribute.renderInstanceBy"
@@ -84,16 +83,44 @@ export default {
     this.tems = templates
     setTimeout(() => {
       this.tems.map((i, k) => {
-        // i.copy().then(n => {
-        //   n.show()
-        // })
-        // i.copy().then(n => {
-        //   n.hide()
-        // })
-        // i.copy().then(n => {
-        //   n.hide()
-        // })
-        // this.list = i.getNodes()
+        i.copy().then(n => {
+          n.show()
+          n.drag({
+            x: 100,
+            y: 100
+          })
+          n.resize({
+            width: 100,
+            height: 100,
+          })
+          n.setZIndex(999)
+        })
+        i.copy().then(n => {
+          n.hide()
+          n.drag({
+            x: 200,
+            y: 200
+          })
+          n.resize({
+            width: 100,
+            height: 100,
+          })
+          n.setZIndex(999)
+        })
+        i.copy().then(n => {
+          n.hide()
+          n.drag({
+            x: 300,
+            y: 300
+          })
+          n.resize({
+            width: 100,
+            height: 100,
+          })
+          n.setZIndex(999)
+        })
+         this.list = i.getNodes()
+        console.log(this.list,'lisrt')
         // i.queueRenderOver((item) => {
         //   console.log(item.getNodes())
         // })
@@ -141,12 +168,4 @@ export default {
 </script>
 
 <style>
-#app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
-}
 </style>

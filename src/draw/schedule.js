@@ -14,65 +14,76 @@ class Node {
         this.load(template)
     }
 
+    //节点添加点击事件
     addClick(callback) {
         this.clickCallback = typeof callback === 'function' ? callback : () => {
             new Error('addClick 参数异常')
         }
     }
 
+    //渲染完毕继续渲染
     waitOver() {
         console.log('waitOver')
         typeof this.talk === 'function' && this.talk()
     }
 
+    //节点添加鼠标按下事件
     addMouseDown(callback) {
         this.mouseDownCallback = typeof callback === 'function' ? callback : () => {
             new Error('addMouseDown 参数异常')
         }
     }
 
+    //节点添加resizeing事件
     addResizing(callback) {
         this.resizingCallback = typeof callback === 'function' ? callback : () => {
             new Error('addMouseUp 参数异常')
         }
     }
 
+    //节点添加鼠标放起事件
     addMouseUp(callback) {
         this.mouseUpCallback = typeof callback === 'function' ? callback : () => {
             new Error('addMouseUp 参数异常')
         }
     }
 
+    //鼠标添加聚焦事件
     addFocus(callback) {
         this.focusCallback = typeof callback === 'function' ? callback : () => {
             new Error('addFocus 参数异常')
         }
     }
 
+    //鼠标添加失焦事件
     addBlur(callback) {
         this.blurCallback = typeof callback === 'function' ? callback : () => {
             new Error('addBlur 参数异常')
         }
     }
 
+    //节点添加拖拽事件
     addDragging(callback) {
         this.draggingCallback = typeof callback === 'function' ? callback : () => {
             new Error('addBlur 参数异常')
         }
     }
 
+//节点添加更改大小结束事件
     addResizeStop(callback) {
         this.resizeStopCallback = typeof callback === 'function' ? callback : () => {
             new Error('addResizeStop 参数异常')
         }
     }
 
+//节点添加拖拽结束事件
     addDragStop(callback) {
         this.dragStopCallback = typeof callback === 'function' ? callback : () => {
             new Error('addDragStop 参数异常')
         }
     }
 
+//深拷贝
     deepCopy(data, hash = new WeakMap()) {
         if (typeof data !== 'object' || data === null) {
             throw new TypeError('传入参数不是对象')
@@ -100,11 +111,13 @@ class Node {
         return newData;
     }
 
+//初始加载来自模板的信息与获取通知继续信号
     load(template) {
         this.attribute = this.deepCopy(template)
         this.talk = template.talk()
     }
 
+//更改节点大小
     resize({
                width,
                height
@@ -113,22 +126,22 @@ class Node {
         this.attribute.size.height = height
     }
 
+//设置节点被聚焦
     toFocus() {
         this.focus = true
     }
 
-    getRenderComponent() {
-        return this.attribute.renderInstanceBy
-    }
-
+//设置节点被失焦
     blur() {
         this.focus = false
     }
 
+//设置优先级
     setZIndex(z) {
         this.attribute.zIndex = z
     }
 
+//设置节点坐标
     drag({
              x,
              y
@@ -137,15 +150,20 @@ class Node {
         this.attribute.position.y = y
     }
 
+//节点隐藏
     hide() {
         this.visisble = false
     }
 
+//节点显示
     show() {
         this.visisble = true
     }
 }
 
+/**
+ * 模板
+ */
 class Template {
     constructor(tag) {
         this.tag = tag
@@ -155,7 +173,7 @@ class Template {
         this.renderOverCallback = undefined
     }
 
-
+//模板位置
     frameOfReference({
                          x,
                          y
@@ -167,6 +185,7 @@ class Template {
         return this
     }
 
+//模板大小
     size({
              height,
              width
@@ -178,11 +197,13 @@ class Template {
         return this
     }
 
+//模板优先级
     priority(zIndex) {
         this.zIndex = zIndex
         return this
     }
 
+//模板最小尺寸
     minSize({
                 minHeight,
                 minWidth
@@ -194,40 +215,46 @@ class Template {
         return this
     }
 
+//模板弹窗
     popup(menu) {
         this.popup = menu
         return this
     }
 
+//模板渲染组件
     renderBy(instance) {
         this.renderInstanceBy = instance
         return this
     }
 
+//模板源头组件
     copyBy(instance) {
         this.copyInstanceBy = instance
         return this
     }
 
+//模板拖拽组件
     dragBy(instance) {
         this.dragInstanceBy = instance
         return this
     }
 
+//获取模板生产的节点
     getNodes() {
         return this.nodes
     }
 
+//包装节点生产promise
     wrapNodes(node) {
         return function () {
             return new Promise(resolve => {
-                console.log('po,')
                 node.show()
                 resolve(node)
             })
         }
     }
 
+//通知队列渲染
     talk() {
         const that = this
         return function () {
@@ -235,6 +262,7 @@ class Template {
         }
     }
 
+//压入渲染队列
     pushQueue(node) {
         console.log(node)
         this.promiseNodes.push({
@@ -242,24 +270,27 @@ class Template {
         })
     }
 
+//队列渲染完毕回调
     queueRenderOver(callback) {
         typeof callback === "function" && (this.renderOverCallback = callback)
     }
 
+//执行队列(promise)0->1->2
     runQueue() {
         if (this.promiseNodes && this.promiseNodes.length) {
-            console.log(this.promiseNodes, 'ps')
-            const first = this.promiseNodes.splice(1, this.promiseNodes.length)[0]
-            this.promiseNodes.unshift()
-            console.log(first, 'dd')
+            this.promiseNodes.shift()
+            const first = this.promiseNodes[0]
+            console.log(first,this.promiseNodes)
             first ? first.promise() : (this.renderOverCallback && this.renderOverCallback.call(this, this))
         }
     }
 
+//获取队列
     getQueue() {
         return this.promiseNodes
     }
 
+//从模板复制出节点，生成节点的方式，是异步的
     copy() {
         const nodesLength = this.nodes.length + 1
         const tag = nodesLength
@@ -277,6 +308,9 @@ class Template {
     }
 }
 
+/**
+ * 解析
+ */
 export class Compiler {
     constructor(config) {
         this.templates = []
@@ -287,6 +321,7 @@ export class Compiler {
         return this.templates
     }
 
+//解析config文件为模板列表
     compiler(config) {
         const {
             scene
