@@ -9,11 +9,12 @@
   },
   "dependencies": {
     "core-js": "^3.8.3",
+    "immutable": "^4.1.0",
     "pnpm": "^7.2.1",
     "rxjs": "^7.5.5",
     "vue": "2.6.10",
-    "vue-template-compiler": "2.6.10",
-    "vue-drag-resize": "^1.5.4"
+    "vue-drag-resize": "^1.5.4",
+    "vue-template-compiler": "2.6.10"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",
