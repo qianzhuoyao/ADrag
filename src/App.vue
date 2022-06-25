@@ -10,6 +10,16 @@
       :node="tems.nodes[1]"
       @finished="finished"
     />
+    <pp
+      v-if="tems.nodes[2].view.visible"
+      :node="tems.nodes[2]"
+      @finished="finished"
+    />
+    <pp
+      v-if="tems.nodes[3].view.visible"
+      :node="tems.nodes[3]"
+      @finished="finished"
+    />
     <!-- <div v-for="(i, k) in tems" :key="k">
       <component :id="`copy${k}`" :is="i.copyInstanceBy"></component>
       <component :id="`drag${k}`" :is="i.dragInstanceBy"></component>
@@ -93,7 +103,8 @@ export default {
     this.tems.create(t[0], 1);
     this.tems.create(t[0], 2);
     this.tems.create(t[1], 3);
-     this.tems.syncRender();
+    this.tems.syncRender();
+    this.tems.create(t[1], 4);
     // setTimeout(()=>{
     //   this.tems.nodes[1].instance.display()
     // },2000)

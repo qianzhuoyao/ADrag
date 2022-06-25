@@ -33,7 +33,7 @@ export default {
   },
   mounted() {
      setTimeout(() => {
-         this.$emit('finished',this.node.instance.tag)
+         this.$emit('finished',this.node.instance)
         }, 2000);
   },
 };

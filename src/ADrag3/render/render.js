@@ -3,6 +3,7 @@ import lodash from "lodash";
 const MAPKEYS = ["x", "y", "ZIndex", "width", "height", "visible"];
 export default class Render {
   constructor() {
+    this.wait = false;
     this.records = [];
     this.nodes = [];
   }
@@ -15,8 +16,12 @@ export default class Render {
   shot(s) {
     this.records.push(s);
   }
+  //分水岭的作用，前后create的节点渲染机制不一样，之前的为wait模式，之后的将不再顾及是否finished，直接渲染
   syncRender() {
+    this.wait = true;
     this.nodes.map((i, k) => {
+      //当前节点打上同步标签，表明其会被额外当成一个任务被同步的执行
+      i.instance.tagWaitRener();
       if (k) {
         i.instance.hide();
       } else {
@@ -25,19 +30,22 @@ export default class Render {
     });
   }
   nextRender(currentTag) {
+    let stop = false;
     for (let i = 0, length = this.nodes.length; i < length; i++) {
       if (
         this.nodes[i].instance.tag !== currentTag &&
         !this.nodes[i].instance.visible
       ) {
         this.nodes[i].instance.display();
+        stop = true;
         break;
       }
     }
+    return stop;
   }
   finished(current) {
-    if (current) {
-      this.nextRender(current);
+    if (current && this.wait && current.isTagWaitRender()) {
+      this.wait = this.nextRender(current.tag);
     }
   }
   /**
@@ -72,7 +80,6 @@ export default class Render {
         return true;
       },
     });
-    console.log(instance,'instance');
     this.nodes.push({
       instance,
       view: Object.freeze(view),
