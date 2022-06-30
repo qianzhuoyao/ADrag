@@ -44,6 +44,14 @@ export class PipeEvent {
         this.obstructDefaultEvent()
     }
 
+    reloadDragPosition() {
+        domPosition({
+            dom: this.dragElement,
+            x: 0,
+            y: 0
+        })
+    }
+
     obstructDefaultEvent() {
         document.onselectstart = i => i.preventDefault()
     }
@@ -90,6 +98,7 @@ export class PipeEvent {
         domHide(this.dragElement)
         return this
     }
+
     dragElementShow() {
         isShow(this.dragElement) || domShow(this.dragElement)
         return this

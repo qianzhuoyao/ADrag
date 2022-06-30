@@ -5,6 +5,7 @@ export default class Template {
     this.width = 0;
     this.height = 0;
     this.ZIndex = 0;
+    this.focus = true;
     //节点显示
     this.visible = true;
     //匹配config luncher
@@ -13,6 +14,12 @@ export default class Template {
     this.templateState = null;
     //执行区分,当其为true时，他不会等待其他节点渲染完毕再渲染
     this.waitRender = false;
+  }
+  toFocus() {
+    this.focus = true;
+  }
+  toBlur() {
+    this.focus = false;
   }
   tagWaitRener() {
     this.waitRender = true;

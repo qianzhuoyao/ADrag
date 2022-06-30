@@ -1,12 +1,15 @@
+import Origin from "@/component/o.vue";
+import Drag from "@/component/d.vue";
+import Puzzle from "@/component/p.vue";
 const CONFIG = {
   scene: [
     {
       //匹配到template的接收器receiver
       launcher: "quxian",
       components: {
-        ORIGIN: "XXX",
-        DRAG: "DDDD",
-        PUZZLE: "RRRR",
+        ORIGIN: Origin,
+        DRAG: Drag,
+        PUZZLE: Puzzle,
       },
       //template与components内组件共享数据 ORIGIN/DRAG/PUZZLE
       state: {
@@ -17,9 +20,9 @@ const CONFIG = {
       //匹配到template的接收器receiver
       launcher: "ditu",
       components: {
-        ORIGIN: "XXX",
-        DRAG: "DDDD",
-        PUZZLE: "RRRR",
+        ORIGIN: Origin,
+        DRAG: Drag,
+        PUZZLE: Puzzle,
       },
       //template与components内组件共享数据 ORIGIN/DRAG/PUZZLE
       state: {

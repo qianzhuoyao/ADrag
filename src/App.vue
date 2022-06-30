@@ -1,117 +1,164 @@
 <template>
-  <div style="position: absolute">
-    <pp
-      v-if="tems.nodes[0].view.visible"
-      :node="tems.nodes[0]"
-      @finished="finished"
-    />
-    <pp
-      v-if="tems.nodes[1].view.visible"
-      :node="tems.nodes[1]"
-      @finished="finished"
-    />
-    <pp
-      v-if="tems.nodes[2].view.visible"
-      :node="tems.nodes[2]"
-      @finished="finished"
-    />
-    <pp
-      v-if="tems.nodes[3].view.visible"
-      :node="tems.nodes[3]"
-      @finished="finished"
-    />
-    <!-- <div v-for="(i, k) in tems" :key="k">
-      <component :id="`copy${k}`" :is="i.copyInstanceBy"></component>
-      <component :id="`drag${k}`" :is="i.dragInstanceBy"></component>
-      <div
-        id="container"
-        style="
-          position: absolute;
-          width: 1000px;
-          height: 1000px;
-          background: #2c3e50;
-        "
-      >
-        <VueDragResize
-          v-for="(k, index) in list.toJS()"
-          :key="index"
-          :x="
-            k.attribute.get('position').x -
-            parseFloat(String(computeContainer().offsetLeft))
-          "
-          :y="
-            k.attribute.get('position').y -
-            parseFloat(String(computeContainer().offsetTop))
-          "
-          :w="k.attribute.get('size').width"
-          :h="k.attribute.get('size').height"
-          :z="k.attribute.get('zIndex')"
-          :isActive="k.focus"
-          :parentH="parseFloat(String(computeContainer().styleOfHeight))"
-          :parentW="parseFloat(String(computeContainer().styleOfWidth))"
-          :parentLimitation="true"
-          @clicked="() => clicked(k)"
-          @activated="() => activated(k)"
-          @deactivated="acrossFunction(k.blurCallback, k)"
-          @resizing="(p) => resizing(k, p)"
-          @resizestop="(p) => resizeStop(k, p)"
-          @dragging="(p) => dragging(k, p)"
-          @dragstop="() => dragStop(k)"
-        >
-          {{ k.attribute.get("position").x }}
-          {{ k.attribute.get("position").y }}
-          {{ k.attribute.get("size").width }}
-          {{ k.attribute.get("size").height }}
-          <component
-            v-if="k.visisble"
-            :is="k.attribute.get('renderInstanceBy')"
-            :node="k"
-          >
-          </component>
-        </VueDragResize>
+  <!--    <svg height="210" width="500">-->
+  <!--      <line x1="0" y1="0" x2="200" y2="200" style="stroke:rgb(255,0,0);stroke-width:2"/>-->
+  <!--    </svg>-->
+  <div>
+    <div @click="unDo">
+      unDo
+    </div>
+    <div style="position: absolute;width: 1000px;height: 1000px;background: #42b983">
+      <div v-for="i in templates" :key="`origin${i.tag}`" :id="`origin${i.tag}`">
+        <component :is="i.originComponent"></component>
       </div>
-    </div> -->
+      <div v-for="i in templates" :key="`drag${i.tag}`" :id="`drag${i.tag}`">
+        <component :is="i.dragComponent"></component>
+      </div>
+      <VueDragResize
+          :ref="`${k.view.tag}ref`"
+          v-for="(k) in view"
+          :key="k.view.tag"
+          :x="k.view.x"
+          :y="k.view.y"
+          :w="k.view.width"
+          :h="k.view.height"
+          :z="k.view.ZIndex"
+          :isActive="k.view.focus"
+          :parentH="2000"
+          :parentW="2000"
+          :parentLimitation="true"
+          @dragging="(p)=>dragging(p,k.view.tag)"
+          @dragstop="()=>dragstop()"
+      >
+        {{ k.view.x }}
+        {{ k.view.y }}
+        {{ k.view.width }}
+        {{ k.view.height }}
+        <component
+            v-if="k.view.visible"
+            :is="k.instance.renderComponent"
+            :node="k"
+        >
+        </component>
+      </VueDragResize>
+    </div>
   </div>
 </template>
 
 <script>
 import Render from "./ADrag3/render/render";
-//import VueDragResize from "vue-drag-resize";
-import pp from "./component/p.vue";
+import VueDragResize from "vue-drag-resize";
+
+import {PipeEvent} from "@/ADrag3/hook/event";
+
 export default {
   name: "App",
-  components: {
-    pp,
-    //VueDragResize,
-  },
   data: () => {
     return {
       list: [],
-      tems: [],
+      view: [],
+      dragOnHandle: true,
+      render: {},
+      templates: [],
       node: {},
     };
   },
+  components: {VueDragResize},
   methods: {
+    // findInstanceByViewTag(viewTag){
+    //   return this.view
+    // },
+    unDo() {
+      this.dragOnHandle = false
+      this.render.unDo().then((preStep) => {
+        console.log(preStep, 'preStep')
+        if (preStep) {
+          this.render.updateElement(preStep.instance.tag, (instance) => {
+            console.log(preStep.view, 'willrender')
+            instance.setPosition({
+              x: preStep.view.x,
+              y: preStep.view.y
+            })
+            instance.setSize({
+              w: preStep.view.width,
+              h: preStep.view.height
+            })
+          }).then(() => {
+            this.view = this.render.getNodes()
+            //vueDragResize更新异常,遍历更新节点
+            this.view.forEach(i => {
+              console.log(this.$refs[`${i.view.tag}ref`][0], this.view, 'render')
+              this.$refs[`${i.view.tag}ref`][0].left = i.view.x
+              this.$refs[`${i.view.tag}ref`][0].top = i.view.y
+            })
+          })
+        } else {
+          this.view = []
+        }
+      })
+    },
+    dragstop() {
+      this.render.shot();
+      this.dragOnHandle = true;
+    },
+    dragging(position, tag) {
+      if (this.dragOnHandle) {
+        const {left: x, top: y} = position
+        console.log(this.view, tag, position, 'drag')
+        this.render.updateElement(tag, (instance) => {
+          instance.setPosition({
+            x,
+            y
+          })
+        }).then(() => {
+          this.view = this.render.getNodes()
+        })
+      }
+    },
     finished(tag) {
       console.log(tag, "finished");
       this.tems.finished(tag);
     },
   },
   mounted() {
-    this.tems = new Render();
-    const t = this.tems.start();
-    this.tems.create(t[0], 1);
-    this.tems.create(t[0], 2);
-    this.tems.create(t[1], 3);
-    this.tems.syncRender();
-    this.tems.create(t[1], 4);
-    // setTimeout(()=>{
-    //   this.tems.nodes[1].instance.display()
-    // },2000)
-    // this.tems.nodes[0].view.x = 20
-    this.node = this.tems.getIndexOfNodes(0);
-    //this.tems.nodes[0].instance.setPosition({ x: 10, y: 10 });
-    console.log(this.tems.nodes[0].view.visible, this.node, "Render()");
+    this.render = new Render();
+    this.templates = this.render.start();
+    console.log(this.templates, " this.templates ");
+    setTimeout(() => {
+      this.templates.forEach((i) => {
+        console.log(i, "iii");
+        new PipeEvent()
+            .setDragElement(`drag${i.tag}`)
+            .setCopyElement(`origin${i.tag}`)
+            .dragElementHide()
+            .pipeEventStart({
+              downCallback: () => {
+              },
+              moveCallback: (pipe) => {
+                pipe.dragElementShow();
+              },
+              overCallback: (pipeOver, e) => {
+                pipeOver.dragElementHide();
+                this.render.create(i, this.view.length + 1).then(tem => {
+                  console.log(tem, 'tem')
+                  tem.setPosition({
+                    x: e.x,
+                    y: e.y
+                  })
+                  tem.setSize({
+                    w: 100,
+                    h: 100
+                  })
+                  tem.setZIndex(999)
+                }).then(() => {
+                  //打个快照
+                  this.render.shot()
+                  this.view = this.render.getNodes()
+                  console.log(this.view, "viwew");
+                })
+              },
+            });
+      });
+    }, 0);
   },
 };
 </script>
