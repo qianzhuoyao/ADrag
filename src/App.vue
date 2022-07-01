@@ -28,6 +28,8 @@
           :parentLimitation="true"
           @dragging="(p)=>dragging(p,k.view.tag)"
           @dragstop="()=>dragstop()"
+          @resizing="(p)=>resizing(p,k.view.tag)"
+          @resizestop="()=>resizestop()"
       >
         {{ k.view.x }}
         {{ k.view.y }}
@@ -99,6 +101,23 @@ export default {
     dragstop() {
       this.render.shot();
       this.dragOnHandle = true;
+    },
+    resizestop() {
+      this.render.shot();
+      this.dragOnHandle = true;
+    },
+    resizing(position, tag) {
+      if (this.dragOnHandle) {
+        const {width: w, height: h} = position
+        this.render.updateElement(tag, (instance) => {
+          instance.setSize({
+            w,
+            h
+          })
+        }).then(() => {
+          this.view = this.render.getNodes()
+        })
+      }
     },
     dragging(position, tag) {
       if (this.dragOnHandle) {
