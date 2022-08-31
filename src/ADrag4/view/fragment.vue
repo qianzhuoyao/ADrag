@@ -73,15 +73,16 @@ export default {
           .setCopyElement(this.displaySlot)
           .dragElementHide()
           .pipeEventStart({
-            downCallback: (pipe) => {
-              pipe.dragElementShow()
+            downCallback: () => {
+
             },
             moveCallback: (pipe, e) => {
+              pipe.dragElementShow()
               pipe.dragElementPosition({x: e.x, y: e.y})
             },
             overCallback: (pipe, e) => {
               pipe.dragElementHide()
-              this.controller.update({
+              this.controller.updateForCreate({
                 c: this.putComponent,
                 tag: this.tag,
                 x: e.x,

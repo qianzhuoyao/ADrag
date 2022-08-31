@@ -1,22 +1,25 @@
 <template>
   <div>
-    <VueDragResize
-        v-for="(k,i) in renderData"
-        :key="i"
-        :x="k.x"
-        :y="k.y"
-        :w="k.w"
-        :h="k.h"
-        :z="k.z"
-        :isActive="k.f"
-        :parentH="2000"
-        :parentW="2000"
-        :parentLimitation="true"
-    >
-      <component
-          :is="k.c"
-      ></component>
-    </VueDragResize>
+    <div @click="del">删除</div>
+    <div v-for="(k,i) in renderData" :key="i" @click="()=>click(k)">
+      <VueDragResize
+          v-if="k.v"
+          :x="k.x"
+          :y="k.y"
+          :w="k.w"
+          :h="k.h"
+          :z="k.z"
+          :isActive="k.f"
+          :parentH="2000"
+          :parentW="2000"
+          :parentLimitation="true"
+      >
+        <component
+            :is="k.c"
+        ></component>
+      </VueDragResize>
+    </div>
+
   </div>
 </template>
 
@@ -48,9 +51,21 @@ export default {
   },
   methods: {
     update(items) {
-      console.log('item', items)
       this.renderData = items
     },
+    click(item) {
+      console.log(item, 'cick')
+      this.controller.updateForChange((i) => {
+        return {...i, f: i.id === item.id}
+      }, {tag: item.tag})
+    },
+    del() {
+      console.log(' this.controller', this.controller.getRenderData())
+      this.controller.getRenderData().map(i => {
+        this.controller.updateForDelete({id: i.id, tag: i.tag})
+      })
+
+    }
   }
 }
 </script>

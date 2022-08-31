@@ -7,12 +7,61 @@ export class Controller {
         this.getInstance()
     }
 
-    update(args) {
+    updateForCreate(args) {
         const {tag} = args
-        if (Controller.instance.tags.includes(tag)) {
+        this.updateViewAfterChange(() => {
             this.create(args)
-            this.updateView()
+            this.editor((i, k) => {
+                return k === this.getRenderData().length - 1 ? {...i, f: true} : {...i, f: false}
+            })
+        }, tag)
+    }
+
+    updateForChange(fn, args) {
+        console.log(fn, args, 'change')
+        if (typeof fn === "function") {
+            const {tag} = args
+            this.updateViewAfterChange(() => {
+                this.editor(fn)
+            }, tag)
         }
+    }
+
+    editor(fn) {
+        if (typeof fn === 'function') {
+            Controller.instance.renderModel.iterateChange((i, k) => {
+                const res = fn(i, k)
+                console.log(res, 'res')
+                //注意res 类型
+                return {...i, ...res}
+            })
+        }
+    }
+
+    editorAll(args) {
+        Controller.instance.renderModel.iterateChange((i) => {
+            return {...i, ...args}
+        })
+    }
+
+    tagsCheck(tag) {
+        return Controller.instance.tags.includes(tag)
+    }
+
+    updateViewAfterChange(fn, tag) {
+        if (typeof fn === 'function') {
+            if (this.tagsCheck(tag)) {
+                fn()
+                this.updateView()
+            }
+        }
+    }
+
+    updateForDelete(args) {
+        const {tag, id} = args
+        this.updateViewAfterChange(() => {
+            this.delete(id)
+        }, tag)
     }
 
     updateView() {
@@ -42,8 +91,17 @@ export class Controller {
         return Controller.instance.renderModel.getItems()
     }
 
-    create({x, y, w, h, f, z,c}) {
-        Controller.instance.renderModel.create({x, y, w, h, f, z,c})
+    delete(id) {
+        Controller.instance.renderModel.iterateChange((i) => {
+            if (i.id === id) {
+                i.v = false
+            }
+            return i
+        })
+    }
+
+    create({x, y, w, h, f, z, c, tag}) {
+        Controller.instance.renderModel.create({x, y, w, h, f, z, c, tag})
     }
 
     remove() {
