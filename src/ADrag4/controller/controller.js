@@ -9,12 +9,15 @@ export class Controller {
 
     updateForCreate(args) {
         const {tag} = args
-        this.updateViewAfterChange(() => {
-            this.create(args)
-            this.editor((i, k) => {
-                return k === this.getRenderData().length - 1 ? {...i, f: true} : {...i, f: false}
-            })
-        }, tag)
+        console.log(Controller.instance)
+        if (this.checkMoveTargetInside(args)) {
+            this.updateViewAfterChange(() => {
+                this.create(args)
+                this.editor((i, k) => {
+                    return k === this.getRenderData().length - 1 ? {...i, f: true} : {...i, f: false}
+                })
+            }, tag)
+        }
     }
 
     updateForChange(fn, args) {
@@ -72,6 +75,10 @@ export class Controller {
         Controller.instance.tags = tags
     }
 
+    bindId(id) {
+        Controller.instance.id = id
+    }
+
     undo() {
     }
 
@@ -82,6 +89,7 @@ export class Controller {
         if (!Controller.instance) {
             this.renderModel = new RenderModel()
             this.tags = []
+            this.id = undefined
             Controller.instance = this;
         }
         return Controller.instance;
@@ -100,8 +108,12 @@ export class Controller {
         })
     }
 
-    create({x, y, w, h, f, z, c, tag}) {
-        Controller.instance.renderModel.create({x, y, w, h, f, z, c, tag})
+    create({x, y, w, h, f, z, c, tag,m}) {
+        Controller.instance.renderModel.create({x, y, m,w, h, f, z, c, tag})
+    }
+
+    checkMoveTargetInside(itemParams) {
+        return Controller.instance.renderModel.hasItemInsideProvider(itemParams, Controller.instance.id)
     }
 
     remove() {

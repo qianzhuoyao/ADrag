@@ -26,11 +26,28 @@ export default {
       type: String,
       default: ''
     },
+    defaultComponentWidth: {
+      type: Number,
+      default: 100
+    },
+    defaultComponentHeight: {
+      type: Number,
+      default: 100
+    },
+    defaultComponentZIndex: {
+      type: Number,
+      default: 999
+    },
     hide: {
       type: String,
       default: ''
     },
     putComponent: {
+      type: Object,
+      default: () => {
+      }
+    },
+    modalComponent: {
       type: Object,
       default: () => {
       }
@@ -66,6 +83,7 @@ export default {
     getController() {
       this.controller = new Controller()
     },
+
     registryEvent() {
       new PipeEvent()
           .setDragElement(this.hideSlot)
@@ -84,12 +102,13 @@ export default {
               pipe.dragElementHide()
               this.controller.updateForCreate({
                 c: this.putComponent,
+                m: this.modalComponent,
                 tag: this.tag,
                 x: e.x,
                 y: e.y,
-                w: 100,
-                h: 100,
-                z: 999,
+                w: this.defaultComponentWidth,
+                h: this.defaultComponentHeight,
+                z: this.defaultComponentZIndex,
                 f: true
               })
             },

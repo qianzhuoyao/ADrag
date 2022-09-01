@@ -1,12 +1,23 @@
 <template>
-  <div>p</div>
+  <ul>
+    <li @click="log1">
+      <a>Option 1</a>
+    </li>
+    <li>
+      <a>Option 2</a>
+    </li>
+  </ul>
 </template>
 
 <script>
 export default {
   name: "view-c",
   props: {
-    node: {
+    updateView: {
+      type: Function,
+      default: new Function('')
+    },
+    thisData: {
       type: Object,
       default: () => {
         return {};
@@ -19,6 +30,12 @@ export default {
     };
   },
   watch: {
+    thisData: {
+      handler(n) {
+        console.log(n, 'nnn')
+      }, deep: true,
+      immediate: true
+    }
     // node: {
     //   handler(n) {
     //     this.ns = n;
@@ -32,10 +49,16 @@ export default {
     // },
   },
   mounted() {
-     setTimeout(() => {
-         this.$emit('finished',this.node.instance)
-        }, 2000);
   },
+  methods: {
+    log1() {
+      console.log(this.updateView,'updateView')
+      this.updateView(()=>{
+        console.log('123')
+      },this.thisData.tag)
+      console.log(1)
+    }
+  }
 };
 </script>
 

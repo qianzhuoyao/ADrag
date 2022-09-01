@@ -1,6 +1,14 @@
 <template>
   <div>
-    <fragment tag="1" display="123" hide="456" :put-component="components[0]">
+    <fragment
+        tag="1"
+        display="123"
+        hide="456"
+        :put-component="components[0]"
+        :modal-component="components[2]"
+        :default-component-height="100"
+        :default-component-width="100"
+        :default-component-z-index="999">
       <template #display>
         <div>123</div>
       </template>
@@ -16,7 +24,7 @@
         <div>1345</div>
       </template>
     </fragment>
-    <provider :tags="['1']">
+    <provider ref="provider" :tags="['1']" pid="pid" style="background: antiquewhite" @modalClick="modalClick">
     </provider>
   </div>
 </template>
@@ -26,13 +34,14 @@ import fragment from "@/ADrag4/view/fragment";
 import provider from "@/ADrag4/view/provider";
 import drag from '@/component/d'
 import o from '@/component/o'
+import f from '@/component/p'
 
 export default {
   name: "App",
   components: {fragment, provider},
   data: () => {
     return {
-      components: [drag, o],
+      components: [drag, o, f],
       list: [],
       view: [],
       dragOnHandle: true,
@@ -41,7 +50,16 @@ export default {
       node: {},
     };
   },
-  methods: {},
+  mounted() {
+    this.$refs.provider.on('click', (o) => {
+      console.log(o, 'click')
+    })
+  },
+  methods: {
+    modalClick(e) {
+      console.log(e, 'modalClick')
+    }
+  },
 
 };
 </script>

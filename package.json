@@ -15,6 +15,7 @@
     "lodash": "^4.17.21",
     "pnpm": "^7.2.1",
     "vue": "2.6.10",
+    "vue-context": "^6.0.0",
     "vue-drag-resize": "^1.5.4",
     "vue-template-compiler": "2.6.10"
   },
