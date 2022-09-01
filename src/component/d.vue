@@ -1,12 +1,16 @@
 <template>
-  <div>drag</div>
+  <div>{{ thisData.renderData.text || 'drag' }}</div>
 </template>
 
 <script>
 export default {
   name: "view-c",
   props: {
-    node: {
+    updateData: {
+      type: Function,
+      default: new Function('')
+    },
+    thisData: {
       type: Object,
       default: () => {
         return {};

@@ -76,9 +76,11 @@ export class RenderModel {
          */
         const {x, y, w, h, f, z, c, tag, m} = args
         const v = true
+        const renderData = {}
         const id = this.getItems().length
         RenderModel.instance.items.push({
-            x, y, w, h, f, z, c, v, m, id, tag
-        })
+                x, y, w, h, f, z, c, v, m, id, tag, renderData
+            }
+        )
     }
 }

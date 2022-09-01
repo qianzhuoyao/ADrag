@@ -13,7 +13,7 @@
 export default {
   name: "view-c",
   props: {
-    updateView: {
+    updateData: {
       type: Function,
       default: new Function('')
     },
@@ -52,10 +52,15 @@ export default {
   },
   methods: {
     log1() {
-      console.log(this.updateView,'updateView')
-      this.updateView(()=>{
+      console.log(this.updateData, 'updateView')
+      this.updateData((i) => {
         console.log('123')
-      },this.thisData.tag)
+        if (i.id === this.thisData.id) {
+          return {
+            text: 1
+          }
+        }
+      }, this.thisData.tag)
       console.log(1)
     }
   }

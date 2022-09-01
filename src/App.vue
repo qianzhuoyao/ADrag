@@ -24,7 +24,7 @@
         <div>1345</div>
       </template>
     </fragment>
-    <provider ref="provider" :tags="['1']" pid="pid" style="background: antiquewhite" @modalClick="modalClick">
+    <provider ref="provider" :tags="['1']" pid="pid" style="background: antiquewhite">
     </provider>
   </div>
 </template>
@@ -56,9 +56,6 @@ export default {
     })
   },
   methods: {
-    modalClick(e) {
-      console.log(e, 'modalClick')
-    }
   },
 
 };

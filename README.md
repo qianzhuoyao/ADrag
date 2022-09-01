@@ -23,3 +23,5 @@
 
 你需要使用updateView函数来更新视图
 每个放置组件与弹窗组件都有该属性的prop以及对应的组件数据thisData
+
+三方组件使用$refs.provider.updateData()来更新视图。

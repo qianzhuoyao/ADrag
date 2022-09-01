@@ -26,6 +26,7 @@
             :is="k.c"
             :thisData="k"
             :updateView="updateView"
+            :updateData="updateData"
         ></component>
       </VueDragResize>
       <menuContext :ref="`ref${k.id}`" style="z-index: 99999999;position: absolute">
@@ -33,6 +34,7 @@
             :is="k.m"
             :thisData="k"
             :updateView="updateView"
+            :updateData="updateData"
         ></component>
       </menuContext>
     </div>
@@ -90,7 +92,13 @@ export default {
     update(items) {
       this.renderData = items
     },
-    // 向外暴露的更新方法，fn返回新数据即可  更新
+    // 向外暴露的更新方法，fn返回新数据即可  更新数据
+    updateData(fn, tag) {
+      this.controller.updateForChange((i) => {
+        return {...i, renderData: fn(i)}
+      }, {tag})
+    },
+    // 向外暴露的更新方法，fn返回新数据即可  更新视图，danger
     updateView(fn, tag) {
       this.controller.updateForChange((i) => {
         return fn(i)
