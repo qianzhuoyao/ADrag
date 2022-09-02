@@ -15,7 +15,7 @@
 
 |组件|作用|props|slot|
 |-|-|-|-|
-|fragment|模板|<strong>tag:[String, Number, Boolean]</strong>:标识,与provider的tags一起使用,只有被provider的tags包含的tag的fragment才可以被绘制到provider</br><strong>renderKey:String</strong>:用于渲染用的标识</br><strong>defaultComponentWidth:Number</strong>:防止组件的默认宽</br><strong>defaultComponentHeight:Number</strong>:防止组件的默认高</br><strong>defaultComponentZIndex:Number</strong>:防止组件的默认层级</br><strong>putComponent:VNODE</strong>:放置的组件</br><strong>modalComponent:VNODE</strong>:默认防止组件右键触发的弹窗组件|<strong>display</strong>:明面上显示的</br><strong>hide</strong>:明面上隐藏的,会在拖动display时绑在鼠标上|
+|fragment|模板|<strong>tag:[String, Number, Boolean]</strong>:标识,与provider的tags一起使用,只有被provider的tags包含的tag的fragment才可以被绘制到provider</br><strong>renderKey:String</strong>:用于渲染用的标识</br><strong>defaultComponentWidth:Number</strong>:放置组件的默认宽</br><strong>defaultComponentHeight:Number</strong>:放置组件的默认高</br><strong>defaultComponentZIndex:Number</strong>:放置组件的默认层级</br><strong>putComponent:VNODE</strong>:放置的组件</br><strong>modalComponent:VNODE</strong>:默认放置组件右键触发的弹窗组件|<strong>display</strong>:明面上显示的</br><strong>hide</strong>:明面上隐藏的,会在拖动display时绑在鼠标上|
 |provider|容器|<strong>tags:any[]</strong>:可放置的fragment的tag数组</br><strong>parentH:Number</strong>:容器边界高</br><strong>parentW:Number</strong>:容器边界长|-|
 
 ## 例子
