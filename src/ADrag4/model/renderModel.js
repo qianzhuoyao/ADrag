@@ -1,3 +1,5 @@
+const result = Symbol('items')
+
 export class RenderModel {
     constructor() {
         this.getInstance()
@@ -5,7 +7,7 @@ export class RenderModel {
 
     getInstance() {
         if (!RenderModel.instance) {
-            this.items = []
+            this[result] = []
             RenderModel.instance = this;
         }
         return RenderModel.instance;
@@ -48,17 +50,16 @@ export class RenderModel {
     }
 
     getItems() {
-        return RenderModel.instance.items
+        return RenderModel.instance[result]
     }
 
 
     iterateChange(fn) {
         if (typeof fn === "function") {
             const list = this.getItems()
-            RenderModel.instance.items = list.map((i, k) => fn.call(this, i, k))
+            RenderModel.instance[result] = list.map((i, k) => fn.call(this, i, k))
         }
     }
-
 
     create(args) {
         /*
@@ -72,15 +73,17 @@ export class RenderModel {
          * m 弹窗组件
          * v 显示,
          * id 标识
+         * renderData 数据
          *
          */
         const {x, y, w, h, f, z, c, tag, m} = args
         const v = true
-        const renderData = {}
+        const renderData = Object.seal({})
         const id = this.getItems().length
-        RenderModel.instance.items.push({
+        RenderModel.instance[result].push({
                 x, y, w, h, f, z, c, v, m, id, tag, renderData
             }
         )
+        console.log(this.getItems(), 'gis')
     }
 }

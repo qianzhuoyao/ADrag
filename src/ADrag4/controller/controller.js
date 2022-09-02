@@ -8,15 +8,27 @@ export class Controller {
     }
 
     updateForCreate(args) {
+        this.afterCreateSuccess(() => {
+            this.editor((i, k) => {
+                return k === this.getRenderData().length - 1 ? {...i, f: true} : {...i, f: false}
+            })
+        }, args)
+    }
+
+    updateForDraw(args) {
+        this.afterCreateSuccess(() => {
+        }, args)
+    }
+
+    afterCreateSuccess(fn, args) {
         const {tag} = args
-        console.log(Controller.instance)
-        if (this.checkMoveTargetInside(args)) {
-            this.updateViewAfterChange(() => {
-                this.create(args)
-                this.editor((i, k) => {
-                    return k === this.getRenderData().length - 1 ? {...i, f: true} : {...i, f: false}
-                })
-            }, tag)
+        if (typeof fn === 'function') {
+            if (this.checkMoveTargetInside(args)) {
+                this.updateViewAfterChange(() => {
+                    this.create(args)
+                    fn()
+                }, tag)
+            }
         }
     }
 
@@ -108,15 +120,11 @@ export class Controller {
         })
     }
 
-    create({x, y, w, h, f, z, c, tag,m}) {
-        Controller.instance.renderModel.create({x, y, m,w, h, f, z, c, tag})
+    create({x, y, w, h, f, z, c, tag, m}) {
+        Controller.instance.renderModel.create({x, y, m, w, h, f, z, c, tag})
     }
 
     checkMoveTargetInside(itemParams) {
         return Controller.instance.renderModel.hasItemInsideProvider(itemParams, Controller.instance.id)
-    }
-
-    remove() {
-        Controller.instance = undefined
     }
 }

@@ -1,9 +1,9 @@
 <template>
-  <div :id="pid" class="provider-class" :style="{width:parentW+'px',height:parentH+'px'}">
+  <div :id="pid" class="provider-class" :style="{width:parentW+'px',height:parentH+'px'}" @click="areaClick">
     <!--    <div @click="del">删除</div>-->
     <div v-for="(k,i) in renderData"
          :key="i"
-         @click="()=>click(k)"
+         @click.stop="()=>click(k)"
          @contextmenu.prevent="(e)=>contextmenu(k,e)"
     >
       <VueDragResize
@@ -25,7 +25,6 @@
         <component
             :is="k.c"
             :thisData="k"
-            :updateView="updateView"
             :updateData="updateData"
         ></component>
       </VueDragResize>
@@ -33,7 +32,6 @@
         <component
             :is="k.m"
             :thisData="k"
-            :updateView="updateView"
             :updateData="updateData"
         ></component>
       </menuContext>
@@ -92,27 +90,49 @@ export default {
     update(items) {
       this.renderData = items
     },
+    drawEach(item) {
+      console.log(item, 'i')
+      const {c, m, tag, x, y, w, h, z, f = false} = item
+      this.controller.updateForDraw({
+        c,
+        m,
+        tag,
+        x,
+        y,
+        w,
+        h,
+        z,
+        f
+      })
+    },
+    //绘制
+    draw(data) {
+      data.map(i => {
+        this.drawEach(i)
+      })
+    },
     // 向外暴露的更新方法，fn返回新数据即可  更新数据
     updateData(fn, tag) {
       this.controller.updateForChange((i) => {
-        return {...i, renderData: fn(i)}
-      }, {tag})
-    },
-    // 向外暴露的更新方法，fn返回新数据即可  更新视图，danger
-    updateView(fn, tag) {
-      this.controller.updateForChange((i) => {
-        return fn(i)
+        return {...i, renderData: fn(i) || {}}
       }, {tag})
     },
     //向外公布on方法与回调  操作
     on(event, callback) {
-      const EVENTS = ['dragging', 'dragStop', 'resizing', 'resizeStop', 'click', 'hover']
+      const EVENTS = ['dragging', 'dragStop', 'resizing', 'areaClick', 'resizeStop', 'componentClick', 'hover']
       if (EVENTS.includes(event)) {
         if (typeof callback === 'function') {
           //覆盖事件
           this.eventMap[event] = callback
         }
       }
+    },
+    areaClick(e) {
+      console.log(
+          'area'
+      )
+      this.click({id: NaN, tag: this.tags[0]})
+      this.eventRun('areaClick', e)
     },
     resizing(item) {
       this.eventRun('resizing', item)
@@ -138,14 +158,13 @@ export default {
       this.controller.updateForChange((i) => {
         return {...i, f: i.id === item.id}
       }, {tag: item.tag})
-      this.eventRun('click', item)
+      this.eventRun('componentClick', item)
     },
     del() {
       console.log(' this.controller', this.controller.getRenderData())
       this.controller.getRenderData().map(i => {
         this.controller.updateForDelete({id: i.id, tag: i.tag})
       })
-
     }
   }
 }
