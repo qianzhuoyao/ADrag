@@ -1,9 +1,9 @@
 <template>
   <div>
-    <div :id="displaySlot">
+    <div :id="displayKey()">
       <slot name="display"/>
     </div>
-    <div :id="hideSlot">
+    <div :id="hideKey()">
       <slot name="hide"/>
     </div>
   </div>
@@ -13,8 +13,6 @@
 import {PipeEvent} from '../event/event'
 import {Controller} from "@/ADrag4/controller/controller";
 
-const DISPLAY = 'display'
-const HIDE = 'hide'
 export default {
   name: "a-fragment",
   props: {
@@ -22,9 +20,11 @@ export default {
       type: [String, Number, Boolean],
       default: 'a_default_fragment'
     },
-    display: {
-      type: String,
-      default: ''
+    renderKey: {
+      display: {
+        type: String,
+        default: ''
+      },
     },
     defaultComponentWidth: {
       type: Number,
@@ -38,10 +38,6 @@ export default {
       type: Number,
       default: 999
     },
-    hide: {
-      type: String,
-      default: ''
-    },
     putComponent: {
       type: Object,
       default: () => {
@@ -54,25 +50,17 @@ export default {
     }
   },
   watch: {
-    display: {
+    renderKey: {
       handler(n) {
-        this.checkProp(DISPLAY, n)
+        this.checkRenderKey(n)
       },
       immediate: true
     },
-    hide: {
-      handler(n) {
-        this.checkProp(HIDE, n)
-      },
-      immediate: true
-    }
   },
   data: () => {
     return {
       render: null,
       controller: null,
-      displaySlot: '',
-      hideSlot: ''
     }
   },
   mounted() {
@@ -83,12 +71,17 @@ export default {
     getController() {
       this.controller = new Controller()
     },
-
+    displayKey() {
+      return `${this.renderKey}-display`
+    },
+    hideKey() {
+      return `${this.renderKey}-hide`
+    },
     registryEvent() {
       new PipeEvent()
-          .setDragElement(this.hideSlot)
+          .setDragElement(this.displayKey())
           //设置来源元素
-          .setCopyElement(this.displaySlot)
+          .setCopyElement(this.hideKey())
           .dragElementHide()
           .pipeEventStart({
             downCallback: () => {
@@ -114,14 +107,9 @@ export default {
             },
           });
     },
-    checkProp(prop, value) {
-      const TACTICS = [DISPLAY, HIDE]
-      if (TACTICS.includes(prop)) {
-        if (!value) {
-          throw new Error(`${prop} must be truth`)
-        } else {
-          this[`${prop}Slot`] = value
-        }
+    checkRenderKey(value) {
+      if (!value) {
+        throw new Error(`${value} must be truth`)
       }
     }
   }

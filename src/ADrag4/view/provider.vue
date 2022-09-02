@@ -50,7 +50,7 @@ export default {
   props: {
     pid: {
       type: String,
-      default: ''
+      default: 'providerId'
     },
     tags: {
       type: Array,

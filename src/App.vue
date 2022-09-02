@@ -2,8 +2,7 @@
   <div>
     <fragment
         tag="1"
-        display="123"
-        hide="456"
+        render-key="123"
         :put-component="components[0]"
         :modal-component="components[2]"
         :default-component-height="100"
@@ -16,7 +15,7 @@
         <div>345</div>
       </template>
     </fragment>
-    <fragment tag="1" display="1123" hide="1456" :put-component="components[1]">
+    <fragment tag="1" render-key="456" :put-component="components[1]">
       <template #display>
         <div>1123</div>
       </template>
@@ -24,7 +23,7 @@
         <div>1345</div>
       </template>
     </fragment>
-    <provider ref="provider" :tags="['1']" pid="pid" style="background: antiquewhite">
+    <provider ref="provider" :tags="['1']" style="background: antiquewhite">
     </provider>
   </div>
 </template>
@@ -44,12 +43,6 @@ export default {
   data: () => {
     return {
       components: [drag, o, f],
-      list: [],
-      view: [],
-      dragOnHandle: true,
-      render: {},
-      templates: [],
-      node: {},
     };
   },
   mounted() {
