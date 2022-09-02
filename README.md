@@ -45,6 +45,3 @@ import modalComponent = new Vue(...) 某个组件
 
 这个例子会在页面上画出provider一个antiquewhite颜色2000*2000的矩形容器与一个内容为123的文本，此时拖动123文本时会在鼠标上出现一个随鼠标移动的345文本，当此时鼠标拖动到provider容器内时放开鼠标则会在provider上显示一个putComponent组件，该组件默认加持一个右击事件，右击时会显示modalComponent的组件。
 
-### License
-
-React is [MIT licensed](./LICENSE).
