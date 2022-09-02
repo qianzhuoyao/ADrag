@@ -18,9 +18,9 @@
           :parentW="parentW"
           :parentLimitation="true"
           @dragging="()=>dragging(k)"
-          @dragstop="()=>dragStop(k)"
+          @dragstop="(params)=>dragStop(k,params)"
           @resizing="()=>resizing(k)"
-          @resizestop="()=>resizeStop(k)"
+          @resizestop="(params)=>resizeStop(k,params)"
       >
         <component
             :is="k.c"
@@ -128,9 +128,6 @@ export default {
       }
     },
     areaClick(e) {
-      console.log(
-          'area'
-      )
       this.click({id: NaN, tag: this.tags[0]})
       this.eventRun('areaClick', e)
     },
@@ -140,11 +137,18 @@ export default {
     dragging(item) {
       this.eventRun('dragging', item)
     },
-    dragStop(item) {
+    dragStop(item, params) {
+      this.updateItemForStaticData({x: params.left, y: params.top}, item)
       this.eventRun('dragStop', item)
     },
-    resizeStop(item) {
+    resizeStop(item, params) {
+      this.updateItemForStaticData({w: params.width, h: params.height}, item)
       this.eventRun('resizeStop', item)
+    },
+    updateItemForStaticData(newItem, item) {
+      this.controller.updateForChange((i) => {
+        return i.id === item.id ? {...i, ...newItem} : i
+      }, {tag: item.tag})
     },
     contextmenu(item, e) {
       this.$refs[`ref${item.id}`][0].open(e)
