@@ -155,7 +155,6 @@ export default {
       this.eventRun('resizeStop', item)
     },
     updateItemForStaticData(newItem, item, sync) {
-      console.log(newItem, 'ni')
       this.controller.updateForChange((i) => {
         return i.id === item.id ? {...i, ...newItem} : i
       }, {tag: item.tag}, !!sync)
@@ -190,7 +189,6 @@ export default {
       })
     },
     del() {
-      console.log(' this.controller', this.controller.getRenderData())
       this.controller.getRenderData().map(i => {
         this.controller.updateForDelete({id: i.id, tag: i.tag})
       })

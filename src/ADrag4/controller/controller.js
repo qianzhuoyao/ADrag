@@ -13,7 +13,6 @@ export class Controller {
             })
         }, args)
         this.syncOperation()
-        console.log(Controller.instance.shots, 'createShot')
     }
 
     updateForDraw(args) {
@@ -34,14 +33,12 @@ export class Controller {
     }
 
     updateForChange(fn, args, sync) {
-        console.log(fn, args, 'change')
         if (typeof fn === "function") {
             const {tag} = args
             this.updateViewAfterChange(() => {
                 this.editor(fn)
             }, tag)
             !!sync && this.syncOperation()
-            console.log(Controller.instance.shots, 'changeShot')
 
         }
     }
@@ -50,7 +47,6 @@ export class Controller {
         if (typeof fn === 'function') {
             Controller.instance.renderModel.iterateChange((i, k) => {
                 const res = fn(i, k)
-                console.log(res, 'res')
                 //注意res 类型
                 return {...i, ...res}
             })
