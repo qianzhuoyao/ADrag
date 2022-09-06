@@ -119,3 +119,8 @@ import modalComponent = new Vue(...) 某个组件
 <style scoped>
 </style>
 ```
+
+## 组件特性
+
+provider 组件可提供undo[x]/redo功能与事件监听on[x]事件有'dragging', 'dragStop', 'resizing', 'areaClick', 'resizeStop', '
+componentClick', 'hover'

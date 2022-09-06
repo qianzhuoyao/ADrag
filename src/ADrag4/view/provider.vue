@@ -1,6 +1,6 @@
 <template>
   <div :id="pid" class="provider-class" :style="{width:parentW+'px',height:parentH+'px'}" @click="areaClick">
-    <div @click="undo">undo</div>
+    <!--    <div @click="undo">undo</div>-->
     <div v-for="(k,i) in renderData"
          :key="i"
          @click.stop="()=>click(k)"
@@ -22,6 +22,7 @@
           @dragstop="(params)=>dragStop(k,params)"
           @resizing="()=>resizing(k)"
           @resizestop="(params)=>resizeStop(k,params)"
+          @mouseover="(e)=>hover(k,e)"
       >
         <component
             :is="k.c"
@@ -145,6 +146,9 @@ export default {
     dragStop(item, params) {
       this.updateItemForStaticData({x: params.left, y: params.top}, item, !this.precision(item, params))
       this.eventRun('dragStop', item)
+    },
+    hover(item, event) {
+      this.eventRun('hover', item, event)
     },
     resizeStop(item, params) {
       this.updateItemForStaticData({w: params.width, h: params.height}, item, !this.precision(item, params))
