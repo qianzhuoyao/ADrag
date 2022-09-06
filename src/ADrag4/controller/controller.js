@@ -1,7 +1,6 @@
 import {RenderModel} from "@/ADrag4/model/renderModel";
 import {Render} from "@/ADrag4/render/render";
 
-
 export class Controller {
     constructor() {
         this.getInstance()
@@ -13,6 +12,8 @@ export class Controller {
                 return k === this.getRenderData().length - 1 ? {...i, f: true} : {...i, f: false}
             })
         }, args)
+        this.syncOperation()
+        console.log(Controller.instance.shots, 'createShot')
     }
 
     updateForDraw(args) {
@@ -32,13 +33,16 @@ export class Controller {
         }
     }
 
-    updateForChange(fn, args) {
+    updateForChange(fn, args, sync) {
         console.log(fn, args, 'change')
         if (typeof fn === "function") {
             const {tag} = args
             this.updateViewAfterChange(() => {
                 this.editor(fn)
             }, tag)
+            !!sync && this.syncOperation()
+            console.log(Controller.instance.shots, 'changeShot')
+
         }
     }
 
@@ -66,7 +70,7 @@ export class Controller {
     updateViewAfterChange(fn, tag) {
         if (typeof fn === 'function') {
             if (this.tagsCheck(tag)) {
-                fn()
+                fn.call(this)
                 this.updateView()
             }
         }
@@ -77,6 +81,15 @@ export class Controller {
         this.updateViewAfterChange(() => {
             this.delete(id)
         }, tag)
+        this.syncOperation()
+        console.log(Controller.instance.shots, 'deleteShot')
+
+    }
+
+    syncOperation() {
+        Controller.instance.renderModel.backUp()
+        Controller.instance.shots = Controller.instance.renderModel.getBackUpHistory()
+        Controller.instance.operationPoint++
     }
 
     updateView() {
@@ -92,6 +105,13 @@ export class Controller {
     }
 
     undo() {
+        Controller.instance.operationPoint = Controller.instance.operationPoint > 0 ? Controller.instance.operationPoint - 1 : 0
+        this.evaluation(Controller.instance.shots[Controller.instance.operationPoint])
+        this.updateView()
+    }
+
+    evaluation(data) {
+        Controller.instance.renderModel.setResult(data)
     }
 
     redo() {
@@ -100,6 +120,8 @@ export class Controller {
     getInstance() {
         if (!Controller.instance) {
             this.renderModel = new RenderModel()
+            this.shots = []
+            this.operationPoint = -1
             this.tags = []
             this.id = undefined
             Controller.instance = this;

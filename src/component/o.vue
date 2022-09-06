@@ -5,16 +5,8 @@
 <script>
 export default {
   name: "view-c",
-  props: {
-    node: {
-      type: Object,
-      default: () => {
-        return {};
-      },
-    },
-  },
   mounted() {
-    console.log(this.node, "view");
+    //console.log(this.node, "view");
   },
 };
 </script>

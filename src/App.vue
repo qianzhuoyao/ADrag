@@ -46,7 +46,7 @@ export default {
     };
   },
   mounted() {
-    this.beforeStart()
+   // this.beforeStart()
     this.$refs.provider.on('click', (o) => {
       console.log(o, 'click')
     })
@@ -54,8 +54,8 @@ export default {
   methods: {
     beforeStart() {
       const {nameMap} = config
-      data.map(i => {
-        this.$refs.provider.drawEach({
+      const draw = data.map(i => {
+        return {
           c: nameMap[i.cMap],
           m: nameMap[i.mMap],
           tag: i.tag,
@@ -64,8 +64,9 @@ export default {
           w: i.w,
           h: i.h,
           z: i.z,
-        })
+        }
       })
+      this.$refs.provider.draw(draw)
     }
   },
 

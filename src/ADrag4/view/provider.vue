@@ -1,6 +1,6 @@
 <template>
   <div :id="pid" class="provider-class" :style="{width:parentW+'px',height:parentH+'px'}" @click="areaClick">
-    <!--    <div @click="del">删除</div>-->
+    <div @click="undo">undo</div>
     <div v-for="(k,i) in renderData"
          :key="i"
          @click.stop="()=>click(k)"
@@ -8,6 +8,7 @@
     >
       <VueDragResize
           v-if="k.v"
+          :ref="`VDR${k.id}`"
           :x="k.x"
           :y="k.y"
           :w="k.w"
@@ -88,10 +89,10 @@ export default {
   },
   methods: {
     update(items) {
+      //console.log(items, 'ffffrender')
       this.renderData = items
     },
     drawEach(item) {
-      console.log(item, 'i')
       const {c, m, tag, x, y, w, h, z, f = false} = item
       this.controller.updateForDraw({
         c,
@@ -110,6 +111,7 @@ export default {
       data.map(i => {
         this.drawEach(i)
       })
+      this.controller.syncOperation()
     },
     // 向外暴露的更新方法，fn返回新数据即可  更新数据
     updateData(fn, tag) {
@@ -137,18 +139,22 @@ export default {
     dragging(item) {
       this.eventRun('dragging', item)
     },
+    precision(item, params) {
+      return Math.abs(item.x - params.left) < 5 && Math.abs(item.y - params.top) < 5
+    },
     dragStop(item, params) {
-      this.updateItemForStaticData({x: params.left, y: params.top}, item)
+      this.updateItemForStaticData({x: params.left, y: params.top}, item, !this.precision(item, params))
       this.eventRun('dragStop', item)
     },
     resizeStop(item, params) {
-      this.updateItemForStaticData({w: params.width, h: params.height}, item)
+      this.updateItemForStaticData({w: params.width, h: params.height}, item, !this.precision(item, params))
       this.eventRun('resizeStop', item)
     },
-    updateItemForStaticData(newItem, item) {
+    updateItemForStaticData(newItem, item, sync) {
+      console.log(newItem, 'ni')
       this.controller.updateForChange((i) => {
         return i.id === item.id ? {...i, ...newItem} : i
-      }, {tag: item.tag})
+      }, {tag: item.tag}, !!sync)
     },
     contextmenu(item, e) {
       this.$refs[`ref${item.id}`][0].open(e)
@@ -163,6 +169,21 @@ export default {
         return {...i, f: i.id === item.id}
       }, {tag: item.tag})
       this.eventRun('componentClick', item)
+    },
+    undo() {
+      this.controller.undo()
+      //由于vuedragresize组件存在的异常同步位置问题，需要再次手动同步位置
+      this.syncPosition()
+    },
+    syncPosition() {
+      this.renderData.map(i => {
+        const right = this.parentW - i.x - i.w
+        const bottom = this.parentH - i.y - i.h
+        this.$refs[`VDR${i.id}`][0].left = i.x
+        this.$refs[`VDR${i.id}`][0].top = i.y
+        this.$refs[`VDR${i.id}`][0].right = right
+        this.$refs[`VDR${i.id}`][0].bottom = bottom
+      })
     },
     del() {
       console.log(' this.controller', this.controller.getRenderData())

@@ -1,4 +1,8 @@
+import {cloneDeep} from "lodash";
+
+
 const result = Symbol('items')
+const shot = Symbol('shot')
 
 export class RenderModel {
     constructor() {
@@ -7,7 +11,9 @@ export class RenderModel {
 
     getInstance() {
         if (!RenderModel.instance) {
+            this.uuid = 0
             this[result] = []
+            this[shot] = []
             RenderModel.instance = this;
         }
         return RenderModel.instance;
@@ -54,11 +60,34 @@ export class RenderModel {
     }
 
 
+    getBackUpHistory() {
+        return RenderModel.instance[shot]
+    }
+
+    backUp() {
+        RenderModel.instance[shot].push(cloneDeep(RenderModel.instance[result]))
+    }
+
+    setResult(data) {
+        RenderModel.instance.clear()
+        Array.isArray(data) && data.length && data.map(i => {
+            RenderModel.instance.create(i)
+        })
+    }
+
     iterateChange(fn) {
         if (typeof fn === "function") {
             const list = this.getItems()
             RenderModel.instance[result] = list.map((i, k) => fn.call(this, i, k))
         }
+    }
+
+    clear() {
+        RenderModel.instance[result] = []
+    }
+
+    clearShots() {
+        RenderModel.instance[shot] = []
     }
 
     create(args) {
@@ -84,6 +113,5 @@ export class RenderModel {
                 x, y, w, h, f, z, c, v, m, id, tag, renderData
             }
         )
-        console.log(this.getItems(), 'gis')
     }
 }
