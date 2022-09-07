@@ -190,7 +190,12 @@ export default {
       }, {tag: item.tag}, !!sync)
     },
     contextmenu(item, e) {
-      this.$refs[`ref${item.id}`][0].open(e)
+      const {left, top} = window.getComputedStyle(document.getElementById(this.pid), null)
+      this.$refs[`ref${item.id}`][0].open({
+        ...e,
+        clientX: e.clientX - parseFloat(left),
+        clientY: e.clientY - parseFloat(top)
+      })
     },
     eventRun(event, params) {
       if (typeof this.eventMap[event] === 'function') {
