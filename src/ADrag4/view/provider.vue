@@ -172,7 +172,7 @@ export default {
       return Math.abs(item.x - params.left) < 5 && Math.abs(item.y - params.top) < 5
     },
     dragStop(item, params) {
-      this.updateItemForStaticData({x: params.left, y: params.top}, item, !this.precision(item, params))
+      this.updateItemForStaticData({x: params.left, y: params.top}, item, true)
       this.clearAider()
       this.eventRun('dragStop', item)
     },
@@ -180,7 +180,7 @@ export default {
       this.eventRun('hover', item, event)
     },
     resizeStop(item, params) {
-      this.updateItemForStaticData({w: params.width, h: params.height}, item, !this.precision(item, params))
+      this.updateItemForStaticData({w: params.width, h: params.height}, item, true)
       this.clearAider()
       this.eventRun('resizeStop', item)
     },
@@ -239,12 +239,12 @@ export default {
           baseItem.map((k, kIndex) => {
             if (kIndex < 2) {
               //base X
-              if (i.baseArrow === 'x' && Math.abs(k - i.base) <= spaceNumber) {
+              if (i.baseArrow === 'x' && Math.floor(Math.abs(k - i.base)) <= spaceNumber) {
                 cur.lineColor = tipColor
               }
             } else {
               //base Y
-              if (i.baseArrow === 'y' && Math.abs(k - i.base) <= spaceNumber) {
+              if (i.baseArrow === 'y' && Math.floor(Math.abs(k - i.base)) <= spaceNumber) {
                 cur.lineColor = tipColor
               }
             }

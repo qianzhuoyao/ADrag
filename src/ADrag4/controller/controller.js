@@ -39,7 +39,6 @@ export class Controller {
                 this.editor(fn)
             }, tag)
             !!sync && this.syncOperation()
-
         }
     }
 
@@ -78,7 +77,7 @@ export class Controller {
             this.delete(id)
         }, tag)
         this.syncOperation()
-        console.log(Controller.instance.shots, 'deleteShot')
+
 
     }
 
@@ -86,6 +85,7 @@ export class Controller {
         Controller.instance.renderModel.backUp()
         Controller.instance.shots = Controller.instance.renderModel.getBackUpHistory()
         Controller.instance.operationPoint++
+        console.log(Controller.instance.shots,Controller.instance.operationPoint, 'deleteShot')
     }
 
     updateView() {
@@ -143,6 +143,7 @@ export class Controller {
             left: offsetX,
             top: offsetY
         } = window.getComputedStyle(document.getElementById(Controller.instance.id), null)
+        console.log(offsetX,x,'cccccx')
         Controller.instance.renderModel.create({
             x: x - parseFloat(offsetX),
             y: y - parseFloat(offsetY),

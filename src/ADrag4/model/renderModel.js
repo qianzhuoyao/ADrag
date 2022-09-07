@@ -60,7 +60,7 @@ export class RenderModel {
     }
 
     getItems() {
-        return RenderModel.instance[result]
+        return cloneDeep(RenderModel.instance[result])
     }
 
 

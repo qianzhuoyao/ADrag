@@ -52,7 +52,6 @@ export default {
       this.$refs.provider.undo()
       if (this.aider) {
         this.$refs.provider.openAider()
-        this.$refs.provider.aiderComputed()
       } else {
         this.$refs.provider.closeAider()
         this.$refs.provider.clearAider()
