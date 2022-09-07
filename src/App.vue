@@ -61,12 +61,10 @@ export default {
     aiderClear() {
       this.aider = false
       this.$refs.provider.closeAider()
-      this.$refs.provider.clearAider()
     },
     aiderComputed() {
       this.aider = true
       this.$refs.provider.openAider()
-      this.$refs.provider.aiderComputed()
     },
     beforeStart() {
       const {nameMap} = config

@@ -156,15 +156,15 @@ export default {
     resizing(item, params) {
       const {left: x, top: y, height: h, width: w} = params
       this.updateItemForStaticData({w, h}, item, false)
-      this.aiderComputed()
-      this.recommendAider({x, y, w, h})
+      this.aiderComputed(item)
+      this.recommendAider({x, y, w, h, id: item.id})
       this.eventRun('resizing', item)
     },
     dragging(item, params) {
       const {left: x, top: y, height: h, width: w} = params
       this.updateItemForStaticData({x, y}, item, false)
-      this.aiderComputed()
-      this.recommendAider({x, y, w, h})
+      this.aiderComputed(item)
+      this.recommendAider({x, y, w, h, id: item.id})
       this.adsorption(item)
       this.eventRun('dragging', item)
     },
@@ -173,6 +173,7 @@ export default {
     },
     dragStop(item, params) {
       this.updateItemForStaticData({x: params.left, y: params.top}, item, !this.precision(item, params))
+      this.clearAider()
       this.eventRun('dragStop', item)
     },
     hover(item, event) {
@@ -180,6 +181,7 @@ export default {
     },
     resizeStop(item, params) {
       this.updateItemForStaticData({w: params.width, h: params.height}, item, !this.precision(item, params))
+      this.clearAider()
       this.eventRun('resizeStop', item)
     },
     updateItemForStaticData(newItem, item, sync) {
@@ -224,24 +226,27 @@ export default {
     },
     closeAider() {
       this.viewStatus.aider = false
+      this.clearAider()
     },
     //推荐辅助线
     recommendAider(item, spaceNumber = 1, tipColor = 'red') {
-      const {x, y, h, w} = item
+      const {x, y, h, w, id} = item
       const baseItem = [x, x + w, y, y + h]
       if (this.viewStatus.aider) {
         this.aiderLines = this.aiderLines.map(i => {
           const cur = JSON.parse(JSON.stringify(i))
           baseItem.map((k, kIndex) => {
-            if (kIndex < 2) {
-              //base X
-              if (i.baseArrow === 'x' && Math.abs(k - i.base) <= spaceNumber) {
-                cur.lineColor = tipColor
-              }
-            } else {
-              //base Y
-              if (i.baseArrow === 'y' && Math.abs(k - i.base) <= spaceNumber) {
-                cur.lineColor = tipColor
+            if (id !== i.id) {
+              if (kIndex < 2) {
+                //base X
+                if (i.baseArrow === 'x' && Math.abs(k - i.base) <= spaceNumber) {
+                  cur.lineColor = tipColor
+                }
+              } else {
+                //base Y
+                if (i.baseArrow === 'y' && Math.abs(k - i.base) <= spaceNumber) {
+                  cur.lineColor = tipColor
+                }
               }
             }
           })
@@ -254,7 +259,8 @@ export default {
 
     },
     //计算辅助线
-    aiderComputed() {
+    aiderComputed(item) {
+      const {id} = item
       if (this.viewStatus.aider) {
         this.clearAider()
         this.aider.computeAiderLines()
@@ -262,7 +268,7 @@ export default {
         const container = document.getElementById(this.pid)
         const {height, width} = window.getComputedStyle(container, null)
         this.renderData.map(i => {
-          if (!i.f) {
+          if (!i.f && id !== i.id) {
             const {xR, xL, yT, yB} = lines[String(i.id)]
             const position = [xR, xL, yT, yB]
             position.map((k, kIndex) => {
@@ -275,7 +281,7 @@ export default {
                   y1: 0,
                   x2: k,
                   y2: parseFloat(height),
-                  lineColor: '#42b983'
+                  lineColor: ''
                 })
               } else {
                 this.aiderLines.push({
@@ -286,7 +292,7 @@ export default {
                   y1: k,
                   x2: parseFloat(width),
                   y2: k,
-                  lineColor: '#42b983'
+                  lineColor: ''
                 })
               }
             })

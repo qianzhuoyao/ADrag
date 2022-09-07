@@ -139,7 +139,21 @@ export class Controller {
     }
 
     create({x, y, w, h, f, z, c, tag, m}) {
-        Controller.instance.renderModel.create({x, y, m, w, h, f, z, c, tag})
+        const {
+            left: offsetX,
+            top: offsetY
+        } = window.getComputedStyle(document.getElementById(Controller.instance.id), null)
+        Controller.instance.renderModel.create({
+            x: x - parseFloat(offsetX),
+            y: y - parseFloat(offsetY),
+            m,
+            w,
+            h,
+            f,
+            z,
+            c,
+            tag
+        })
     }
 
     checkMoveTargetInside(itemParams) {
