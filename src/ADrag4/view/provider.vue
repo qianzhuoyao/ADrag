@@ -1,6 +1,5 @@
 <template>
   <div :id="pid" class="provider-class" :style="{width:parentW+'px',height:parentH+'px'}" @click="areaClick">
-    <!--    <div @click="undo">undo</div>-->
     <div v-for="(k,i) in renderData"
          :key="i"
          @click.stop="()=>click(k)"
@@ -18,9 +17,9 @@
           :parentH="parentH"
           :parentW="parentW"
           :parentLimitation="true"
-          @dragging="()=>dragging(k)"
+          @dragging="(params)=>dragging(k,params)"
           @dragstop="(params)=>dragStop(k,params)"
-          @resizing="()=>resizing(k)"
+          @resizing="(params)=>resizing(k,params)"
           @resizestop="(params)=>resizeStop(k,params)"
           @mouseover="(e)=>hover(k,e)"
       >
@@ -38,6 +37,19 @@
         ></component>
       </menuContext>
     </div>
+    <div id="aiderLinesContainer" class="linesAider">
+      <svg width="100%" height="100%">
+        <line
+            v-for="(i,k) in aiderLines"
+            :key="k"
+            :x1="i.x1"
+            :y1="i.y1"
+            :x2="i.x2"
+            :y2="i.y2"
+            :style="{stroke:i.lineColor ,strokeWidth: '2px'}"
+        ></line>
+      </svg>
+    </div>
   </div>
 </template>
 
@@ -46,6 +58,7 @@ import {Controller} from "@/ADrag4/controller/controller";
 import {Render} from "@/ADrag4/render/render";
 import VueDragResize from "vue-drag-resize";
 import menuContext from 'vue-context'
+import {Aider} from "@/ADrag4/aider/aider";
 
 export default {
   name: "a-provider",
@@ -70,16 +83,22 @@ export default {
   components: {VueDragResize, menuContext},
   data: () => {
     return {
+      viewStatus: {
+        aider: false,
+      },
       renderData: [],
+      aiderLines: [],
       render: null,
       eventMap: {},
-      controller: null
+      controller: null,
+      aider: null,
     }
   },
   mounted() {
     //注册控制器
     this.controller = new Controller()
     this.render = new Render()
+    this.aider = new Aider()
     this.render.watch(this.update)
     this.controller.setTags(this.tags)
     //pid禁止更改
@@ -134,10 +153,19 @@ export default {
       this.click({id: NaN, tag: this.tags[0]})
       this.eventRun('areaClick', e)
     },
-    resizing(item) {
+    resizing(item, params) {
+      const {left: x, top: y, height: h, width: w} = params
+      this.updateItemForStaticData({w, h}, item, false)
+      this.aiderComputed()
+      this.recommendAider({x, y, w, h})
       this.eventRun('resizing', item)
     },
-    dragging(item) {
+    dragging(item, params) {
+      const {left: x, top: y, height: h, width: w} = params
+      this.updateItemForStaticData({x, y}, item, false)
+      this.aiderComputed()
+      this.recommendAider({x, y, w, h})
+      this.adsorption(item)
       this.eventRun('dragging', item)
     },
     precision(item, params) {
@@ -188,6 +216,85 @@ export default {
         this.$refs[`VDR${i.id}`][0].bottom = bottom
       })
     },
+    clearAider() {
+      this.aiderLines = []
+    },
+    openAider() {
+      this.viewStatus.aider = true
+    },
+    closeAider() {
+      this.viewStatus.aider = false
+    },
+    //推荐辅助线
+    recommendAider(item, spaceNumber = 1, tipColor = 'red') {
+      const {x, y, h, w} = item
+      const baseItem = [x, x + w, y, y + h]
+      if (this.viewStatus.aider) {
+        this.aiderLines = this.aiderLines.map(i => {
+          const cur = JSON.parse(JSON.stringify(i))
+          baseItem.map((k, kIndex) => {
+            if (kIndex < 2) {
+              //base X
+              if (i.baseArrow === 'x' && Math.abs(k - i.base) <= spaceNumber) {
+                cur.lineColor = tipColor
+              }
+            } else {
+              //base Y
+              if (i.baseArrow === 'y' && Math.abs(k - i.base) <= spaceNumber) {
+                cur.lineColor = tipColor
+              }
+            }
+          })
+          return cur
+        })
+      }
+    },
+    //自动吸附
+    adsorption() {
+
+    },
+    //计算辅助线
+    aiderComputed() {
+      if (this.viewStatus.aider) {
+        this.clearAider()
+        this.aider.computeAiderLines()
+        const lines = this.aider.getAiderLines()
+        const container = document.getElementById(this.pid)
+        const {height, width} = window.getComputedStyle(container, null)
+        this.renderData.map(i => {
+          if (!i.f) {
+            const {xR, xL, yT, yB} = lines[String(i.id)]
+            const position = [xR, xL, yT, yB]
+            position.map((k, kIndex) => {
+              if (kIndex < 2) {
+                this.aiderLines.push({
+                  base: k,
+                  baseArrow: 'x',
+                  id: i.id,
+                  x1: k,
+                  y1: 0,
+                  x2: k,
+                  y2: parseFloat(height),
+                  lineColor: '#42b983'
+                })
+              } else {
+                this.aiderLines.push({
+                  base: k,
+                  baseArrow: 'y',
+                  id: i.id,
+                  x1: 0,
+                  y1: k,
+                  x2: parseFloat(width),
+                  y2: k,
+                  lineColor: '#42b983'
+                })
+              }
+            })
+          }
+        })
+      }
+      console.log(this.aiderLines, 'aiderLines')
+    },
     del() {
       this.controller.getRenderData().map(i => {
         this.controller.updateForDelete({id: i.id, tag: i.tag})
@@ -199,6 +306,12 @@ export default {
 
 <style scoped>
 .provider-class {
+  position: absolute;
+}
+
+.linesAider {
+  width: 100%;
+  height: 100%;
   position: absolute;
 }
 </style>

@@ -33,7 +33,7 @@ export class RenderModel {
     }
 
     inside(area, item) {
-        const {leftTop: [leftNum, topNum], rightBottom: [rightNum, bottomNum]} = area
+        const {xL: leftNum, xR: rightNum, yT: topNum, yB: bottomNum,} = area
         const {w, h, x, y} = item
         const l = x
         const r = x + w
@@ -51,7 +51,11 @@ export class RenderModel {
             leftTop: [left, top],
             leftBottom: [left, top + height],
             rightTop: [left + width, top],
-            rightBottom: [left + width, top + height]
+            rightBottom: [left + width, top + height],
+            xL: left,
+            xR: left + width,
+            yT: top,
+            yB: top + height
         }
     }
 

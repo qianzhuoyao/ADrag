@@ -10,18 +10,7 @@
 * **说明:** 数据层面由VUE2.X代劳。rxjs实现事件模型用以用户的操作句柄。vueContext用于组件操作返回的弹窗。vuedragresize为操作面板上可编辑的组件容器。
 
 ## 文档
-
-|组件|作用|props|slot|
-|-|-|-|-|
-|fragment|模板|<strong>tag:[String, Number, Boolean]</strong>:
-标识,与provider的tags一起使用,只有被provider的tags包含的tag的fragment才可以被绘制到provider</br><strong>renderKey:
-String</strong>:用于渲染用的标识</br><strong>defaultComponentWidth:Number</strong>:放置组件的默认宽</br><strong>
-defaultComponentHeight:Number</strong>:放置组件的默认高</br><strong>defaultComponentZIndex:Number</strong>:
-放置组件的默认层级</br><strong>putComponent:VNODE</strong>:放置的组件</br><strong>modalComponent:VNODE</strong>:
-默认放置组件右键触发的弹窗组件|<strong>display</strong>:明面上显示的</br><strong>hide</strong>:明面上隐藏的,会在拖动display时绑在鼠标上|
-|provider|容器|<strong>tags:any[]</strong>:可放置的fragment的tag数组</br><strong>parentH:Number</strong>:
-容器边界高</br><strong>parentW:Number</strong>:容器边界长|-|
-
+todo
 ## 例子
 
 下面是一个简单的例子,你可以将组件a拖拽并添加到容器上

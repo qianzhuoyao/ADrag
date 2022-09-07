@@ -1,5 +1,8 @@
 <template>
   <div>
+    <div @click="aiderComputed">aider开启</div>
+    <div @click="aiderClear">aider关闭</div>
+    <div @click="undo">undo</div>
     <fragment
         tag="1"
         render-key="123"
@@ -15,15 +18,7 @@
         <div>345</div>
       </template>
     </fragment>
-    <fragment tag="1" render-key="456" :put-component="components[1]">
-      <template #display>
-        <div>1123</div>
-      </template>
-      <template #hide>
-        <div>1345</div>
-      </template>
-    </fragment>
-    <provider ref="provider" :tags="['1']" style="background: antiquewhite">
+    <provider ref="provider" :tags="['1']" style="background: antiquewhite;top:100px">
     </provider>
   </div>
 </template>
@@ -42,16 +37,37 @@ export default {
   components: {fragment, provider},
   data: () => {
     return {
+      aider: false,
       components: [drag, o, f],
     };
   },
   mounted() {
-   // this.beforeStart()
-    this.$refs.provider.on('click', (o) => {
-      console.log(o, 'click')
+    // this.beforeStart()
+    this.$refs.provider.on('componentClick', (o) => {
+      console.log(o, 'componentClick')
     })
   },
   methods: {
+    undo() {
+      this.$refs.provider.undo()
+      if (this.aider) {
+        this.$refs.provider.openAider()
+        this.$refs.provider.aiderComputed()
+      } else {
+        this.$refs.provider.closeAider()
+        this.$refs.provider.clearAider()
+      }
+    },
+    aiderClear() {
+      this.aider = false
+      this.$refs.provider.closeAider()
+      this.$refs.provider.clearAider()
+    },
+    aiderComputed() {
+      this.aider = true
+      this.$refs.provider.openAider()
+      this.$refs.provider.aiderComputed()
+    },
     beforeStart() {
       const {nameMap} = config
       const draw = data.map(i => {
