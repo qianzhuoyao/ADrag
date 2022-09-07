@@ -46,7 +46,7 @@
             :y1="i.y1"
             :x2="i.x2"
             :y2="i.y2"
-            :style="{stroke:i.lineColor ,strokeWidth: '2px'}"
+            :style="{stroke:i.lineColor ,strokeWidth: '1px',strokeDasharray:'5,5'}"
         ></line>
       </svg>
     </div>
@@ -157,14 +157,14 @@ export default {
       const {left: x, top: y, height: h, width: w} = params
       this.updateItemForStaticData({w, h}, item, false)
       this.aiderComputed(item)
-      this.recommendAider({x, y, w, h, id: item.id})
+      this.recommendAider({x, y, w, h})
       this.eventRun('resizing', item)
     },
     dragging(item, params) {
       const {left: x, top: y, height: h, width: w} = params
       this.updateItemForStaticData({x, y}, item, false)
       this.aiderComputed(item)
-      this.recommendAider({x, y, w, h, id: item.id})
+      this.recommendAider({x, y, w, h})
       this.adsorption(item)
       this.eventRun('dragging', item)
     },
@@ -229,24 +229,23 @@ export default {
       this.clearAider()
     },
     //推荐辅助线
-    recommendAider(item, spaceNumber = 1, tipColor = 'red') {
-      const {x, y, h, w, id} = item
+    recommendAider(item, spaceNumber = 0, tipColor = 'red') {
+      const {x, y, h, w} = item
       const baseItem = [x, x + w, y, y + h]
       if (this.viewStatus.aider) {
         this.aiderLines = this.aiderLines.map(i => {
           const cur = JSON.parse(JSON.stringify(i))
+          console.log(baseItem, 'baseItem')
           baseItem.map((k, kIndex) => {
-            if (id !== i.id) {
-              if (kIndex < 2) {
-                //base X
-                if (i.baseArrow === 'x' && Math.abs(k - i.base) <= spaceNumber) {
-                  cur.lineColor = tipColor
-                }
-              } else {
-                //base Y
-                if (i.baseArrow === 'y' && Math.abs(k - i.base) <= spaceNumber) {
-                  cur.lineColor = tipColor
-                }
+            if (kIndex < 2) {
+              //base X
+              if (i.baseArrow === 'x' && Math.abs(k - i.base) <= spaceNumber) {
+                cur.lineColor = tipColor
+              }
+            } else {
+              //base Y
+              if (i.baseArrow === 'y' && Math.abs(k - i.base) <= spaceNumber) {
+                cur.lineColor = tipColor
               }
             }
           })
@@ -268,7 +267,7 @@ export default {
         const container = document.getElementById(this.pid)
         const {height, width} = window.getComputedStyle(container, null)
         this.renderData.map(i => {
-          if (!i.f && id !== i.id) {
+          if (id !== i.id) {
             const {xR, xL, yT, yB} = lines[String(i.id)]
             const position = [xR, xL, yT, yB]
             position.map((k, kIndex) => {

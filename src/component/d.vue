@@ -1,5 +1,5 @@
 <template>
-  <div style="background: aquamarine;height: 100%;">{{ thisData.renderData.text || 'drag' }}</div>
+  <div style="background: aquamarine;height: 100%;">{{ thisData.id }}</div>
 </template>
 
 <script>
