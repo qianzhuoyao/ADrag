@@ -46,6 +46,27 @@ export default {
     this.$refs.provider.on('componentClick', (o) => {
       console.log(o, 'componentClick')
     })
+    this.$refs.provider.on('dragging', (o) => {
+      console.log(o, 'dragging')
+    })
+    this.$refs.provider.on('dragStop', (o) => {
+      console.log(o, 'dragStop')
+    })
+    this.$refs.provider.on('resizing', (o) => {
+      console.log(o, 'resizing')
+    })
+    this.$refs.provider.on('areaClick', (o) => {
+      console.log(o, 'areaClick')
+    })
+    this.$refs.provider.on('resizeStop', (o) => {
+      console.log(o, 'resizeStop')
+    })
+    this.$refs.provider.on('hover', (o) => {
+      console.log(o, 'hover')
+    })
+    this.$refs.provider.on('leave', (o) => {
+      console.log(o, 'leave')
+    })
   },
   methods: {
     undo() {
@@ -54,7 +75,6 @@ export default {
         this.$refs.provider.openAider()
       } else {
         this.$refs.provider.closeAider()
-        this.$refs.provider.clearAider()
       }
     },
     aiderClear() {

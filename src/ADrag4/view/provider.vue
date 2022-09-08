@@ -2,8 +2,9 @@
   <div :id="pid" class="provider-class" :style="{width:parentW+'px',height:parentH+'px'}" @click="areaClick">
     <div v-for="(k,i) in renderData"
          :key="i"
-         @click.stop="()=>click(k)"
          @contextmenu.prevent="(e)=>contextmenu(k,e)"
+         @mouseover.prevent="(e)=>hover(k,e)"
+         @mouseleave.prevent="e=>leave(k,e)"
     >
       <VueDragResize
           v-if="k.v"
@@ -21,7 +22,7 @@
           @dragstop="(params)=>dragStop(k,params)"
           @resizing="(params)=>resizing(k,params)"
           @resizestop="(params)=>resizeStop(k,params)"
-          @mouseover="(e)=>hover(k,e)"
+          @clicked="(params)=>click(k,params)"
       >
         <component
             :is="k.c"
@@ -96,6 +97,7 @@ export default {
       },
       renderData: [],
       aiderLines: [],
+      eventStopList: [],
       render: null,
       eventMap: {},
       controller: null,
@@ -149,7 +151,7 @@ export default {
     },
     //向外公布on方法与回调  操作
     on(event, callback) {
-      const EVENTS = ['dragging', 'dragStop', 'resizing', 'areaClick', 'resizeStop', 'componentClick', 'hover']
+      const EVENTS = ['dragging', 'leave', 'dragStop', 'resizing', 'areaClick', 'resizeStop', 'componentClick', 'hover']
       if (EVENTS.includes(event)) {
         if (typeof callback === 'function') {
           //覆盖事件
@@ -158,7 +160,7 @@ export default {
       }
     },
     areaClick(e) {
-      this.click({id: NaN, tag: this.tags[0]})
+      this.targetFocus({id: NaN, tag: this.tags[0]})
       this.eventRun('areaClick', e)
     },
     resizing(item, params) {
@@ -173,6 +175,8 @@ export default {
       this.updateItemForStaticData({x, y}, item, false)
       this.aiderComputed(item)
       this.recommendAider({x, y, w, h})
+      //this.reStartEvent(['dragging','dragStop'])
+      this.eventStop(['hover', 'leave'])
       this.eventRun('dragging', item)
     },
     precision(item, params) {
@@ -183,6 +187,10 @@ export default {
       this.adsorption({id: item.id, x: params.left, y: params.top, w: params.width, h: params.height})
       this.clearAider()
       this.eventRun('dragStop', item)
+      this.reStartEvent(['hover', 'leave'])
+    },
+    leave(item, event) {
+      this.eventRun('leave', item, event)
     },
     hover(item, event) {
       this.eventRun('hover', item, event)
@@ -206,15 +214,34 @@ export default {
       })
     },
     eventRun(event, params) {
-      if (typeof this.eventMap[event] === 'function') {
+      if (typeof this.eventMap[event] === 'function' && !this.isEventStop(event)) {
         this.eventMap[event](params)
       }
     },
-    click(item) {
+    isEventStop(event) {
+      return this.eventStopList.includes(event)
+    },
+    eventStop(events) {
+      this.eventStopList = this.eventStopList.concat(events)
+    },
+    reStartEvent(events) {
+      if (Array.isArray(events) && events.length) {
+        this.eventStopList = this.eventStopList.filter(i => !events.includes(i))
+      } else {
+        this.eventStopList = []
+      }
+    },
+    click(item, params) {
+      console.log(params, 'params218')
+      console.log(item, 'item214')
+      this.targetFocus(item)
+      this.eventRun('componentClick', item)
+      // this.eventStop(['dragging', 'dragStop'])
+    },
+    targetFocus(item) {
       this.controller.updateForChange((i) => {
         return {...i, f: i.id === item.id}
       }, {tag: item.tag})
-      this.eventRun('componentClick', item)
     },
     undo() {
       this.controller.undo()

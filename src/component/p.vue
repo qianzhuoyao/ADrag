@@ -32,7 +32,7 @@ export default {
   watch: {
     thisData: {
       handler(n) {
-        console.log(n, 'nnn')
+         console.log(n, 'nnn')
       }, deep: true,
       immediate: true
     }

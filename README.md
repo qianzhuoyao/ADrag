@@ -10,7 +10,9 @@
 * **说明:** 数据层面由VUE2.X代劳。rxjs实现事件模型用以用户的操作句柄。vueContext用于组件操作返回的弹窗。vuedragresize为操作面板上可编辑的组件容器。
 
 ## 文档
+
 todo
+
 ## 例子
 
 下面是一个简单的例子,你可以将组件a拖拽并添加到容器上
@@ -113,3 +115,6 @@ import modalComponent = new Vue(...) 某个组件
 
 provider 组件可提供undo[x]/redo功能与事件监听on[x]事件有'dragging', 'dragStop', 'resizing', 'areaClick', 'resizeStop', '
 componentClick', 'hover'
+
+provider也可以帮助你对组件进行更进一步的操控，比如帮你画出辅助线以及自动吸附！this.$refs.provider.openAider()
+/关闭this.$refs.provider.closeAider()
