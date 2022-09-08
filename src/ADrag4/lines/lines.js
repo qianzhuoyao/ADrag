@@ -8,6 +8,7 @@ export class Lines {
     getInstance() {
         if (!Lines.instance) {
             this.lines = []
+            this.adderId = 0
             Lines.instance = this;
         }
         return Lines.instance;
@@ -89,7 +90,7 @@ export class Lines {
             const x3 = Z.center[0]
             const y3 = Z.center[1]
             const {x2, y2} = this.computedCenter(x1, y1, x3, y3)
-            const id = this.lines.length
+            const id = Lines.instance.adderId++
             return {
                 x1, y1, x2, y2, x3, y3, id
             }

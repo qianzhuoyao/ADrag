@@ -12,6 +12,7 @@ export class RenderModel {
     getInstance() {
         if (!RenderModel.instance) {
             this.uuid = 0
+            this.adderId = 0
             this[result] = []
             this[shot] = []
             RenderModel.instance = this;
@@ -112,7 +113,7 @@ export class RenderModel {
         const {x, y, w, h, f, z, c, tag, m} = args
         const v = true
         const renderData = Object.seal({})
-        const id = this.getItems().length
+        const id = RenderModel.instance.adderId++
         const center = [x + w / 2, y + h / 2]
         RenderModel.instance[result].push({
                 x, y, w, h, f, z, c, v, m, id, tag, renderData, center
