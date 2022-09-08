@@ -113,8 +113,9 @@ export class RenderModel {
         const v = true
         const renderData = Object.seal({})
         const id = this.getItems().length
+        const center = [x + w / 2, y + h / 2]
         RenderModel.instance[result].push({
-                x, y, w, h, f, z, c, v, m, id, tag, renderData
+                x, y, w, h, f, z, c, v, m, id, tag, renderData, center
             }
         )
     }

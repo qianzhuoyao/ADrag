@@ -38,7 +38,7 @@
         ></component>
       </menuContext>
     </div>
-    <div id="aiderLinesContainer" class="linesAider">
+    <div id="aiderLinesContainer" class="svgC">
       <svg width="100%" height="100%">
         <line
             v-for="(i,k) in aiderLines"
@@ -51,6 +51,21 @@
         ></line>
       </svg>
     </div>
+    <div id="renderLine" class="svgC">
+      <svg width="100%" height="100%">
+        <!--        <line-->
+        <!--            v-for="(i,k) in renderLines"-->
+        <!--            :key="k"-->
+        <!--            :style="{stroke:'green' ,strokeWidth: '1px'}"-->
+        <!--        ></line>-->
+        <path
+            v-for="(i,k) in renderLines"
+            :key="k"
+            :id="i.id"
+            :d="`M${i.x1||0} ${i.y1||0} Q ${i.x2||0} ${i.y2||0} ${i.x3||0} ${i.y3||0}`"
+            stroke="black" fill="transparent"/>
+      </svg>
+    </div>
   </div>
 </template>
 
@@ -60,6 +75,7 @@ import {Render} from "@/ADrag4/render/render";
 import VueDragResize from "vue-drag-resize";
 import menuContext from 'vue-context'
 import {Aider} from "@/ADrag4/aider/aider";
+import {Lines} from "@/ADrag4/lines/lines";
 
 const _CONSTVARS = {
   _Y: 'y',
@@ -115,11 +131,13 @@ export default {
       },
       renderData: [],
       aiderLines: [],
+      renderLines: [],
       eventStopList: [],
       render: null,
       eventMap: {},
       controller: null,
       aider: null,
+      lines: null
     }
   },
   mounted() {
@@ -127,6 +145,7 @@ export default {
     this.controller = new Controller()
     this.render = new Render()
     this.aider = new Aider()
+    this.lines = new Lines()
     this.render.watch(this.update)
     this.controller.setTags(this.tags)
     //pid禁止更改
@@ -136,6 +155,11 @@ export default {
     this.controller.bindId(this.pid)
   },
   methods: {
+    createLine(aid, zid) {
+      this.lines.createLine(aid, zid)
+      this.renderLines = this.lines.getLines()
+      console.log(this.renderLines, 'this.renderLines')
+    },
     update(items) {
       this.renderData = items
     },
@@ -189,6 +213,11 @@ export default {
     },
     dragging(item, params) {
       const {left: x, top: y, height: h, width: w} = params
+      const moveCenterX = x + w / 2
+      const moveCenterY = y + h / 2
+      const role = this.lines.checkRole(item.id)
+      const newCoordinate = role === 'A' ? {x1: moveCenterX, y1: moveCenterY} : {x3: moveCenterX, y3: moveCenterY}
+      this.lines.syncMove(item.id, newCoordinate)
       this.updateItemForStaticData({x, y}, item, false)
       this.aiderComputed(item)
       this.recommendAider({x, y, w, h})
@@ -440,7 +469,7 @@ export default {
   position: absolute;
 }
 
-.linesAider {
+.svgC {
   width: 100%;
   height: 100%;
   position: absolute;

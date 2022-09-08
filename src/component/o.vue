@@ -1,5 +1,5 @@
 <template>
-  <div>o</div>
+  <div style="background: aquamarine;height: 100%;">o</div>
 </template>
 
 <script>

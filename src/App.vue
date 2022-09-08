@@ -42,7 +42,7 @@ export default {
     };
   },
   mounted() {
-    // this.beforeStart()
+    this.beforeStart()
     this.$refs.provider.on('componentClick', (o) => {
       console.log(o, 'componentClick')
     })
@@ -100,6 +100,7 @@ export default {
         }
       })
       this.$refs.provider.draw(draw)
+      this.$refs.provider.createLine(0, 1)
     }
   },
 
