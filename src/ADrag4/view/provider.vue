@@ -60,6 +60,14 @@ import VueDragResize from "vue-drag-resize";
 import menuContext from 'vue-context'
 import {Aider} from "@/ADrag4/aider/aider";
 
+const _CONSTVARS = {
+  _Y: 'y',
+  _X: 'x',
+  _TS: 'topSide',
+  _LS: 'leftSide',
+  _RS: 'rightSide',
+  _BS: 'bottomSide'
+}
 export default {
   name: "a-provider",
   props: {
@@ -165,7 +173,6 @@ export default {
       this.updateItemForStaticData({x, y}, item, false)
       this.aiderComputed(item)
       this.recommendAider({x, y, w, h})
-      this.adsorption(item)
       this.eventRun('dragging', item)
     },
     precision(item, params) {
@@ -173,6 +180,7 @@ export default {
     },
     dragStop(item, params) {
       this.updateItemForStaticData({x: params.left, y: params.top}, item, true)
+      this.adsorption({id: item.id, x: params.left, y: params.top, w: params.width, h: params.height})
       this.clearAider()
       this.eventRun('dragStop', item)
     },
@@ -233,24 +241,37 @@ export default {
       this.viewStatus.aider = false
       this.clearAider()
     },
+
     //推荐辅助线
-    recommendAider(item, spaceNumber = 0, tipColor = 'red') {
+    recommendAider(item, spaceNumber = 5, tipColor = 'red') {
       const {x, y, h, w} = item
-      const baseItem = [x, x + w, y, y + h]
+      const basePosition = [
+        {value: x, label: _CONSTVARS._LS},
+        {value: x + w, label: _CONSTVARS._RS},
+        {value: y, label: _CONSTVARS._TS},
+        {value: y + h, label: _CONSTVARS._BS},
+      ]
       if (this.viewStatus.aider) {
         this.aiderLines = this.aiderLines.map(i => {
           const cur = JSON.parse(JSON.stringify(i))
-          console.log(baseItem, 'baseItem')
-          baseItem.map((k, kIndex) => {
+          basePosition.map((k, kIndex) => {
             if (kIndex < 2) {
               //base X
-              if (i.baseArrow === 'x' && Math.floor(Math.abs(k - i.base)) <= spaceNumber) {
+              if (i.baseArrow === _CONSTVARS._X && Math.floor(Math.abs(k.value - i.base)) <= spaceNumber) {
                 cur.lineColor = tipColor
+                cur.response = true
+                cur.space = Math.floor(k.value - i.base)
+                cur.inRange = k.value - i.base <= 0
+                cur.position = k.label
               }
             } else {
               //base Y
-              if (i.baseArrow === 'y' && Math.floor(Math.abs(k - i.base)) <= spaceNumber) {
+              if (i.baseArrow === _CONSTVARS._Y && Math.floor(Math.abs(k.value - i.base)) <= spaceNumber) {
                 cur.lineColor = tipColor
+                cur.response = true
+                cur.space = Math.floor(k.value - i.base)
+                cur.inRange = k.value - i.base <= 0
+                cur.position = k.label
               }
             }
           })
@@ -259,8 +280,54 @@ export default {
       }
     },
     //自动吸附
-    adsorption() {
-
+    adsorption(params) {
+      console.log(this.aiderLines.filter(i => i.response), params, 'rp')
+      const rec = this.aiderLines.filter(i => i.response)
+      const newBaseXRec = rec.filter(i => i.baseArrow === _CONSTVARS._X)
+      const newBaseYRec = rec.filter(i => i.baseArrow === _CONSTVARS._Y)
+      const XYRecs = [{label: _CONSTVARS._X, value: newBaseXRec}, {label: _CONSTVARS._Y, value: newBaseYRec}]
+      XYRecs.map((i) => {
+        const {value, label} = i
+        const length = value.length
+        if (length) {
+          let currentMin = value[0].space
+          let position = value[0]
+          for (let j = 0; j < length; j++) {
+            if (Math.abs(value[j].space) < Math.abs(currentMin)) {
+              currentMin = value[j].space
+              position = value[j]
+            }
+          }
+          const {inRange, space} = position
+          if (label === _CONSTVARS._X) {
+            this.adsorptionX({id: params.id, inRange, space, x: params.x})
+          } else if (label === _CONSTVARS._Y) {
+            this.adsorptionY({id: params.id, inRange, space, y: params.y})
+          }
+        }
+      })
+    },
+    adsorptionBaseComputed(inRange, space, position) {
+      return !inRange ? position - Math.abs(space) : position + Math.abs(space)
+    },
+    adsorptionChange(args, position) {
+      if ([_CONSTVARS._Y, _CONSTVARS._X].includes(position)) {
+        const {id, inRange, space} = args
+        const adsorption = this.adsorptionBaseComputed(inRange, space, args[position])
+        this.controller.updateForChange((i) => {
+          if (id === i.id) {
+            return {...i, [position]: adsorption}
+          } else {
+            return i
+          }
+        }, {tag: this.tags[0]})
+      }
+    },
+    adsorptionX(args) {
+      this.adsorptionChange(args, _CONSTVARS._X)
+    },
+    adsorptionY(args) {
+      this.adsorptionChange(args, _CONSTVARS._Y)
     },
     //计算辅助线
     aiderComputed(item) {
@@ -279,24 +346,35 @@ export default {
               if (kIndex < 2) {
                 this.aiderLines.push({
                   base: k,
-                  baseArrow: 'x',
+                  baseArrow: _CONSTVARS._X,
                   id: i.id,
                   x1: k,
                   y1: 0,
                   x2: k,
                   y2: parseFloat(height),
-                  lineColor: ''
+                  lineColor: '',
+                  response: false,
+                  space: undefined,
+                  //inRange标识操作项的接触边是否在推荐线内，即 接触边的x小于推荐边
+                  inRange: undefined,
+                  position: undefined,
                 })
               } else {
                 this.aiderLines.push({
                   base: k,
-                  baseArrow: 'y',
+                  baseArrow: _CONSTVARS._Y,
                   id: i.id,
                   x1: 0,
                   y1: k,
                   x2: parseFloat(width),
                   y2: k,
-                  lineColor: ''
+                  lineColor: '',
+                  response: false,
+                  space: undefined,
+                  direction: undefined,
+                  //inRange标识操作项的接触边是否在推荐线内，即 接触边的y小于推荐边
+                  inRange: undefined,
+                  position: undefined,
                 })
               }
             })

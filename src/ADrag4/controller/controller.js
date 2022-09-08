@@ -143,7 +143,6 @@ export class Controller {
             left: offsetX,
             top: offsetY
         } = window.getComputedStyle(document.getElementById(Controller.instance.id), null)
-        console.log(offsetX,x,'cccccx')
         Controller.instance.renderModel.create({
             x: x - parseFloat(offsetX),
             y: y - parseFloat(offsetY),
