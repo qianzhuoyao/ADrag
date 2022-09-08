@@ -258,9 +258,13 @@ export default {
       }, {tag: item.tag})
     },
     undo() {
-      this.controller.undo()
-      //由于vuedragresize组件存在的异常同步位置问题，需要再次手动同步位置
-      this.syncPosition()
+      //undo期间不可以使用aider辅助线，因为会导致死循环！
+      if (!this.viewStatus.aider) {
+        this.controller.undo()
+        //由于vuedragresize组件存在的异常同步位置问题，需要再次手动同步位置
+        this.syncPosition()
+      }
+      return !this.viewStatus.aider
     },
     syncPosition() {
       this.renderData.map(i => {
