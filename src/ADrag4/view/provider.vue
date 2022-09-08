@@ -204,26 +204,35 @@ export default {
       this.targetFocus({id: NaN, tag: this.tags[0]})
       this.eventRun(_EVENTS._AC, e)
     },
+    syncLinePosition(fn, params, item) {
+      if (typeof fn === 'function') {
+        const {left: x, top: y, height: h, width: w} = params
+        const moveCenterX = x + w / 2
+        const moveCenterY = y + h / 2
+        const role = this.lines.checkRole(item.id)
+        const newCoordinate = role === 'A' ? {x1: moveCenterX, y1: moveCenterY} : {x3: moveCenterX, y3: moveCenterY}
+        this.lines.syncMove(item.id, newCoordinate)
+        fn()
+      }
+    },
     resizing(item, params) {
       const {left: x, top: y, height: h, width: w} = params
-      this.updateItemForStaticData({w, h}, item, false)
-      this.aiderComputed(item)
-      this.recommendAider({x, y, w, h})
-      this.eventRun(_EVENTS._RI, item)
+      this.syncLinePosition(() => {
+        this.updateItemForStaticData({w, h}, item, false)
+        this.aiderComputed(item)
+        this.recommendAider({x, y, w, h})
+        this.eventRun(_EVENTS._RI, item)
+      }, params, item)
     },
     dragging(item, params) {
       const {left: x, top: y, height: h, width: w} = params
-      const moveCenterX = x + w / 2
-      const moveCenterY = y + h / 2
-      const role = this.lines.checkRole(item.id)
-      const newCoordinate = role === 'A' ? {x1: moveCenterX, y1: moveCenterY} : {x3: moveCenterX, y3: moveCenterY}
-      this.lines.syncMove(item.id, newCoordinate)
-      this.updateItemForStaticData({x, y}, item, false)
-      this.aiderComputed(item)
-      this.recommendAider({x, y, w, h})
-      //this.reStartEvent(['dragging','dragStop'])
-      this.eventStop([_EVENTS._HO, _EVENTS._LE])
-      this.eventRun(_EVENTS._DI, item)
+      this.syncLinePosition(() => {
+        this.updateItemForStaticData({x, y}, item, false)
+        this.aiderComputed(item)
+        this.recommendAider({x, y, w, h})
+        this.eventStop([_EVENTS._HO, _EVENTS._LE])
+        this.eventRun(_EVENTS._DI, item)
+      }, params, item)
     },
     precision(item, params) {
       return Math.abs(item.x - params.left) < 5 && Math.abs(item.y - params.top) < 5
