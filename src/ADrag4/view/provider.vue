@@ -69,6 +69,24 @@ const _CONSTVARS = {
   _RS: 'rightSide',
   _BS: 'bottomSide'
 }
+const _EVENTS = {
+  //组件点击
+  _CL: 'componentClick',
+  //组件拖动中
+  _DI: 'dragging',
+  //组件拖动结束
+  _DS: 'dragStop',
+  //组件缩放中
+  _RI: 'resizing',
+  //面板点击
+  _AC: 'areaClick',
+  //组件缩放结束
+  _RS: 'resizeStop',
+  //组件鼠标悬浮
+  _HO: 'hover',
+  //鼠标离开组件上
+  _LE: 'leave'
+}
 export default {
   name: "a-provider",
   props: {
@@ -119,7 +137,6 @@ export default {
   },
   methods: {
     update(items) {
-      //console.log(items, 'ffffrender')
       this.renderData = items
     },
     drawEach(item) {
@@ -151,7 +168,7 @@ export default {
     },
     //向外公布on方法与回调  操作
     on(event, callback) {
-      const EVENTS = ['dragging', 'leave', 'dragStop', 'resizing', 'areaClick', 'resizeStop', 'componentClick', 'hover']
+      const EVENTS = Object.values(_EVENTS)
       if (EVENTS.includes(event)) {
         if (typeof callback === 'function') {
           //覆盖事件
@@ -161,14 +178,14 @@ export default {
     },
     areaClick(e) {
       this.targetFocus({id: NaN, tag: this.tags[0]})
-      this.eventRun('areaClick', e)
+      this.eventRun(_EVENTS._AC, e)
     },
     resizing(item, params) {
       const {left: x, top: y, height: h, width: w} = params
       this.updateItemForStaticData({w, h}, item, false)
       this.aiderComputed(item)
       this.recommendAider({x, y, w, h})
-      this.eventRun('resizing', item)
+      this.eventRun(_EVENTS._RI, item)
     },
     dragging(item, params) {
       const {left: x, top: y, height: h, width: w} = params
@@ -176,8 +193,8 @@ export default {
       this.aiderComputed(item)
       this.recommendAider({x, y, w, h})
       //this.reStartEvent(['dragging','dragStop'])
-      this.eventStop(['hover', 'leave'])
-      this.eventRun('dragging', item)
+      this.eventStop([_EVENTS._HO, _EVENTS._LE])
+      this.eventRun(_EVENTS._DI, item)
     },
     precision(item, params) {
       return Math.abs(item.x - params.left) < 5 && Math.abs(item.y - params.top) < 5
@@ -186,19 +203,19 @@ export default {
       this.updateItemForStaticData({x: params.left, y: params.top}, item, true)
       this.adsorption({id: item.id, x: params.left, y: params.top, w: params.width, h: params.height})
       this.clearAider()
-      this.eventRun('dragStop', item)
-      this.reStartEvent(['hover', 'leave'])
+      this.eventRun(_EVENTS._DS, item)
+      this.reStartEvent([_EVENTS._HO, _EVENTS._LE])
     },
     leave(item, event) {
-      this.eventRun('leave', item, event)
+      this.eventRun(_EVENTS._LE, item, event)
     },
     hover(item, event) {
-      this.eventRun('hover', item, event)
+      this.eventRun(_EVENTS._HO, item, event)
     },
     resizeStop(item, params) {
       this.updateItemForStaticData({w: params.width, h: params.height}, item, true)
       this.clearAider()
-      this.eventRun('resizeStop', item)
+      this.eventRun(_EVENTS._RS, item)
     },
     updateItemForStaticData(newItem, item, sync) {
       this.controller.updateForChange((i) => {
@@ -231,12 +248,9 @@ export default {
         this.eventStopList = []
       }
     },
-    click(item, params) {
-      console.log(params, 'params218')
-      console.log(item, 'item214')
+    click(item) {
       this.targetFocus(item)
-      this.eventRun('componentClick', item)
-      // this.eventStop(['dragging', 'dragStop'])
+      this.eventRun(_EVENTS._CL, item)
     },
     targetFocus(item) {
       this.controller.updateForChange((i) => {
@@ -308,7 +322,6 @@ export default {
     },
     //自动吸附
     adsorption(params) {
-      console.log(this.aiderLines.filter(i => i.response), params, 'rp')
       const rec = this.aiderLines.filter(i => i.response)
       const newBaseXRec = rec.filter(i => i.baseArrow === _CONSTVARS._X)
       const newBaseYRec = rec.filter(i => i.baseArrow === _CONSTVARS._Y)
@@ -408,7 +421,6 @@ export default {
           }
         })
       }
-      console.log(this.aiderLines, 'aiderLines')
     },
     del() {
       this.controller.getRenderData().map(i => {
