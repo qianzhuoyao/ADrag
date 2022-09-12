@@ -351,6 +351,11 @@ export default {
         this.$refs[`VDR${i.id}`][0].top = i.y
         this.$refs[`VDR${i.id}`][0].right = right
         this.$refs[`VDR${i.id}`][0].bottom = bottom
+        const moveCenterX = i.x + i.w / 2
+        const moveCenterY = i.y + i.h / 2
+        const role = this.lines.checkRole(i.id)
+        const newCoordinate = role === 'A' ? {x1: moveCenterX, y1: moveCenterY} : {x3: moveCenterX, y3: moveCenterY}
+        this.lines.syncMove(i.id, newCoordinate)
       })
       // this.closeRestrict()
     },
