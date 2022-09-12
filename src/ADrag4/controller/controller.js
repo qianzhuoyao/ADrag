@@ -84,8 +84,8 @@ export class Controller {
     syncOperation() {
         Controller.instance.renderModel.backUp()
         Controller.instance.shots = Controller.instance.renderModel.getBackUpHistory()
-        Controller.instance.operationPoint++
-        console.log(Controller.instance.shots,Controller.instance.operationPoint, 'deleteShot')
+        Controller.instance.operationPoint = Controller.instance.shots.length - 1
+        console.log(Controller.instance.shots, Controller.instance.operationPoint, '备份')
     }
 
     updateView() {
@@ -101,9 +101,13 @@ export class Controller {
     }
 
     undo() {
-        Controller.instance.operationPoint = Controller.instance.operationPoint > 0 ? Controller.instance.operationPoint - 1 : 0
-        this.evaluation(Controller.instance.shots[Controller.instance.operationPoint])
-        this.updateView()
+        return new Promise((resolve) => {
+            Controller.instance.operationPoint = Controller.instance.operationPoint > 0 ? Controller.instance.operationPoint - 1 : 0
+            resolve(Controller.instance.shots[Controller.instance.operationPoint])
+            this.evaluation(Controller.instance.shots[Controller.instance.operationPoint])
+            this.updateView()
+            console.log(Controller.instance.shots[Controller.instance.operationPoint], Controller.instance.shots, Controller.instance.operationPoint, 'Controller.instance.operationPoint ')
+        })
     }
 
     evaluation(data) {

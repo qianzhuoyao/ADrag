@@ -87,6 +87,24 @@ export class RenderModel {
         }
     }
 
+    setShadow(id, shadow) {
+        this.iterateChange((i) => {
+            if (i.id === id) {
+                return {...i, shadow: shadow ? 'drop-shadow(2px 2px 7px #1990ff)' : ''}
+            } else {
+                return i
+            }
+        })
+    }
+
+    openShadow(id) {
+        this.setShadow(id, true)
+    }
+
+    closeShadow(id) {
+        this.setShadow(id, false)
+    }
+
     clear() {
         RenderModel.instance[result] = []
     }
@@ -108,15 +126,18 @@ export class RenderModel {
          * v 显示,
          * id 标识
          * renderData 数据
+         * shadow 链接效果
          *
          */
-        const {x, y, w, h, f, z, c, tag, m} = args
+        const {x, y, w, h, f, z, c, tag, m, id} = args
         const v = true
         const renderData = Object.seal({})
-        const id = RenderModel.instance.adderId++
+        const onlyId = id || `node${RenderModel.instance.adderId++}`
         const center = [x + w / 2, y + h / 2]
+        //drop-shadow(2px 2px 7px #1990ff)'
+        const shadow = ''
         RenderModel.instance[result].push({
-                x, y, w, h, f, z, c, v, m, id, tag, renderData, center
+                x, y, w, h, f, z, c, v, m, id: onlyId, tag, renderData, center, shadow,
             }
         )
     }

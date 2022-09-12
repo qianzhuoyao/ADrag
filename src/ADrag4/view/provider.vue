@@ -5,7 +5,9 @@
          @contextmenu.prevent="(e)=>contextmenu(k,e)"
          @mouseover.prevent="(e)=>hover(k,e)"
          @mouseleave.prevent="e=>leave(k,e)"
+         @mouseup.prevent="e=>mouseup(k,e)"
     >
+      {{ `VDR${k.id}` }}
       <VueDragResize
           v-if="k.v"
           :ref="`VDR${k.id}`"
@@ -53,17 +55,15 @@
     </div>
     <div id="renderLine" class="svgC">
       <svg width="100%" height="100%">
-        <!--        <line-->
-        <!--            v-for="(i,k) in renderLines"-->
-        <!--            :key="k"-->
-        <!--            :style="{stroke:'green' ,strokeWidth: '1px'}"-->
-        <!--        ></line>-->
-        <path
-            v-for="(i,k) in renderLines"
-            :key="k"
-            :id="i.id"
-            :d="`M${i.x1||0} ${i.y1||0} Q ${i.x2||0} ${i.y2||0} ${i.x3||0} ${i.y3||0}`"
-            stroke="black" fill="transparent"/>
+        <a v-for="(i,k) in renderLines"
+           :key="k"
+           :id="i.id"
+           @click.stop="(e)=>lineClick(i,e)">
+          <path
+              :d="`M${i.x1||0} ${i.y1||0} Q ${i.x2||0} ${i.y2||0} ${i.x3||0} ${i.y3||0}`"
+              :style="{stroke:i.lineColor ,strokeWidth: i.width+'px',strokeDasharray:i.isDashed?'5,5':''}"
+              stroke="black" fill="transparent"/>
+        </a>
       </svg>
     </div>
   </div>
@@ -86,6 +86,9 @@ const _CONSTVARS = {
   _BS: 'bottomSide'
 }
 const _EVENTS = {
+  _MU: 'mouseUp',
+  //连线点击
+  _LC: 'lineClick',
   //组件点击
   _CL: 'componentClick',
   //组件拖动中
@@ -128,6 +131,10 @@ export default {
     return {
       viewStatus: {
         aider: false,
+        restrict: {
+          restrictDragStopForUndo: false,
+          restrictResizeStopForUndo: false,
+        },
       },
       renderData: [],
       aiderLines: [],
@@ -155,8 +162,13 @@ export default {
     this.controller.bindId(this.pid)
   },
   methods: {
-    createLine(aid, zid) {
-      this.lines.createLine(aid, zid)
+
+    lineClick(item, event) {
+      this.targetFocus({id: NaN, tag: this.tags[0]})
+      this.eventRun(_EVENTS._LC, {item, event})
+    },
+    createLine(aid, zid, params) {
+      this.lines.createLine(aid, zid, params)
       this.renderLines = this.lines.getLines()
       console.log(this.renderLines, 'this.renderLines')
     },
@@ -200,9 +212,9 @@ export default {
         }
       }
     },
-    areaClick(e) {
+    areaClick(event) {
       this.targetFocus({id: NaN, tag: this.tags[0]})
-      this.eventRun(_EVENTS._AC, e)
+      this.eventRun(_EVENTS._AC, {event})
     },
     syncLinePosition(fn, params, item) {
       if (typeof fn === 'function') {
@@ -216,44 +228,63 @@ export default {
       }
     },
     resizing(item, params) {
-      const {left: x, top: y, height: h, width: w} = params
-      this.syncLinePosition(() => {
-        this.updateItemForStaticData({w, h}, item, false)
-        this.aiderComputed(item)
-        this.recommendAider({x, y, w, h})
-        this.eventRun(_EVENTS._RI, item)
-      }, params, item)
+      if (!this.viewStatus.restrict.restrictResizeStopForUndo) {
+        const {left: x, top: y, height: h, width: w} = params
+        this.syncLinePosition(() => {
+          this.updateItemForStaticData({w, h}, item, false)
+          this.aiderComputed(item)
+          this.recommendAider({x, y, w, h})
+          this.eventRun(_EVENTS._RI, {item})
+        }, params, item)
+      }
     },
     dragging(item, params) {
-      const {left: x, top: y, height: h, width: w} = params
-      this.syncLinePosition(() => {
-        this.updateItemForStaticData({x, y}, item, false)
-        this.aiderComputed(item)
-        this.recommendAider({x, y, w, h})
-        this.eventStop([_EVENTS._HO, _EVENTS._LE])
-        this.eventRun(_EVENTS._DI, item)
-      }, params, item)
+      if (!this.viewStatus.restrict.restrictDragStopForUndo) {
+        const {left: x, top: y, height: h, width: w} = params
+        this.syncLinePosition(() => {
+          this.updateItemForStaticData({x, y}, item, false)
+          this.aiderComputed(item)
+          this.recommendAider({x, y, w, h})
+          this.eventStop([_EVENTS._HO, _EVENTS._LE])
+          this.eventRun(_EVENTS._DI, {item})
+        }, params, item)
+      }
     },
     precision(item, params) {
       return Math.abs(item.x - params.left) < 5 && Math.abs(item.y - params.top) < 5
     },
+    changeRestrictDragStopForUndo(state) {
+      this.viewStatus.restrict.restrictDragStopForUndo = !!state
+    },
+    changeRestrictResizetopForUndo(state) {
+      this.viewStatus.restrict.restrictDragStopForUndo = !!state
+    },
     dragStop(item, params) {
-      this.updateItemForStaticData({x: params.left, y: params.top}, item, true)
-      this.adsorption({id: item.id, x: params.left, y: params.top, w: params.width, h: params.height})
-      this.clearAider()
-      this.eventRun(_EVENTS._DS, item)
-      this.reStartEvent([_EVENTS._HO, _EVENTS._LE])
+      if (!this.viewStatus.restrict.restrictDragStopForUndo) {
+        this.updateItemForStaticData({x: params.left, y: params.top}, item, true)
+        this.adsorption({id: item.id, x: params.left, y: params.top, w: params.width, h: params.height})
+        this.clearAider()
+        this.eventRun(_EVENTS._DS, {item})
+        this.reStartEvent([_EVENTS._HO, _EVENTS._LE])
+      }
+    },
+    mouseup(item, event) {
+      this.changeRestrictResizetopForUndo(false)
+      this.changeRestrictDragStopForUndo(false)
+      this.eventRun(_EVENTS._MU, {item, event})
     },
     leave(item, event) {
-      this.eventRun(_EVENTS._LE, item, event)
+      this.eventRun(_EVENTS._LE, {item, event})
     },
     hover(item, event) {
-      this.eventRun(_EVENTS._HO, item, event)
+      this.eventRun(_EVENTS._HO, {item, event})
     },
     resizeStop(item, params) {
-      this.updateItemForStaticData({w: params.width, h: params.height}, item, true)
-      this.clearAider()
-      this.eventRun(_EVENTS._RS, item)
+      if (!this.viewStatus.restrict.restrictResizeStopForUndo) {
+        this.updateItemForStaticData({w: params.width, h: params.height}, item, true)
+        this.clearAider()
+        this.eventRun(_EVENTS._RS, {item})
+      }
     },
     updateItemForStaticData(newItem, item, sync) {
       this.controller.updateForChange((i) => {
@@ -288,7 +319,7 @@ export default {
     },
     click(item) {
       this.targetFocus(item)
-      this.eventRun(_EVENTS._CL, item)
+      this.eventRun(_EVENTS._CL, {item})
     },
     targetFocus(item) {
       this.controller.updateForChange((i) => {
@@ -297,15 +328,20 @@ export default {
     },
     undo() {
       //undo期间不可以使用aider辅助线，因为会导致死循环！
+      //限制视图同步数据导致异常备份
+      this.changeRestrictResizetopForUndo(true)
+      this.changeRestrictDragStopForUndo(true)
       if (!this.viewStatus.aider) {
-        this.controller.undo()
-        //由于vuedragresize组件存在的异常同步位置问题，需要再次手动同步位置
-        this.syncPosition()
+        this.controller.undo().then(() => {
+          this.syncPosition()
+          console.log(this.renderData, 'this.renderData')
+        })
       }
       return !this.viewStatus.aider
     },
     syncPosition() {
       this.renderData.map(i => {
+        console.log(i, 'i')
         const right = this.parentW - i.x - i.w
         const bottom = this.parentH - i.y - i.h
         this.$refs[`VDR${i.id}`][0].left = i.x
@@ -365,8 +401,15 @@ export default {
     //自动吸附
     adsorption(params) {
       const rec = this.aiderLines.filter(i => i.response)
-      const newBaseXRec = rec.filter(i => i.baseArrow === _CONSTVARS._X)
-      const newBaseYRec = rec.filter(i => i.baseArrow === _CONSTVARS._Y)
+      const newBaseXRec = []
+      const newBaseYRec = []
+      rec.map(i => {
+        if (i.baseArrow === _CONSTVARS._X) {
+          newBaseXRec.push(i)
+        } else if (i.baseArrow === _CONSTVARS._Y) {
+          newBaseYRec.push(i)
+        }
+      })
       const XYRecs = [{label: _CONSTVARS._X, value: newBaseXRec}, {label: _CONSTVARS._Y, value: newBaseYRec}]
       XYRecs.map((i) => {
         const {value, label} = i

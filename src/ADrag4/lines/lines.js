@@ -18,12 +18,13 @@ export class Lines {
         return this.lines
     }
 
+
     deleteById(id) {
         this.lines = this.lines.filter(i => i.id !== id)
     }
 
-    createLine(nodeAID, nodeZID) {
-        const line = this.buildLine(nodeAID, nodeZID)
+    createLine(nodeAID, nodeZID, lineParams = {}) {
+        const line = this.buildLine(nodeAID, nodeZID, lineParams)
         this.lines.push({...line, AId: nodeAID, ZId: nodeZID})
     }
 
@@ -56,8 +57,7 @@ export class Lines {
     }
 
     computedCenter(x1, y1, x3, y3) {
-        let x2 = x1
-        let y2 = y1
+        let x2, y2
         console.log(x1, y1, x3, y3, 'x1, y1, x3, y3')
         if (x1 >= x3) {
             x2 = x3 + (x1 - x3) / 2
@@ -72,7 +72,9 @@ export class Lines {
         return {x2, y2}
     }
 
-    buildLine(nodeAID, nodeZID) {
+    buildLine(nodeAID, nodeZID, lineParams = {}) {
+        const {lineColor, isDashed, width} = lineParams
+        console.log(lineParams, 'lp')
         const nodes = new RenderModel().getItems()
         let A = null
         let Z = null
@@ -90,9 +92,18 @@ export class Lines {
             const x3 = Z.center[0]
             const y3 = Z.center[1]
             const {x2, y2} = this.computedCenter(x1, y1, x3, y3)
-            const id = Lines.instance.adderId++
+            const id = `line${Lines.instance.adderId++}`
             return {
-                x1, y1, x2, y2, x3, y3, id
+                x1,
+                y1,
+                x2,
+                y2,
+                x3,
+                y3,
+                id,
+                lineColor: lineColor || 'black',
+                isDashed: !!isDashed,
+                width: parseFloat(String(width)) || 1
             }
         }
     }

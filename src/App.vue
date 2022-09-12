@@ -3,6 +3,7 @@
     <div @click="aiderComputed">aider开启</div>
     <div @click="aiderClear">aider关闭</div>
     <div @click="undo">undo</div>
+    <div @click="toConnect">toConnect</div>
     <fragment
         tag="1"
         render-key="123"
@@ -18,7 +19,7 @@
         <div>345</div>
       </template>
     </fragment>
-    <provider ref="provider" :tags="['1']" style="background: antiquewhite;top:100px">
+    <provider ref="provider" :tags="['1']" style="background: antiquewhite;top:300px">
     </provider>
   </div>
 </template>
@@ -67,8 +68,12 @@ export default {
     this.$refs.provider.on('leave', (o) => {
       console.log(o, 'leave')
     })
+    this.$refs.provider.on('lineClick', (o) => {
+      console.log(o, 'lineClick')
+    })
   },
   methods: {
+    toConnect(){},
     undo() {
       this.$refs.provider.undo()
       if (this.aider) {
@@ -100,7 +105,8 @@ export default {
         }
       })
       this.$refs.provider.draw(draw)
-      this.$refs.provider.createLine(0, 1)
+      const nodes = this.$refs.provider.renderData
+      this.$refs.provider.createLine(nodes[0].id, nodes[1].id, {width: 4,isDashed:true})
     }
   },
 

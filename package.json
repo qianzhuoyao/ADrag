@@ -1,7 +1,7 @@
 {
-  "name": "vue",
-  "version": "0.1.0",
-  "private": true,
+  "name": "adrag",
+  "version": "1.0.1",
+  "private": false,
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
@@ -47,5 +47,17 @@
     "last 2 versions",
     "not dead",
     "not ie 11"
-  ]
+  ],
+  "description": "这是一个简单的可视化模板,可以帮助你管理操作流程与整个可视化模块间的更新与操作。",
+  "main": "babel.config.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qianzhuoyao/ADrag.git"
+  },
+  "author": "arron",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/qianzhuoyao/ADrag/issues"
+  },
+  "homepage": "https://github.com/qianzhuoyao/ADrag#readme"
 }
