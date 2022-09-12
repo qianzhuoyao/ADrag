@@ -88,6 +88,10 @@ export class Controller {
         console.log(Controller.instance.shots, Controller.instance.operationPoint, '备份')
     }
 
+    getHistory() {
+        return Controller.instance.shots
+    }
+
     updateView() {
         new Render().updateProvider(this.getRenderData())
     }

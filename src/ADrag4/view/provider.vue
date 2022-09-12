@@ -5,9 +5,7 @@
          @contextmenu.prevent="(e)=>contextmenu(k,e)"
          @mouseover.prevent="(e)=>hover(k,e)"
          @mouseleave.prevent="e=>leave(k,e)"
-         @mouseup.prevent="e=>mouseup(k,e)"
     >
-      {{ `VDR${k.id}` }}
       <VueDragResize
           v-if="k.v"
           :ref="`VDR${k.id}`"
@@ -160,6 +158,7 @@ export default {
       throw new Error('PID 必须为truth类型的数据存在')
     }
     this.controller.bindId(this.pid)
+
   },
   methods: {
 
@@ -213,6 +212,7 @@ export default {
       }
     },
     areaClick(event) {
+      console.log('area cvlick')
       this.targetFocus({id: NaN, tag: this.tags[0]})
       this.eventRun(_EVENTS._AC, {event})
     },
@@ -267,11 +267,12 @@ export default {
         this.eventRun(_EVENTS._DS, {item})
         this.reStartEvent([_EVENTS._HO, _EVENTS._LE])
       }
+      this.closeRestrict()
     },
-    mouseup(item, event) {
-      this.changeRestrictResizetopForUndo(false)
+    closeRestrict() {
+      console.log('click')
       this.changeRestrictDragStopForUndo(false)
-      this.eventRun(_EVENTS._MU, {item, event})
+      this.changeRestrictResizetopForUndo(false)
     },
     leave(item, event) {
       this.eventRun(_EVENTS._LE, {item, event})
@@ -285,6 +286,7 @@ export default {
         this.clearAider()
         this.eventRun(_EVENTS._RS, {item})
       }
+      this.closeRestrict()
     },
     updateItemForStaticData(newItem, item, sync) {
       this.controller.updateForChange((i) => {
@@ -318,6 +320,7 @@ export default {
       }
     },
     click(item) {
+      console.log('selfclick')
       this.targetFocus(item)
       this.eventRun(_EVENTS._CL, {item})
     },
@@ -348,7 +351,10 @@ export default {
         this.$refs[`VDR${i.id}`][0].top = i.y
         this.$refs[`VDR${i.id}`][0].right = right
         this.$refs[`VDR${i.id}`][0].bottom = bottom
+        // this.$refs[`VDR${i.id}`][0].width = i.w
+        // this.$refs[`VDR${i.id}`][0].height = i.h
       })
+      // this.closeRestrict()
     },
     clearAider() {
       this.aiderLines = []
