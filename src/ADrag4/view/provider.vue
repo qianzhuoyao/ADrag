@@ -256,8 +256,8 @@ export default {
     changeRestrictDragStopForUndo(state) {
       this.viewStatus.restrict.restrictDragStopForUndo = !!state
     },
-    changeRestrictResizetopForUndo(state) {
-      this.viewStatus.restrict.restrictDragStopForUndo = !!state
+    changeRestrictResizeStopForUndo(state) {
+      this.viewStatus.restrict.restrictResizeStopForUndo = !!state
     },
     dragStop(item, params) {
       if (!this.viewStatus.restrict.restrictDragStopForUndo) {
@@ -267,12 +267,12 @@ export default {
         this.eventRun(_EVENTS._DS, {item})
         this.reStartEvent([_EVENTS._HO, _EVENTS._LE])
       }
-      this.closeRestrict()
+      this.changeRestrictDragStopForUndo(false)
     },
     closeRestrict() {
       console.log('click')
       this.changeRestrictDragStopForUndo(false)
-      this.changeRestrictResizetopForUndo(false)
+      this.changeRestrictResizeStopForUndo(false)
     },
     leave(item, event) {
       this.eventRun(_EVENTS._LE, {item, event})
@@ -286,7 +286,7 @@ export default {
         this.clearAider()
         this.eventRun(_EVENTS._RS, {item})
       }
-      this.closeRestrict()
+      this.changeRestrictResizeStopForUndo(false)
     },
     updateItemForStaticData(newItem, item, sync) {
       this.controller.updateForChange((i) => {
@@ -332,7 +332,7 @@ export default {
     undo() {
       //undo期间不可以使用aider辅助线，因为会导致死循环！
       //限制视图同步数据导致异常备份
-      this.changeRestrictResizetopForUndo(true)
+      this.changeRestrictResizeStopForUndo(true)
       this.changeRestrictDragStopForUndo(true)
       if (!this.viewStatus.aider) {
         this.controller.undo().then(() => {
@@ -351,8 +351,6 @@ export default {
         this.$refs[`VDR${i.id}`][0].top = i.y
         this.$refs[`VDR${i.id}`][0].right = right
         this.$refs[`VDR${i.id}`][0].bottom = bottom
-        // this.$refs[`VDR${i.id}`][0].width = i.w
-        // this.$refs[`VDR${i.id}`][0].height = i.h
       })
       // this.closeRestrict()
     },
