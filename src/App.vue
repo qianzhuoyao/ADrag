@@ -12,7 +12,10 @@
         :default-component-width="100"
         :put-offset-x="10"
         :put-offset-y="20"
-        :default-component-z-index="999">
+        :default-component-z-index="999"
+        :move-offset-x="200"
+        :move-offset-y="200"
+    >
       <template #display>
         <div>123</div>
       </template>
@@ -74,7 +77,8 @@ export default {
     })
   },
   methods: {
-    toConnect(){},
+    toConnect() {
+    },
     undo() {
       this.$refs.provider.undo()
       if (this.aider) {
@@ -90,6 +94,10 @@ export default {
     aiderComputed() {
       this.aider = true
       this.$refs.provider.openAider()
+    },
+    fragmentMove(p) {
+      console.log('fragmentMove')
+      p.setOffsetDrag({x:-200,y:-200})
     },
     beforeStart() {
       const {nameMap} = config
@@ -107,7 +115,7 @@ export default {
       })
       this.$refs.provider.draw(draw)
       const nodes = this.$refs.provider.renderData
-      this.$refs.provider.createLine(nodes[0].id, nodes[1].id, {width: 4,isDashed:true})
+      this.$refs.provider.createLine(nodes[0].id, nodes[1].id, {width: 4, isDashed: true})
     }
   },
 

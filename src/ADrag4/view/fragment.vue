@@ -20,6 +20,14 @@ export default {
       type: [String, Number, Boolean],
       default: 'a_default_fragment'
     },
+    moveOffsetX: {
+      type: [Number],
+      default: 0
+    },
+    moveOffsetY: {
+      type: [Number],
+      default: 0
+    },
     putOffsetX: {
       type: [Number],
       default: 0
@@ -58,6 +66,18 @@ export default {
     }
   },
   watch: {
+    moveOffsetX: {
+      handler(n) {
+        this.moveX = n
+      },
+      immediate: true
+    },
+    moveOffsetY: {
+      handler(n) {
+        this.moveY = n
+      },
+      immediate: true
+    },
     putOffsetX: {
       handler(n) {
         this.offsetX = n
@@ -102,6 +122,8 @@ export default {
       width: 0,
       offsetX: 0,
       offsetY: 0,
+      moveX: 0,
+      moveY: 0,
       height: 0,
       zIndex: 999
     }
@@ -128,11 +150,11 @@ export default {
           .dragElementHide()
           .pipeEventStart({
             downCallback: (pipe) => {
+              pipe.setOffsetDrag({x: this.moveX, y: this.moveY})
               this.$emit('fragmentDown', pipe)
             },
-            moveCallback: (pipe, e) => {
+            moveCallback: (pipe) => {
               pipe.dragElementShow()
-              pipe.dragElementPosition({x: e.x, y: e.y})
               this.$emit('fragmentMove', pipe)
             },
             overCallback: (pipe, e) => {

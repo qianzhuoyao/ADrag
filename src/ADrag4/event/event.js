@@ -88,6 +88,7 @@ export default class PipeEvent {
 
 
     dragElementPosition({x, y}) {
+        console.log(this.dragElement,x,y,'ds')
         domPosition({
             dom: this.dragElement,
             x,
@@ -96,6 +97,7 @@ export default class PipeEvent {
     }
 
     setOffsetDrag({x, y}) {
+        console.log(x,y,'lo')
         this.offset = {
             x,
             y
@@ -165,6 +167,7 @@ export default class PipeEvent {
             ).subscribe(result => {
                 this.dragElementAbsolute()
                 if (this.dragElement) {
+                    console.log(this.offset,!this.offset ? result.x : result.x + (this.offset.x || 0),'this.offset')
                     this.dragElementPosition({
                         x: !this.offset ? result.x : result.x + (this.offset.x || 0),
                         y: !this.offset ? result.y : result.y + (this.offset.y || 0),
