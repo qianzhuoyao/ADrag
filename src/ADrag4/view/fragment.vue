@@ -10,7 +10,7 @@
 </template>
 
 <script>
-import {PipeEvent} from '../event/event'
+import PipeEvent from '../event/event'
 import {Controller} from "../controller/controller";
 
 export default {
@@ -19,6 +19,14 @@ export default {
     tag: {
       type: [String, Number, Boolean],
       default: 'a_default_fragment'
+    },
+    putOffsetX: {
+      type: [Number],
+      default: 0
+    },
+    putOffsetY: {
+      type: [Number],
+      default: 0
     },
     renderKey: {
       display: {
@@ -50,6 +58,18 @@ export default {
     }
   },
   watch: {
+    putOffsetX: {
+      handler(n) {
+        this.offsetX = n
+      },
+      immediate: true
+    },
+    putOffsetY: {
+      handler(n) {
+        this.offsetY = n
+      },
+      immediate: true
+    },
     defaultComponentWidth: {
       handler(n) {
         this.width = n
@@ -80,6 +100,8 @@ export default {
       render: null,
       controller: null,
       width: 0,
+      offsetX: 0,
+      offsetY: 0,
       height: 0,
       zIndex: 999
     }
@@ -100,9 +122,9 @@ export default {
     },
     registryEvent() {
       new PipeEvent()
-          .setDragElement(this.displayKey())
+          .setDragElement(this.hideKey())
           //设置来源元素
-          .setCopyElement(this.hideKey())
+          .setCopyElement(this.displayKey())
           .dragElementHide()
           .pipeEventStart({
             downCallback: (pipe) => {
@@ -119,8 +141,8 @@ export default {
                 c: this.putComponent,
                 m: this.modalComponent,
                 tag: this.tag,
-                x: e.x,
-                y: e.y,
+                x: e.x - this.offsetX,
+                y: e.y - this.offsetY,
                 w: this.width,
                 h: this.height,
                 z: this.zIndex,

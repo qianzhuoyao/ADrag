@@ -10,6 +10,8 @@
         :modal-component="components[2]"
         :default-component-height="100"
         :default-component-width="100"
+        :put-offset-x="10"
+        :put-offset-y="20"
         :default-component-z-index="999">
       <template #display>
         <div>123</div>

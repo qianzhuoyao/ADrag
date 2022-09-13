@@ -1,6 +1,5 @@
 import {concatAll, fromEvent, takeUntil, withLatestFrom} from 'rxjs';
 import {map} from 'rxjs/operators';
-
 const dragIndex = "99999"
 const _STYLE = {
     _DISPLAY: {
@@ -12,24 +11,29 @@ const _STYLE = {
         _UNSET: 'unset'
     }
 }
+
 const setAbsolute = (dom) => {
     if (dom) {
         dom.style.position = _STYLE._POSITION._ABSOLUTE
     }
 }
+
 const isShow = (dom) => {
     return dom.style.display === _STYLE._DISPLAY._BLOCK
 }
+
 const domShow = (dom) => {
     if (dom) {
         dom.style.display = _STYLE._DISPLAY._BLOCK
     }
 }
+
 const domHide = (dom) => {
     if (dom) {
         dom.style.display = _STYLE._DISPLAY._NONE
     }
 }
+
 const domPosition = ({dom, x, y}) => {
     if (dom) {
         dom.style.left = typeof x === 'number' ? (x + 'px') : x
@@ -37,24 +41,20 @@ const domPosition = ({dom, x, y}) => {
     }
 }
 
-export class PipeEvent {
+
+export default class PipeEvent {
     constructor() {
         this.init();
         this.registryEvent();
         this.obstructDefaultEvent()
     }
 
-    reloadDragPosition() {
-        domPosition({
-            dom: this.dragElement,
-            x: 0,
-            y: 0
-        })
-    }
 
     obstructDefaultEvent() {
         document.onselectstart = i => i.preventDefault()
+        document.ondragstart = () => false
     }
+
 
     init() {
         this.copyElement = undefined
@@ -64,23 +64,28 @@ export class PipeEvent {
         this.mouseDownObservable = null
     }
 
+
     getDom(id) {
         return document.getElementById(id)
     }
 
+
     setCopyElement(id) {
         this.copyElement = this.getDom(id)
+        console.log(id, 'getid123')
         return this
+
     }
+
 
     setDragElement(id) {
         this.dragElement = this.getDom(id)
         if (this.dragElement) {
             this.dragElement.style.zIndex = dragIndex
         }
-        this.dragElementAbsolute()
         return this
     }
+
 
     dragElementPosition({x, y}) {
         domPosition({
@@ -90,10 +95,19 @@ export class PipeEvent {
         })
     }
 
+    setOffsetDrag({x, y}) {
+        this.offset = {
+            x,
+            y
+        }
+        return this
+    }
+
     dragElementAbsolute() {
         setAbsolute(this.dragElement)
         return this
     }
+
 
     dragElementHide() {
         domHide(this.dragElement)
@@ -105,10 +119,12 @@ export class PipeEvent {
         return this
     }
 
+
     registryEvent() {
         this.mouseUpObservable = fromEvent(document, 'mouseup');
         this.mouseMoveObservable = fromEvent(document, 'mousemove');
     }
+
 
     pipeEventStart({
                        downCallback,
@@ -117,16 +133,19 @@ export class PipeEvent {
                    }) {
         if (this.copyElement) {
             this.mouseDownObservable = fromEvent(this.copyElement, 'mousedown');
+            console.log('preEvent')
             this.mouseDownObservable.pipe(
                 map(() => {
                     if (typeof downCallback === 'function') {
                         downCallback.call(this, this)
                     }
+                    console.log(this.copyElement, 'afterEvent')
                     return this.mouseMoveObservable
                         .pipe(
                             takeUntil(this.mouseUpObservable.pipe(
                                 map((e) => {
                                     if (typeof overCallback === 'function') {
+                                        console.log('over')
                                         overCallback.call(this, this, e)
                                     }
                                 })
@@ -144,14 +163,14 @@ export class PipeEvent {
                     }
                 })
             ).subscribe(result => {
+                this.dragElementAbsolute()
                 if (this.dragElement) {
-                    if (typeof moveCallback === 'function') {
-                        moveCallback.call(this, this, result)
-                    }
                     this.dragElementPosition({
-                        x: result.x,
-                        y: result.y
+                        x: !this.offset ? result.x : result.x + (this.offset.x || 0),
+                        y: !this.offset ? result.y : result.y + (this.offset.y || 0),
                     })
+                    if (typeof moveCallback === 'function') {
+                        moveCallback.call(this, this, result)                    }
                 } else {
                     throw new Error('dragElement 不存在')
                 }
@@ -159,5 +178,7 @@ export class PipeEvent {
         } else {
             throw new Error('copyElement 不存在')
         }
+
     }
+
 }
