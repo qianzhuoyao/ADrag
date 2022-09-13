@@ -77,8 +77,25 @@ export class Controller {
             this.delete(id)
         }, tag)
         this.syncOperation()
+    }
 
+    onConnect(id) {
+        Controller.instance.renderModel.openShadow(id)
+        this.updateView()
+    }
 
+    hasConnect() {
+        return Controller.instance.renderModel.hasConnect()
+    }
+
+    closeConnect(id) {
+        Controller.instance.renderModel.closeShadow(id)
+        this.updateView()
+    }
+
+    clearConnect() {
+        Controller.instance.renderModel.closeAllShadow()
+        this.updateView()
     }
 
     syncOperation() {

@@ -1,7 +1,13 @@
 <template>
   <ul>
-    <li @click="log1">
-      <a>Option 1</a>
+    <li @click="onConnect">
+      <a>onConnect</a>
+    </li>
+    <li @click="disConnect">
+      <a>disConnect</a>
+    </li>
+    <li @click="clearConnectSelf">
+      <a>clearConnect</a>
     </li>
     <li>
       <a>Option 2</a>
@@ -13,7 +19,19 @@
 export default {
   name: "view-c",
   props: {
+    clearConnect: {
+      type: Function,
+      default: new Function('')
+    },
     updateData: {
+      type: Function,
+      default: new Function('')
+    },
+    closeConnect: {
+      type: Function,
+      default: new Function('')
+    },
+    connect: {
       type: Function,
       default: new Function('')
     },
@@ -32,7 +50,7 @@ export default {
   watch: {
     thisData: {
       handler(n) {
-         console.log(n, 'nnn')
+        console.log(n, 'nnn')
       }, deep: true,
       immediate: true
     }
@@ -51,6 +69,17 @@ export default {
   mounted() {
   },
   methods: {
+    disConnect(e) {
+      this.closeConnect(e)
+    },
+    clearConnectSelf() {
+      this.clearConnect()
+    },
+    onConnect(e) {
+      //开启连线
+      console.log(e, 'e')
+      this.connect(e)
+    },
     log1() {
       console.log(this.updateData, 'updateView')
       this.updateData((i) => {

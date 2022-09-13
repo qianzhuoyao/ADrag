@@ -87,10 +87,10 @@ export class RenderModel {
         }
     }
 
-    setShadow(id, shadow) {
+    setShadow(id, openShadow) {
         this.iterateChange((i) => {
             if (i.id === id) {
-                return {...i, shadow: shadow ? 'drop-shadow(2px 2px 7px #1990ff)' : ''}
+                return {...i, shadow: openShadow ? 'drop-shadow(2px 2px 7px #1990ff)' : ''}
             } else {
                 return i
             }
@@ -103,6 +103,16 @@ export class RenderModel {
 
     closeShadow(id) {
         this.setShadow(id, false)
+    }
+
+    hasConnect() {
+        return RenderModel.instance[result].some(i => !!i.shadow)
+    }
+
+    closeAllShadow() {
+        this.iterateChange((i) => {
+            return {...i, shadow: ''}
+        })
     }
 
     clear() {

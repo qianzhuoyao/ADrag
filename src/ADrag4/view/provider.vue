@@ -28,6 +28,11 @@
             :is="k.c"
             :thisData="k"
             :updateData="updateData"
+            :change="updateComponent"
+            :connect="(e)=>onConnect(k.id,e)"
+            :closeConnect="(e)=>closeConnect(k.id,e)"
+            :clearConnect="()=>clearBindConnect(k.id)"
+            :style="{filter:`${k.shadow}`}"
         ></component>
       </VueDragResize>
       <div :id="`menu${k.id}`"
@@ -38,6 +43,10 @@
             :is="k.m"
             :thisData="k"
             :updateData="updateData"
+            :change="updateComponent"
+            :clearConnect="()=>clearBindConnect(k.id)"
+            :connect="(e)=>onConnect(k.id,e)"
+            :closeConnect="(e)=>closeConnect(k.id,e)"
         ></component>
       </div>
     </div>
@@ -86,6 +95,11 @@ const _CONSTVARS = {
   _BS: 'bottomSide'
 }
 const _EVENTS = {
+  _CS: 'connectStart',
+  _CI: 'connectIng',
+  _CE: 'connectEnd',
+  _CC: 'closeAllConnect',
+  //鼠标放起
   _MU: 'mouseUp',
   //连线点击
   _LC: 'lineClick',
@@ -131,6 +145,7 @@ export default {
     return {
       viewStatus: {
         aider: false,
+        connectId: undefined,
         restrict: {
           restrictDragStopForUndo: false,
           restrictResizeStopForUndo: false,
@@ -166,16 +181,27 @@ export default {
   methods: {
 
     lineClick(item, event) {
+      if (item.willDelete) {
+        this.lines.deleteById(item.id)
+        this.updateLine()
+      }
       this.targetFocus({id: NaN, tag: this.tags[0]})
       this.eventRun(_EVENTS._LC, {item, event})
     },
+    updateLine() {
+      this.calibration()
+      this.renderLines = this.lines.getLines()
+    },
     createLine(aid, zid, params) {
       this.lines.createLine(aid, zid, params)
-      this.renderLines = this.lines.getLines()
-      console.log(this.renderLines, 'this.renderLines')
+      this.updateLine()
+      console.log(this.renderData, this.renderLines, 'this.renderLines')
     },
     update(items) {
       this.renderData = items
+    },
+    calibration() {
+      this.renderData.map(i => this.updateLinesForNode(i))
     },
     drawEach(item) {
       const {c, m, tag, x, y, w, h, z, f = false} = item
@@ -203,6 +229,54 @@ export default {
         this.menu.style.visibility = 'hidden'
       }
     },
+    onConnect(id, e) {
+      if (e) {
+        e.stopPropagation()
+        this.controller.onConnect(id)
+        this.viewStatus.connectId = id
+        this.eventRun(_EVENTS._CS, {id, e})
+      } else {
+        throw new Error('你需要在connect函数内传入事件参数')
+      }
+    },
+    clearBindConnect(id) {
+      this.lines.deleteByNodeId(id)
+      this.updateLine()
+    },
+    closeConnect(id, e) {
+      if (e) {
+        e.stopPropagation()
+        this.controller.closeConnect(id)
+        const lines = this.lines.findLineByNodeId(id)
+        console.log(lines, 'line')
+        lines.map(i => {
+          this.lines.buildLineParamsById(i.id, {
+            lineColor: 'red',
+            willDelete: true,
+          })
+        })
+        this.updateLine()
+      } else {
+        throw new Error('你需要在closeConnect函数内传入事件参数')
+      }
+    },
+    hasConnect() {
+      return this.controller.hasConnect()
+    },
+    clearConnect() {
+      this.controller.clearConnect()
+      this.eventRun(_EVENTS._CC)
+    },
+    // 向外暴露的更新方法，fn返回新的非数据即可  更新视图
+    updateComponent(key, fn, tag) {
+      if (typeof fn === 'function') {
+        this.controller.updateForChange((i) => {
+          if (!!key && key in i && key !== 'renderData') {
+            return {...i, [key]: fn(i) || {}}
+          }
+        }, {tag})
+      }
+    },
     // 向外暴露的更新方法，fn返回新数据即可  更新数据
     updateData(fn, tag) {
       this.controller.updateForChange((i) => {
@@ -221,6 +295,7 @@ export default {
     },
     areaClick(event) {
       console.log('area cvlick')
+      this.clearConnect()
       this.targetFocus({id: NaN, tag: this.tags[0]})
       this.eventRun(_EVENTS._AC, {event})
     },
@@ -331,6 +406,12 @@ export default {
     },
     click(item) {
       console.log('selfclick')
+      if (this.viewStatus.connectId) {
+        this.createLine(this.viewStatus.connectId, item.id, {width: 4, isDashed: true})
+        this.viewStatus.connectId = undefined
+        this.clearConnect()
+        console.log(this.renderLines, 'rs')
+      }
       this.targetFocus(item)
       this.eventRun(_EVENTS._CL, {item})
     },

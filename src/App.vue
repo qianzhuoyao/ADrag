@@ -3,7 +3,6 @@
     <div @click="aiderComputed">aider开启</div>
     <div @click="aiderClear">aider关闭</div>
     <div @click="undo">undo</div>
-    <div @click="toConnect">toConnect</div>
     <fragment
         tag="1"
         render-key="123"

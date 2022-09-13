@@ -23,6 +23,14 @@ export class Lines {
         this.lines = this.lines.filter(i => i.id !== id)
     }
 
+    deleteByNodeId(id) {
+        this.lines = this.lines.filter(i => ![i.AId, i.ZId].includes(id))
+    }
+
+    findLineByNodeId(id) {
+        return this.lines.filter(i => [i.AId, i.ZId].includes(id))
+    }
+
     createLine(nodeAID, nodeZID, lineParams = {}) {
         const line = this.buildLine(nodeAID, nodeZID, lineParams)
         this.lines.push({...line, AId: nodeAID, ZId: nodeZID})
@@ -41,14 +49,18 @@ export class Lines {
     }
 
     syncMove(nodeId, newCoordinate) {
+        console.log('sync')
         const {x1, y1, x3, y3} = newCoordinate
         for (let i = 0; i < this.lines.length; i++) {
             if (nodeId === this.lines[i].AId) {
-                this.lines[i].x1 = x1
-                this.lines[i].y1 = y1
-            } else if (nodeId === this.lines[i].ZId) {
-                this.lines[i].x3 = x3
-                this.lines[i].y3 = y3
+                console.log(this.lines[i], 'A')
+                this.lines[i].x1 = x1 || x3
+                this.lines[i].y1 = y1 || y3
+            }
+            if (nodeId === this.lines[i].ZId) {
+                console.log(this.lines[i], 'Z')
+                this.lines[i].x3 = x3 || x1
+                this.lines[i].y3 = y3 || y1
             }
             const {x2, y2} = this.computedCenter(this.lines[i].x1, this.lines[i].y1, this.lines[i].x3, this.lines[i].y3)
             this.lines[i].x2 = x2
@@ -72,9 +84,17 @@ export class Lines {
         return {x2, y2}
     }
 
+    buildLineParamsById(lineId, lineParams = {}) {
+        this.lines = this.lines.map(i => {
+            return i.id === lineId ? {
+                ...i,
+                ...lineParams
+            } : i
+        })
+    }
+
     buildLine(nodeAID, nodeZID, lineParams = {}) {
         const {lineColor, isDashed, width} = lineParams
-        console.log(lineParams, 'lp')
         const nodes = new RenderModel().getItems()
         let A = null
         let Z = null
@@ -86,6 +106,7 @@ export class Lines {
                 Z = i
             }
         })
+        console.log({A, Z}, 'az')
         if (A && Z) {
             const x1 = A.center[0]
             const y1 = A.center[1]
@@ -103,6 +124,7 @@ export class Lines {
                 id,
                 lineColor: lineColor || 'black',
                 isDashed: !!isDashed,
+                willDelete:false,
                 width: parseFloat(String(width)) || 1
             }
         }

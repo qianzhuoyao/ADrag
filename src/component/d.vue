@@ -18,7 +18,7 @@ export default {
     },
   },
   mounted() {
-    console.log(this.node, "view");
+    console.log(this.thisData, "view");
   },
 };
 </script>
