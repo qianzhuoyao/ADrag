@@ -30,13 +30,16 @@
             :updateData="updateData"
         ></component>
       </VueDragResize>
-      <menuContext :ref="`ref${k.id}`" style="z-index: 99999999;position: absolute">
+      <div :id="`menu${k.id}`"
+           style="visibility: hidden;z-index: 99999999;position: absolute;min-width: 100px;min-height: 100px"
+           @mouseup="closeMenu"
+      >
         <component
             :is="k.m"
             :thisData="k"
             :updateData="updateData"
         ></component>
-      </menuContext>
+      </div>
     </div>
     <div id="aiderLinesContainer" class="svgC">
       <svg width="100%" height="100%">
@@ -71,7 +74,6 @@
 import {Controller} from "@/ADrag4/controller/controller";
 import {Render} from "@/ADrag4/render/render";
 import VueDragResize from "vue-drag-resize";
-import menuContext from 'vue-context'
 import {Aider} from "@/ADrag4/aider/aider";
 import {Lines} from "@/ADrag4/lines/lines";
 
@@ -124,7 +126,7 @@ export default {
       default: 2000
     }
   },
-  components: {VueDragResize, menuContext},
+  components: {VueDragResize},
   data: () => {
     return {
       viewStatus: {
@@ -141,6 +143,7 @@ export default {
       render: null,
       eventMap: {},
       controller: null,
+      menu: null,
       aider: null,
       lines: null
     }
@@ -195,6 +198,11 @@ export default {
       })
       this.controller.syncOperation()
     },
+    closeMenu() {
+      if (this.menu) {
+        this.menu.style.visibility = 'hidden'
+      }
+    },
     // 向外暴露的更新方法，fn返回新数据即可  更新数据
     updateData(fn, tag) {
       this.controller.updateForChange((i) => {
@@ -219,11 +227,13 @@ export default {
     syncLinePosition(fn, params, item) {
       if (typeof fn === 'function') {
         const {left: x, top: y, height: h, width: w} = params
-        const moveCenterX = x + w / 2
-        const moveCenterY = y + h / 2
-        const role = this.lines.checkRole(item.id)
-        const newCoordinate = role === 'A' ? {x1: moveCenterX, y1: moveCenterY} : {x3: moveCenterX, y3: moveCenterY}
-        this.lines.syncMove(item.id, newCoordinate)
+        this.updateLinesForNode({
+          x,
+          w,
+          y,
+          h,
+          id: item.id
+        })
         fn()
       }
     },
@@ -294,12 +304,12 @@ export default {
       }, {tag: item.tag}, !!sync)
     },
     contextmenu(item, e) {
+      this.closeMenu()
       const {left, top} = window.getComputedStyle(document.getElementById(this.pid), null)
-      this.$refs[`ref${item.id}`][0].open({
-        ...e,
-        clientX: e.clientX - parseFloat(left),
-        clientY: e.clientY - parseFloat(top)
-      })
+      this.menu = document.getElementById(`menu${item.id}`)
+      this.menu.style.left = e.pageX - parseFloat(left || '0px') + 'px'
+      this.menu.style.top = e.pageY - parseFloat(top || '0px') + 'px'
+      this.menu.style.visibility = 'visible'
     },
     eventRun(event, params) {
       if (typeof this.eventMap[event] === 'function' && !this.isEventStop(event)) {
@@ -328,6 +338,7 @@ export default {
       this.controller.updateForChange((i) => {
         return {...i, f: i.id === item.id}
       }, {tag: item.tag})
+      this.closeMenu()
     },
     undo() {
       //undo期间不可以使用aider辅助线，因为会导致死循环！
@@ -351,13 +362,17 @@ export default {
         this.$refs[`VDR${i.id}`][0].top = i.y
         this.$refs[`VDR${i.id}`][0].right = right
         this.$refs[`VDR${i.id}`][0].bottom = bottom
-        const moveCenterX = i.x + i.w / 2
-        const moveCenterY = i.y + i.h / 2
-        const role = this.lines.checkRole(i.id)
-        const newCoordinate = role === 'A' ? {x1: moveCenterX, y1: moveCenterY} : {x3: moveCenterX, y3: moveCenterY}
-        this.lines.syncMove(i.id, newCoordinate)
+        this.updateLinesForNode(i)
       })
       // this.closeRestrict()
+    },
+    updateLinesForNode(args) {
+      const {x, w, y, h, id} = args
+      const moveCenterX = x + w / 2
+      const moveCenterY = y + h / 2
+      const role = this.lines.checkRole(id)
+      const newCoordinate = role === 'A' ? {x1: moveCenterX, y1: moveCenterY} : {x3: moveCenterX, y3: moveCenterY}
+      this.lines.syncMove(id, newCoordinate)
     },
     clearAider() {
       this.aiderLines = []
