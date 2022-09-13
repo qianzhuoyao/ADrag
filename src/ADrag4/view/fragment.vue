@@ -50,6 +50,24 @@ export default {
     }
   },
   watch: {
+    defaultComponentWidth: {
+      handler(n) {
+        this.width = n
+      },
+      immediate: true
+    },
+    defaultComponentHeight: {
+      handler(n) {
+        this.height = n
+      },
+      immediate: true
+    },
+    defaultComponentZIndex: {
+      handler(n) {
+        this.zIndex = n
+      },
+      immediate: true
+    },
     renderKey: {
       handler(n) {
         this.checkRenderKey(n)
@@ -61,6 +79,9 @@ export default {
     return {
       render: null,
       controller: null,
+      width: 0,
+      height: 0,
+      zIndex: 999
     }
   },
   mounted() {
@@ -100,9 +121,9 @@ export default {
                 tag: this.tag,
                 x: e.x,
                 y: e.y,
-                w: this.defaultComponentWidth,
-                h: this.defaultComponentHeight,
-                z: this.defaultComponentZIndex,
+                w: this.width,
+                h: this.height,
+                z: this.zIndex,
                 f: true
               })
               this.$emit('fragmentOver', pipe)
