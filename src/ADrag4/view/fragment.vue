@@ -84,12 +84,13 @@ export default {
           .setCopyElement(this.hideKey())
           .dragElementHide()
           .pipeEventStart({
-            downCallback: () => {
-
+            downCallback: (pipe) => {
+              this.$emit('fragmentDown', pipe)
             },
             moveCallback: (pipe, e) => {
               pipe.dragElementShow()
               pipe.dragElementPosition({x: e.x, y: e.y})
+              this.$emit('fragmentMove', pipe)
             },
             overCallback: (pipe, e) => {
               pipe.dragElementHide()
@@ -104,6 +105,7 @@ export default {
                 z: this.defaultComponentZIndex,
                 f: true
               })
+              this.$emit('fragmentOver', pipe)
             },
           });
     },
