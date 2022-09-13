@@ -1,5 +1,5 @@
-import {RenderModel} from "@/ADrag4/model/renderModel";
-import {Render} from "@/ADrag4/render/render";
+import {RenderModel} from "../model/renderModel";
+import {Render} from "../render/render";
 
 export class Controller {
     constructor() {

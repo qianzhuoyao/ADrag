@@ -1,4 +1,4 @@
-import {RenderModel} from "@/ADrag4/model/renderModel";
+import {RenderModel} from "../model/renderModel";
 
 export class Aider {
     constructor() {

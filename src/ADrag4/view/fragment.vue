@@ -11,7 +11,7 @@
 
 <script>
 import {PipeEvent} from '../event/event'
-import {Controller} from "@/ADrag4/controller/controller";
+import {Controller} from "../controller/controller";
 
 export default {
   name: "a-fragment",

@@ -80,11 +80,11 @@
 </template>
 
 <script>
-import {Controller} from "@/ADrag4/controller/controller";
-import {Render} from "@/ADrag4/render/render";
+import {Controller} from "../controller/controller";
+import {Render} from "../render/render";
 import VueDragResize from "vue-drag-resize";
-import {Aider} from "@/ADrag4/aider/aider";
-import {Lines} from "@/ADrag4/lines/lines";
+import {Aider} from "../aider/aider";
+import {Lines} from "../lines/lines";
 
 const _CONSTVARS = {
   _Y: 'y',
