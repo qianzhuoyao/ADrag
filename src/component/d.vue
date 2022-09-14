@@ -1,8 +1,10 @@
 <template>
-  <div style="background: aquamarine;height: 100%;">{{ thisData.id }}</div>
+  <div :id="thisData.id" :style="{width:thisData.w+'px',height:thisData.h+'px'}"></div>
 </template>
 
 <script>
+import * as echarts from 'echarts';
+
 export default {
   name: "view-c",
   props: {
@@ -17,8 +19,32 @@ export default {
       },
     },
   },
+  data: () => {
+    return {
+      option: {
+        xAxis: {
+          type: 'category',
+          data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        },
+        yAxis: {
+          type: 'value'
+        },
+        series: [
+          {
+            data: [150, 230, 224, 218, 135, 147, 260],
+            type: 'line'
+          }
+        ]
+      },
+      s: ''
+    }
+  },
   mounted() {
-    console.log(this.thisData, "view");
+    this.chartDom = document.getElementById(this.thisData.id);
+    this.myChart = echarts.init(this.chartDom);
+    console.log(this.thisData, this.chartDom, "view");
+    this.option && this.myChart.setOption(this.option);
+    this.s = this.thisData.id
   },
 };
 </script>

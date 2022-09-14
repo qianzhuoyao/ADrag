@@ -200,9 +200,15 @@ export default {
         const iLength = data.length
         const jLength = this.renderData.length
         if (iLength > jLength) {
-          const jIds = this.renderData.map(i => i.id)
-          this.renderData = data.map(i => {
-            return {...i, firstMounted: !jIds.includes(i.id)}
+          const jIds = [] //this.renderData.map(i => i.id)
+          for (let i = 0; i < jLength; i++) {
+            jIds.push(this.renderData[i].id)
+            this.renderData[i].firstMounted = false
+            this.renderData[i].f = false
+          }
+          const add = data.filter(i => !jIds.includes(i.id))
+          add.map(i => {
+            this.renderData.push({...i, firstMounted: true, f: true})
           })
         } else if (iLength === jLength) {
           for (let i = 0; i < iLength; i++) {

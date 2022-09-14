@@ -1,5 +1,5 @@
 <template>
-  <div style="background: aquamarine;height: 100%;">{{thisData.id}}+0</div>
+  <div style="background: aquamarine;height: 100%;">{{thisData.id}}+{{s}}</div>
 </template>
 
 <script>
@@ -13,8 +13,14 @@ export default {
       },
     },
   },
+  data:()=>{
+    return{
+      s:'success'
+    }
+  },
   mounted() {
-    this.thisData.firstMounted && console.log(this.thisData, "updatae");
+    this.s = this.thisData.id
+    //this.thisData.firstMounted && console.log(this.thisData, "updatae");
   },
 };
 </script>
