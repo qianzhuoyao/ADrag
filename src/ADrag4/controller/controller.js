@@ -6,6 +6,10 @@ export class Controller {
         this.getInstance()
     }
 
+    remove() {
+        Controller.instance.renderModel.clear()
+    }
+
     updateForCreate(args) {
         this.afterCreateSuccess(() => {
             this.editor((i, k) => {

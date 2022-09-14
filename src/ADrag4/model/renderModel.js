@@ -9,6 +9,7 @@ export class RenderModel {
         this.getInstance()
     }
 
+
     getInstance() {
         if (!RenderModel.instance) {
             this.uuid = 0

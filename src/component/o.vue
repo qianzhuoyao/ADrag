@@ -6,7 +6,7 @@
 export default {
   name: "view-c",
   mounted() {
-    //console.log(this.node, "view");
+    console.log( "updatae");
   },
 };
 </script>

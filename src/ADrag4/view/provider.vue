@@ -179,7 +179,43 @@ export default {
 
   },
   methods: {
-
+    sharkHiddenNodes() {
+      return this.renderData.filter(i => i.v)
+    },
+    compare(data) {
+      console.log(data, this.renderData, 'd')
+      if (Array.isArray(data)) {
+        const iLength = data.length
+        const jLength = this.renderData.length
+        if (iLength > jLength) {
+          const jIds = this.renderData.map(i => i.id)
+          const add = data.filter(i => !jIds.includes(i.id))
+          add.map(i => {
+            this.renderData.push(i)
+          })
+        } else if (iLength === jLength) {
+          for (let i = 0; i < iLength; i++) {
+            const {id: iId} = data[i]
+            for (let j = 0; j < jLength; j++) {
+              const {id: jId} = this.renderData[j]
+              if (iId === jId) {
+                this.renderData[j].x = data[i].x
+                this.renderData[j].y = data[i].y
+                this.renderData[j].w = data[i].w
+                this.renderData[j].h = data[i].h
+                //this.renderData[j].f = data[i].f
+                this.renderData[j].v = data[i].v
+                this.renderData[j].z = data[i].z
+                this.renderData[j].shadow = data[i].shadow
+              }
+            }
+          }
+        } else {
+          this.renderData = data
+        }
+      }
+      console.log(this.renderData, 'rf')
+    },
     lineClick(item, event) {
       if (item.willDelete) {
         this.lines.deleteById(item.id)
@@ -198,7 +234,7 @@ export default {
       console.log(this.renderData, this.renderLines, 'this.renderLines')
     },
     update(items) {
-      this.renderData = items
+      this.compare(items)
     },
     calibration() {
       this.renderData.map(i => this.updateLinesForNode(i))
@@ -405,7 +441,7 @@ export default {
       }
     },
     click(item) {
-      console.log('selfclick')
+      console.log(item,'selfclick')
       if (this.viewStatus.connectId) {
         this.createLine(this.viewStatus.connectId, item.id, {width: 4, isDashed: true})
         this.viewStatus.connectId = undefined
@@ -616,6 +652,9 @@ export default {
       this.controller.getRenderData().map(i => {
         this.controller.updateForDelete({id: i.id, tag: i.tag})
       })
+    },
+    remove() {
+      this.controller.remove()
     }
   }
 }

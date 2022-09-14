@@ -13,8 +13,6 @@
         :put-offset-x="10"
         :put-offset-y="20"
         :default-component-z-index="999"
-        :move-offset-x="200"
-        :move-offset-y="200"
     >
       <template #display>
         <div>123</div>
