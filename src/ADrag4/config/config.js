@@ -1,7 +1,8 @@
-import o from '@/component/o'
+import d from '@/component/d'
+import p from '@/component/p'
 
 export const config = {
     nameMap: {
-        o
+        d, p
     }
 }

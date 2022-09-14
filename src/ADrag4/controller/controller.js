@@ -1,5 +1,6 @@
 import {RenderModel} from "../model/renderModel";
 import {Render} from "../render/render";
+import {Lines} from "@/ADrag4/lines/lines";
 
 export class Controller {
     constructor() {
@@ -54,6 +55,7 @@ export class Controller {
         if (typeof fn === "function") {
             const {tag} = args
             this.updateViewAfterChange(() => {
+                console.log(4)
                 this.editor(fn)
             }, tag)
             !!sync && this.syncOperation()
@@ -63,6 +65,7 @@ export class Controller {
     editor(fn) {
         if (typeof fn === 'function') {
             Controller.instance.renderModel.iterateChange((i, k) => {
+                console.log(fn, 'fn')
                 const res = fn(i, k)
                 //注意res 类型
                 return {...i, ...res}
@@ -81,9 +84,10 @@ export class Controller {
     }
 
     updateViewAfterChange(fn, tag) {
+        console.log(this.tagsCheck(tag), 5)
         if (typeof fn === 'function') {
             if (this.tagsCheck(tag)) {
-                fn.call(this)
+                fn()
                 this.updateView()
             }
         }
@@ -143,6 +147,8 @@ export class Controller {
         return new Promise((resolve) => {
             Controller.instance.operationPoint = Controller.instance.operationPoint > 0 ? Controller.instance.operationPoint - 1 : 0
             resolve(Controller.instance.shots[Controller.instance.operationPoint])
+            const linesBackUp = new Lines().getBackUp()
+            new Lines().setLines(linesBackUp[Controller.instance.operationPoint])
             this.evaluation(Controller.instance.shots[Controller.instance.operationPoint])
             this.updateView()
             console.log(Controller.instance.shots[Controller.instance.operationPoint], Controller.instance.shots, Controller.instance.operationPoint, 'Controller.instance.operationPoint ')

@@ -5,6 +5,18 @@ export class Lines {
         this.getInstance()
     }
 
+    backUp() {
+        Lines.instance.linesShot.push(Lines.instance.lines)
+    }
+
+    getBackUp() {
+        return Lines.instance.linesShot
+    }
+
+    setLines(lines) {
+        Lines.instance.lines = lines
+    }
+
     clearInstance() {
         Lines.instance = null
     }
@@ -12,6 +24,7 @@ export class Lines {
     getInstance() {
         if (!Lines.instance) {
             this.lines = []
+            this.linesShot = []
             this.adderId = 0
             Lines.instance = this;
         }
@@ -52,23 +65,53 @@ export class Lines {
         return role
     }
 
+    getWillDeleteLineParams() {
+        return {
+            lineColor: 'red',
+            willDelete: true,
+        }
+    }
+
+    getNormalLineParams() {
+        return {
+            lineColor: 'black',
+            willDelete: false,
+        }
+    }
+
+    sharkEmptyNodeForLines() {
+        const nodesId = new RenderModel().getItems().map(i => i.id)
+        this.lines = this.lines.filter(i => nodesId.includes(i.AId) && nodesId.includes(i.ZId))
+        return nodesId
+    }
+
     syncMove(nodeId, newCoordinate) {
-        console.log('sync')
-        const {x1, y1, x3, y3} = newCoordinate
-        for (let i = 0; i < this.lines.length; i++) {
-            if (nodeId === this.lines[i].AId) {
-                console.log(this.lines[i], 'A')
-                this.lines[i].x1 = x1 || x3
-                this.lines[i].y1 = y1 || y3
+        const nodes = new RenderModel().find(nodeId)
+        this.sharkEmptyNodeForLines()
+        console.log(this.lines, nodes, nodeId, 'tl')
+        if (nodes[0] && nodes[0].v) {
+            console.log('sync')
+            const {x1, y1, x3, y3} = newCoordinate
+            for (let i = 0; i < this.lines.length; i++) {
+                if (nodeId === this.lines[i].AId) {
+                    console.log(this.lines[i], 'A')
+                    this.lines[i].x1 = x1 || x3
+                    this.lines[i].y1 = y1 || y3
+                }
+                if (nodeId === this.lines[i].ZId) {
+                    console.log(this.lines[i], 'Z')
+                    this.lines[i].x3 = x3 || x1
+                    this.lines[i].y3 = y3 || y1
+                }
+                const {
+                    x2,
+                    y2
+                } = this.computedCenter(this.lines[i].x1, this.lines[i].y1, this.lines[i].x3, this.lines[i].y3)
+                this.lines[i].x2 = x2
+                this.lines[i].y2 = y2
             }
-            if (nodeId === this.lines[i].ZId) {
-                console.log(this.lines[i], 'Z')
-                this.lines[i].x3 = x3 || x1
-                this.lines[i].y3 = y3 || y1
-            }
-            const {x2, y2} = this.computedCenter(this.lines[i].x1, this.lines[i].y1, this.lines[i].x3, this.lines[i].y3)
-            this.lines[i].x2 = x2
-            this.lines[i].y2 = y2
+        } else {
+            this.deleteByNodeId(nodeId)
         }
     }
 

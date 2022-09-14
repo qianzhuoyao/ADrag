@@ -25,16 +25,20 @@
           @resizestop="(params)=>resizeStop(k,params)"
           @clicked="(params)=>click(k,params)"
       >
-        <component
-            :is="k.c"
-            :thisData="k"
-            :updateData="updateData"
-            :change="updateComponent"
-            :connect="(e)=>onConnect(k.id,e)"
-            :closeConnect="(e)=>closeConnect(k.id,e)"
-            :clearConnect="()=>clearBindConnect(k.id)"
-            :style="{filter:`${k.shadow}`}"
-        ></component>
+        <div
+            @mousedown="closeRestrict">
+          <component
+              :is="k.c"
+              :thisData="k"
+              :updateData="updateData"
+              :change="updateComponent"
+              :connect="(e)=>onConnect(k.id,e)"
+              :closeConnect="(e)=>openCloseConnect(k.id,e)"
+              :closeOver="(e)=>overCloseConnect(k.id,e)"
+              :clearConnect="()=>clearBindConnect(k.id)"
+              :style="{filter:`${k.shadow}`}"
+          ></component>
+        </div>
       </VueDragResize>
       <div :id="`menu${k.id}`"
            style="visibility: hidden;z-index: 99999999;position: absolute;min-width: 100px;min-height: 100px"
@@ -47,7 +51,8 @@
             :change="updateComponent"
             :clearConnect="()=>clearBindConnect(k.id)"
             :connect="(e)=>onConnect(k.id,e)"
-            :closeConnect="(e)=>closeConnect(k.id,e)"
+            :closeConnect="(e)=>openCloseConnect(k.id,e)"
+            :closeOver="(e)=>overCloseConnect(k.id,e)"
         ></component>
       </div>
     </div>
@@ -178,7 +183,6 @@ export default {
       throw new Error('PID 必须为truth类型的数据存在')
     }
     this.controller.bindId(this.pid)
-
   },
   methods: {
     clearInstance() {
@@ -276,6 +280,7 @@ export default {
     draw(data) {
       console.log(data, 'data')
       this.controller.onceDraw({data})
+      this.targetFocus({id: NaN, tag: this.tags[0]})
       this.controller.syncOperation()
     },
     closeMenu() {
@@ -297,7 +302,19 @@ export default {
       this.lines.deleteByNodeId(id)
       this.updateLine()
     },
-    closeConnect(id, e) {
+    openCloseConnect(id, e) {
+      const willSet = this.lines.getWillDeleteLineParams()
+      this.closeConnectOperation(id, e, {
+        ...willSet
+      })
+    },
+    overCloseConnect(id, e) {
+      const normalParams = this.lines.getNormalLineParams()
+      this.closeConnectOperation(id, e, {
+        ...normalParams
+      })
+    },
+    closeConnectOperation(id, e, lineParams) {
       if (e) {
         e.stopPropagation()
         this.controller.closeConnect(id)
@@ -305,8 +322,7 @@ export default {
         console.log(lines, 'line')
         lines.map(i => {
           this.lines.buildLineParamsById(i.id, {
-            lineColor: 'red',
-            willDelete: true,
+            ...lineParams,
           })
         })
         this.updateLine()
@@ -326,9 +342,10 @@ export default {
       if (typeof fn === 'function') {
         this.controller.updateForChange((i) => {
           if (!!key && key in i && key !== 'renderData') {
-            return {...i, [key]: fn(i) || {}}
+            return fn(i)
           }
         }, {tag})
+        this.syncPosition()
       }
     },
     // 向外暴露的更新方法，fn返回新数据即可  更新数据
@@ -476,6 +493,7 @@ export default {
       }
       this.targetFocus(item)
       this.eventRun(_EVENTS._CL, {item})
+      // this.closeRestrict()
     },
     targetFocus(item) {
       this.controller.updateForChange((i) => {
@@ -490,8 +508,8 @@ export default {
       this.changeRestrictDragStop(true)
       if (!this.viewStatus.aider) {
         this.controller.undo().then(() => {
-          this.syncPosition()
           console.log(this.renderData, 'this.renderData')
+          this.syncPosition()
         })
       }
       return !this.viewStatus.aider
@@ -507,7 +525,9 @@ export default {
         this.$refs[`VDR${i.id}`][0].bottom = bottom
         this.updateLinesForNode(i)
       })
-      // this.closeRestrict()
+      this.updateLine()
+      console.log(this.renderLines, 'rl')
+      // this.closeRestrict()q
     },
     updateLinesForNode(args) {
       const {x, w, y, h, id} = args

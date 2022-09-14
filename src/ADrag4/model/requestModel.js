@@ -1,7 +1,7 @@
 export const data = [
     {
-        cMap: 'o',
-        mMap: 'o',
+        cMap: 'd',
+        mMap: 'p',
         tag: '1',
         x: 347,
         y: 123,
@@ -10,8 +10,8 @@ export const data = [
         z: 999,
     },
     {
-        cMap: 'o',
-        mMap: 'o',
+        cMap: 'd',
+        mMap: 'p',
         tag: '1',
         x: 247,
         y: 626,
@@ -20,8 +20,8 @@ export const data = [
         z: 999,
     },
     {
-        cMap: 'o',
-        mMap: 'o',
+        cMap: 'd',
+        mMap: 'p',
         tag: '1',
         x: 547,
         y: 953,

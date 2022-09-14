@@ -1,5 +1,5 @@
 import {cloneDeep} from "lodash";
-
+import {Lines} from '../lines/lines'
 
 const result = Symbol('items')
 const shot = Symbol('shot')
@@ -75,6 +75,7 @@ export class RenderModel {
 
     backUp() {
         RenderModel.instance[shot].push(cloneDeep(RenderModel.instance[result]))
+        new Lines().backUp()
     }
 
     setResult(data) {
@@ -127,6 +128,10 @@ export class RenderModel {
         RenderModel.instance[shot] = []
     }
 
+    find(id) {
+        return RenderModel.instance.getItems().filter(i => i.id === id)
+    }
+
     create(args) {
         /*
          * x x,
@@ -152,7 +157,7 @@ export class RenderModel {
         const shadow = ''
         const firstMounted = true
         RenderModel.instance[result].push({
-                x, y, w, h, f, z, c, v, m, id: onlyId, tag, renderData, center, shadow,firstMounted
+                x, y, w, h, f, z, c, v, m, id: onlyId, tag, renderData, center, shadow, firstMounted
             }
         )
     }

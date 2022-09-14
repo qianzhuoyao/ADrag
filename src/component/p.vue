@@ -9,8 +9,11 @@
     <li @click="clearConnectSelf">
       <a>clearConnect</a>
     </li>
-    <li>
-      <a>Option 2</a>
+    <li @click="closeOverSelf">
+      <a>closeOver</a>
+    </li>
+    <li @click="del">
+      <a>del</a>
     </li>
   </ul>
 </template>
@@ -31,7 +34,15 @@ export default {
       type: Function,
       default: new Function('')
     },
+    closeOver: {
+      type: Function,
+      default: new Function('')
+    },
     connect: {
+      type: Function,
+      default: new Function('')
+    },
+    change: {
       type: Function,
       default: new Function('')
     },
@@ -69,6 +80,22 @@ export default {
   mounted() {
   },
   methods: {
+    del() {
+      this.change('v', (i) => {
+        console.log(213)
+        if (i.id === this.thisData.id) {
+          return {
+            ...i,
+            v: false
+          }
+        } else {
+          return i
+        }
+      }, this.thisData.tag)
+    },
+    closeOverSelf(e) {
+      this.closeOver(e)
+    },
     disConnect(e) {
       this.closeConnect(e)
     },
