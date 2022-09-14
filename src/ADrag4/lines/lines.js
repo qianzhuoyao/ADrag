@@ -5,6 +5,10 @@ export class Lines {
         this.getInstance()
     }
 
+    clearInstance() {
+        Lines.instance = null
+    }
+
     getInstance() {
         if (!Lines.instance) {
             this.lines = []
@@ -124,7 +128,7 @@ export class Lines {
                 id,
                 lineColor: lineColor || 'black',
                 isDashed: !!isDashed,
-                willDelete:false,
+                willDelete: false,
                 width: parseFloat(String(width)) || 1
             }
         }

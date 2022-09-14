@@ -95,11 +95,11 @@ export default {
     },
     fragmentMove(p) {
       console.log('fragmentMove')
-      p.setOffsetDrag({x:-200,y:-200})
+      p.setOffsetDrag({x: -200, y: -200})
     },
     beforeStart() {
       const {nameMap} = config
-      const draw = data.map(i => {
+      const draw = data.map((i) => {
         return {
           c: nameMap[i.cMap],
           m: nameMap[i.mMap],

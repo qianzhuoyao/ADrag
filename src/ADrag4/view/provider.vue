@@ -1,5 +1,6 @@
 <template>
-  <div :id="pid" class="provider-class" :style="{width:parentW+'px',height:parentH+'px'}" @click="areaClick">
+  <div :id="pid" class="provider-class" :style="{width:parentW+'px',height:parentH+'px'}"
+       @click.stop.prevent="areaClick">
     <div v-for="(k,i) in renderData"
          :key="i"
          @contextmenu.prevent="(e)=>contextmenu(k,e)"
@@ -146,9 +147,10 @@ export default {
       viewStatus: {
         aider: false,
         connectId: undefined,
+        inNode: false,
         restrict: {
-          restrictDragStopForUndo: false,
-          restrictResizeStopForUndo: false,
+          restrictDragStop: false,
+          restrictResizeStop: false,
         },
       },
       renderData: [],
@@ -179,6 +181,16 @@ export default {
 
   },
   methods: {
+    clearInstance() {
+      this.controller.clearInstance()
+      this.render.clearInstance()
+      this.aider.clearInstance()
+      this.lines.clearInstance()
+      this.aider = null
+      this.render = null
+      this.lines = null
+      this.controller = null
+    },
     sharkHiddenNodes() {
       return this.renderData.filter(i => i.v)
     },
@@ -189,9 +201,8 @@ export default {
         const jLength = this.renderData.length
         if (iLength > jLength) {
           const jIds = this.renderData.map(i => i.id)
-          const add = data.filter(i => !jIds.includes(i.id))
-          add.map(i => {
-            this.renderData.push(i)
+          this.renderData = data.map(i => {
+            return {...i, firstMounted: !jIds.includes(i.id)}
           })
         } else if (iLength === jLength) {
           for (let i = 0; i < iLength; i++) {
@@ -199,11 +210,12 @@ export default {
             for (let j = 0; j < jLength; j++) {
               const {id: jId} = this.renderData[j]
               if (iId === jId) {
+                console.log(data[i], iId, 'datai')
                 this.renderData[j].x = data[i].x
                 this.renderData[j].y = data[i].y
                 this.renderData[j].w = data[i].w
                 this.renderData[j].h = data[i].h
-                //this.renderData[j].f = data[i].f
+                this.renderData[j].f = data[i].f
                 this.renderData[j].v = data[i].v
                 this.renderData[j].z = data[i].z
                 this.renderData[j].shadow = data[i].shadow
@@ -234,6 +246,7 @@ export default {
       console.log(this.renderData, this.renderLines, 'this.renderLines')
     },
     update(items) {
+      console.log('render')
       this.compare(items)
     },
     calibration() {
@@ -255,9 +268,8 @@ export default {
     },
     //绘制
     draw(data) {
-      data.map(i => {
-        this.drawEach(i)
-      })
+      console.log(data, 'data')
+      this.controller.onceDraw({data})
       this.controller.syncOperation()
     },
     closeMenu() {
@@ -330,10 +342,12 @@ export default {
       }
     },
     areaClick(event) {
-      console.log('area cvlick')
-      this.clearConnect()
-      this.targetFocus({id: NaN, tag: this.tags[0]})
-      this.eventRun(_EVENTS._AC, {event})
+      if (!this.viewStatus.inNode) {
+        console.log('area cvlick')
+        this.clearConnect()
+        this.targetFocus({id: NaN, tag: this.tags[0]})
+        this.eventRun(_EVENTS._AC, {event})
+      }
     },
     syncLinePosition(fn, params, item) {
       if (typeof fn === 'function') {
@@ -349,10 +363,10 @@ export default {
       }
     },
     resizing(item, params) {
-      if (!this.viewStatus.restrict.restrictResizeStopForUndo) {
+      if (!this.viewStatus.restrict.restrictResizeStop) {
         const {left: x, top: y, height: h, width: w} = params
         this.syncLinePosition(() => {
-          this.updateItemForStaticData({w, h}, item, false)
+          this.updateItemForStaticData({w, h, f: true}, item, false)
           this.aiderComputed(item)
           this.recommendAider({x, y, w, h})
           this.eventRun(_EVENTS._RI, {item})
@@ -360,57 +374,63 @@ export default {
       }
     },
     dragging(item, params) {
-      if (!this.viewStatus.restrict.restrictDragStopForUndo) {
+      if (!this.viewStatus.restrict.restrictDragStop) {
         const {left: x, top: y, height: h, width: w} = params
         this.syncLinePosition(() => {
-          this.updateItemForStaticData({x, y}, item, false)
+          this.updateItemForStaticData({x, y, f: true}, item, false)
           this.aiderComputed(item)
           this.recommendAider({x, y, w, h})
           this.eventStop([_EVENTS._HO, _EVENTS._LE])
           this.eventRun(_EVENTS._DI, {item})
         }, params, item)
       }
+      console.log('di')
     },
     precision(item, params) {
       return Math.abs(item.x - params.left) < 5 && Math.abs(item.y - params.top) < 5
     },
-    changeRestrictDragStopForUndo(state) {
-      this.viewStatus.restrict.restrictDragStopForUndo = !!state
+    changeRestrictDragStop(state) {
+      this.viewStatus.restrict.restrictDragStop = !!state
     },
-    changeRestrictResizeStopForUndo(state) {
-      this.viewStatus.restrict.restrictResizeStopForUndo = !!state
+    changeRestrictResizeStop(state) {
+      this.viewStatus.restrict.restrictResizeStop = !!state
     },
     dragStop(item, params) {
-      if (!this.viewStatus.restrict.restrictDragStopForUndo) {
-        this.updateItemForStaticData({x: params.left, y: params.top}, item, true)
+      if (!this.viewStatus.restrict.restrictDragStop) {
+        this.updateItemForStaticData({x: params.left, y: params.top, f: true}, item, true)
         this.adsorption({id: item.id, x: params.left, y: params.top, w: params.width, h: params.height})
         this.clearAider()
         this.eventRun(_EVENTS._DS, {item})
         this.reStartEvent([_EVENTS._HO, _EVENTS._LE])
       }
-      this.changeRestrictDragStopForUndo(false)
+      this.changeRestrictDragStop(false)
+      console.log('ds')
     },
     closeRestrict() {
       console.log('click')
-      this.changeRestrictDragStopForUndo(false)
-      this.changeRestrictResizeStopForUndo(false)
+      this.changeRestrictDragStop(false)
+      this.changeRestrictResizeStop(false)
     },
     leave(item, event) {
+      this.viewStatus.inNode = false
       this.eventRun(_EVENTS._LE, {item, event})
     },
     hover(item, event) {
+      this.viewStatus.inNode = true
       this.eventRun(_EVENTS._HO, {item, event})
     },
     resizeStop(item, params) {
-      if (!this.viewStatus.restrict.restrictResizeStopForUndo) {
-        this.updateItemForStaticData({w: params.width, h: params.height}, item, true)
+      if (!this.viewStatus.restrict.restrictResizeStop) {
+        this.updateItemForStaticData({w: params.width, h: params.height, f: true}, item, true)
         this.clearAider()
         this.eventRun(_EVENTS._RS, {item})
       }
-      this.changeRestrictResizeStopForUndo(false)
+      this.changeRestrictResizeStop(false)
     },
     updateItemForStaticData(newItem, item, sync) {
+      console.log(newItem, item, 'ni')
       this.controller.updateForChange((i) => {
+        console.log({...i, ...newItem}, '{...i, ...newItem}')
         return i.id === item.id ? {...i, ...newItem} : i
       }, {tag: item.tag}, !!sync)
     },
@@ -441,7 +461,7 @@ export default {
       }
     },
     click(item) {
-      console.log(item,'selfclick')
+      console.log(item, 'selfclick')
       if (this.viewStatus.connectId) {
         this.createLine(this.viewStatus.connectId, item.id, {width: 4, isDashed: true})
         this.viewStatus.connectId = undefined
@@ -460,8 +480,8 @@ export default {
     undo() {
       //undo期间不可以使用aider辅助线，因为会导致死循环！
       //限制视图同步数据导致异常备份
-      this.changeRestrictResizeStopForUndo(true)
-      this.changeRestrictDragStopForUndo(true)
+      this.changeRestrictResizeStop(true)
+      this.changeRestrictDragStop(true)
       if (!this.viewStatus.aider) {
         this.controller.undo().then(() => {
           this.syncPosition()
@@ -655,6 +675,7 @@ export default {
     },
     remove() {
       this.controller.remove()
+      this.clearInstance()
     }
   }
 }

@@ -3,6 +3,10 @@ export class Render {
         this.getInstance()
     }
 
+    clearInstance() {
+        Render.instance = null
+    }
+
     getInstance() {
         if (!Render.instance) {
             this.updateCallback = undefined

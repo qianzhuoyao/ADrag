@@ -5,6 +5,10 @@ export class Aider {
         this.getInstance()
     }
 
+    clearInstance() {
+        Aider.instance = null
+    }
+
     getInstance() {
         if (!Aider.instance) {
             this.aiderLines = {}

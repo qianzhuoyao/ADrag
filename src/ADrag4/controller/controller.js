@@ -8,6 +8,7 @@ export class Controller {
 
     remove() {
         Controller.instance.renderModel.clear()
+        Controller.instance.renderModel.clearShots()
     }
 
     updateForCreate(args) {
@@ -24,6 +25,18 @@ export class Controller {
         }, args)
     }
 
+    onceDraw(args) {
+        const {data} = args
+        if (Array.isArray(data)) {
+            data.map(i => {
+                if (this.checkMoveTargetInside(i)) {
+                    this.create(i)
+                }
+            })
+            this.updateView()
+        }
+    }
+
     afterCreateSuccess(fn, args) {
         const {tag} = args
         if (typeof fn === 'function') {
@@ -37,6 +50,7 @@ export class Controller {
     }
 
     updateForChange(fn, args, sync) {
+        console.log('ed')
         if (typeof fn === "function") {
             const {tag} = args
             this.updateViewAfterChange(() => {
@@ -140,6 +154,11 @@ export class Controller {
     }
 
     redo() {
+    }
+
+    clearInstance() {
+        Controller.instance.renderModel.clearInstance()
+        Controller.instance = null
     }
 
     getInstance() {

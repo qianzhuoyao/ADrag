@@ -9,6 +9,9 @@ export class RenderModel {
         this.getInstance()
     }
 
+    clearInstance() {
+        RenderModel.instance = null
+    }
 
     getInstance() {
         if (!RenderModel.instance) {
@@ -138,7 +141,7 @@ export class RenderModel {
          * id 标识
          * renderData 数据
          * shadow 链接效果
-         *
+         * firstMounted 组件是否需要渲染，当你渲染的组件为图表时,这会很实用，你在组件的mounted状态内通过该属性来判断是否需要渲染，从而有效规避数据同步时组件数组指向变化导致的组件多次挂载渲染
          */
         const {x, y, w, h, f, z, c, tag, m, id} = args
         const v = true
@@ -147,8 +150,9 @@ export class RenderModel {
         const center = [x + w / 2, y + h / 2]
         //drop-shadow(2px 2px 7px #1990ff)'
         const shadow = ''
+        const firstMounted = true
         RenderModel.instance[result].push({
-                x, y, w, h, f, z, c, v, m, id: onlyId, tag, renderData, center, shadow,
+                x, y, w, h, f, z, c, v, m, id: onlyId, tag, renderData, center, shadow,firstMounted
             }
         )
     }

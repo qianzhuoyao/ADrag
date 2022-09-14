@@ -72,7 +72,6 @@ export default class PipeEvent {
 
     setCopyElement(id) {
         this.copyElement = this.getDom(id)
-        console.log(id, 'getid123')
         return this
 
     }
@@ -88,7 +87,6 @@ export default class PipeEvent {
 
 
     dragElementPosition({x, y}) {
-        console.log(this.dragElement,x,y,'ds')
         domPosition({
             dom: this.dragElement,
             x,
@@ -97,7 +95,6 @@ export default class PipeEvent {
     }
 
     setOffsetDrag({x, y}) {
-        console.log(x,y,'lo')
         this.offset = {
             x,
             y
@@ -135,19 +132,16 @@ export default class PipeEvent {
                    }) {
         if (this.copyElement) {
             this.mouseDownObservable = fromEvent(this.copyElement, 'mousedown');
-            console.log('preEvent')
             this.mouseDownObservable.pipe(
                 map(() => {
                     if (typeof downCallback === 'function') {
                         downCallback.call(this, this)
                     }
-                    console.log(this.copyElement, 'afterEvent')
                     return this.mouseMoveObservable
                         .pipe(
                             takeUntil(this.mouseUpObservable.pipe(
                                 map((e) => {
                                     if (typeof overCallback === 'function') {
-                                        console.log('over')
                                         overCallback.call(this, this, e)
                                     }
                                 })
@@ -167,7 +161,6 @@ export default class PipeEvent {
             ).subscribe(result => {
                 this.dragElementAbsolute()
                 if (this.dragElement) {
-                    console.log(this.offset,!this.offset ? result.x : result.x + (this.offset.x || 0),'this.offset')
                     this.dragElementPosition({
                         x: !this.offset ? result.x : result.x + (this.offset.x || 0),
                         y: !this.offset ? result.y : result.y + (this.offset.y || 0),
