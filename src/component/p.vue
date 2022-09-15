@@ -15,6 +15,9 @@
     <li @click="del">
       <a>del</a>
     </li>
+    <li @click="menuItemClickSelf">
+      <a>上传一个对象</a>
+    </li>
   </ul>
 </template>
 
@@ -31,6 +34,10 @@ export default {
       default: new Function('')
     },
     closeConnect: {
+      type: Function,
+      default: new Function('')
+    },
+    menuItemClick: {
       type: Function,
       default: new Function('')
     },
@@ -80,6 +87,11 @@ export default {
   mounted() {
   },
   methods: {
+    menuItemClickSelf(){
+      this.menuItemClick({
+        a:1
+      })
+    },
     del() {
       this.change('v', (i) => {
         console.log(213)

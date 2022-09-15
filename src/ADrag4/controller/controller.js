@@ -1,6 +1,6 @@
 import {RenderModel} from "../model/renderModel";
 import {Render} from "../render/render";
-import {Lines} from "@/ADrag4/lines/lines";
+import {Lines} from "../lines/lines";
 
 export class Controller {
     constructor() {

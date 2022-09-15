@@ -42,7 +42,7 @@
       </VueDragResize>
       <div :id="`menu${k.id}`"
            style="visibility: hidden;z-index: 99999999;position: absolute;min-width: 100px;min-height: 100px"
-           @mouseup="closeMenu"
+           @mouseup="()=>closeMenu(k)"
       >
         <component
             :is="k.m"
@@ -53,6 +53,7 @@
             :connect="(e)=>onConnect(k.id,e)"
             :closeConnect="(e)=>openCloseConnect(k.id,e)"
             :closeOver="(e)=>overCloseConnect(k.id,e)"
+            :menuItemClick="menuItemClick"
         ></component>
       </div>
     </div>
@@ -101,6 +102,9 @@ const _CONSTVARS = {
   _BS: 'bottomSide'
 }
 const _EVENTS = {
+  _MIC:'menuItemClick',
+  _MEU: 'menuUp',
+  //_MC: 'menuClick',
   _CS: 'connectStart',
   _CI: 'connectIng',
   _CE: 'connectEnd',
@@ -283,9 +287,11 @@ export default {
       this.targetFocus({id: NaN, tag: this.tags[0]})
       this.controller.syncOperation()
     },
-    closeMenu() {
+    closeMenu(item) {
       if (this.menu) {
+        console.log('menuUp')
         this.menu.style.visibility = 'hidden'
+        this.eventRun(_EVENTS._MEU, {item})
       }
     },
     onConnect(id, e) {
@@ -307,6 +313,9 @@ export default {
       this.closeConnectOperation(id, e, {
         ...willSet
       })
+    },
+    menuItemClick(item){
+      this.eventRun(_EVENTS._MIC,{item})
     },
     overCloseConnect(id, e) {
       const normalParams = this.lines.getNormalLineParams()

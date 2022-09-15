@@ -73,6 +73,9 @@ export default {
     this.$refs.provider.on('lineClick', (o) => {
       console.log(o, 'lineClick')
     })
+    this.$refs.provider.on('menuItemClick', (o) => {
+      console.log(o, 'menuItemClick')
+    })
   },
   methods: {
     toConnect() {
