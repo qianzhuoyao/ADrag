@@ -102,7 +102,7 @@ const _CONSTVARS = {
   _BS: 'bottomSide'
 }
 const _EVENTS = {
-  _MIC:'menuItemClick',
+  _MIC: 'menuItemClick',
   _MEU: 'menuUp',
   //_MC: 'menuClick',
   _CS: 'connectStart',
@@ -137,6 +137,14 @@ export default {
       type: String,
       default: 'providerId'
     },
+    modalOffsetY: {
+      type: Number,
+      default: 0
+    },
+    modalOffsetX: {
+      type: Number,
+      default: 0
+    },
     tags: {
       type: Array,
       default: () => ['a_default_fragment']
@@ -166,6 +174,8 @@ export default {
       aiderLines: [],
       renderLines: [],
       eventStopList: [],
+      modalY: 0,
+      modalX: 0,
       render: null,
       eventMap: {},
       controller: null,
@@ -173,6 +183,20 @@ export default {
       aider: null,
       lines: null
     }
+  },
+  watch: {
+    modalOffsetX: {
+      handler(n) {
+        this.modalX = n
+      },
+      immediate: true
+    },
+    modalOffsetY: {
+      handler(n) {
+        this.modalY = n
+      },
+      immediate: true
+    },
   },
   mounted() {
     //注册控制器
@@ -314,8 +338,8 @@ export default {
         ...willSet
       })
     },
-    menuItemClick(item){
-      this.eventRun(_EVENTS._MIC,{item})
+    menuItemClick(item) {
+      this.eventRun(_EVENTS._MIC, {item})
     },
     overCloseConnect(id, e) {
       const normalParams = this.lines.getNormalLineParams()
@@ -372,6 +396,9 @@ export default {
           this.eventMap[event] = callback
         }
       }
+    },
+    toSubscribe(e, c) {
+      this.on(e, c)
     },
     areaClick(event) {
       if (!this.viewStatus.inNode) {
@@ -470,8 +497,8 @@ export default {
       this.closeMenu()
       const {left, top} = window.getComputedStyle(document.getElementById(this.pid), null)
       this.menu = document.getElementById(`menu${item.id}`)
-      this.menu.style.left = e.pageX - parseFloat(left || '0px') + 'px'
-      this.menu.style.top = e.pageY - parseFloat(top || '0px') + 'px'
+      this.menu.style.left = e.pageX - parseFloat(left || '0px') - this.modalX + 'px'
+      this.menu.style.top = e.pageY - parseFloat(top || '0px') - this.modalY + 'px'
       this.menu.style.visibility = 'visible'
     },
     eventRun(event, params) {
