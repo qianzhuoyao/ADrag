@@ -223,8 +223,30 @@ export default {
       this.lines = null
       this.controller = null
     },
+    amplification(px) {
+      if (typeof px === 'number') {
+        this.controller.amplification(px)
+        this.syncPosition()
+      } else {
+        throw new Error('放大参数需要是number')
+      }
+    },
+    narrow(px) {
+      if (typeof px === 'number') {
+        this.controller.narrow(px)
+        this.syncPosition()
+      } else {
+        throw new Error('缩小参数需要是number')
+      }
+    },
     sharkHiddenNodes() {
       return this.renderData.filter(i => i.v)
+    },
+    getAllData() {
+      return this.renderData
+    },
+    getAllLines() {
+      return this.renderLines
     },
     compare(data) {
       console.log(data, this.renderData, 'd')
@@ -257,6 +279,7 @@ export default {
                 this.renderData[j].v = data[i].v
                 this.renderData[j].z = data[i].z
                 this.renderData[j].shadow = data[i].shadow
+                this.renderData[j].renderData = data[i].renderData
               }
             }
           }

@@ -7,6 +7,28 @@ export class Controller {
         this.getInstance()
     }
 
+    narrow(px) {
+        Controller.instance.editor(i => {
+            return {
+                ...i,
+                w: i.w - px,
+                h: i.h - px
+            }
+        })
+        this.updateView()
+    }
+
+    amplification(px) {
+        Controller.instance.editor(i => {
+            return {
+                ...i,
+                w: i.w + px,
+                h: i.h + px
+            }
+        })
+        this.updateView()
+    }
+
     remove() {
         Controller.instance.renderModel.clear()
         Controller.instance.renderModel.clearShots()

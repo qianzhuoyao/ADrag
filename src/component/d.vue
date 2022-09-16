@@ -46,6 +46,14 @@ export default {
     this.option && this.myChart.setOption(this.option);
     this.s = this.thisData.id
   },
+  watch: {
+    thisData: {
+      handler() {
+        this.myChart && this.myChart.resize()
+      }, immediate: true,
+      deep: true
+    }
+  }
 };
 </script>
 

@@ -3,6 +3,8 @@
     <div @click="aiderComputed">aider开启</div>
     <div @click="aiderClear">aider关闭</div>
     <div @click="undo">undo</div>
+    <div @click="zoomOut">放大</div>
+    <div @click="zoomIn">缩小</div>
     <fragment
         tag="1"
         render-key="123"
@@ -78,6 +80,12 @@ export default {
     })
   },
   methods: {
+    zoomOut() {
+      this.$refs.provider.amplification(10)
+    },
+    zoomIn() {
+      this.$refs.provider.narrow(10)
+    },
     toConnect() {
     },
     undo() {
