@@ -14,7 +14,12 @@
         :default-component-width="100"
         :put-offset-x="10"
         :put-offset-y="20"
+        :move-offset-y="0"
+        :move-offset-x="0"
         :default-component-z-index="999"
+        @fragmentDown="fragmentDown"
+        @fragmentMove="fragmentMove"
+        @fragmentOver="fragmentOver"
     >
       <template #display>
         <div>123</div>
@@ -23,7 +28,11 @@
         <div>345</div>
       </template>
     </fragment>
-    <provider ref="provider" :tags="['1']" style="background: antiquewhite;top:300px">
+    <provider ref="provider"
+              :tags="['1']"
+              :modal-offset-x="0"
+              :modal-offset-y="0"
+              style="background: antiquewhite;top:300px">
     </provider>
   </div>
 </template>
@@ -105,8 +114,13 @@ export default {
       this.$refs.provider.openAider()
     },
     fragmentMove(p) {
-      console.log('fragmentMove')
-      p.setOffsetDrag({x: -200, y: -200})
+      console.log(p, 'fragmentMove')
+    },
+    fragmentDown(p) {
+      console.log(p, 'fragmentDown')
+    },
+    fragmentOver(p) {
+      console.log(p, 'fragmentOver')
     },
     beforeStart() {
       const {nameMap} = config
