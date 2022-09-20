@@ -1,238 +1,256 @@
-import {RenderModel} from "../model/renderModel";
-import {Render} from "../render/render";
-import {Lines} from "../lines/lines";
+import { RenderModel } from "../model/renderModel";
+import { Render } from "../render/render";
+import { Lines } from "../lines/lines";
 
 export class Controller {
-    constructor() {
-        this.getInstance()
-    }
+  constructor() {
+    this.getInstance();
+  }
 
-    narrow(px) {
-        Controller.instance.editor(i => {
-            return {
-                ...i,
-                w: i.w - px,
-                h: i.h - px
-            }
-        })
-        this.updateView()
-    }
+  narrow(px) {
+    Controller.instance.editor((i) => {
+      return {
+        ...i,
+        w: i.w - px,
+        h: i.h - px,
+      };
+    });
+    this.updateView();
+  }
 
-    amplification(px) {
-        Controller.instance.editor(i => {
-            return {
-                ...i,
-                w: i.w + px,
-                h: i.h + px
-            }
-        })
-        this.updateView()
-    }
+  amplification(px) {
+    Controller.instance.editor((i) => {
+      return {
+        ...i,
+        w: i.w + px,
+        h: i.h + px,
+      };
+    });
+    this.updateView();
+  }
 
-    remove() {
-        Controller.instance.renderModel.clear()
-        Controller.instance.renderModel.clearShots()
-    }
+  remove() {
+    Controller.instance.renderModel.clear();
+    Controller.instance.renderModel.clearShots();
+  }
 
-    updateForCreate(args) {
-        this.afterCreateSuccess(() => {
-            this.editor((i, k) => {
-                return k === this.getRenderData().length - 1 ? {...i, f: true} : {...i, f: false}
-            })
-        }, args)
-        this.syncOperation()
-    }
+  updateForCreate(args) {
+    this.afterCreateSuccess(() => {
+      this.editor((i, k) => {
+        return k === this.getRenderData().length - 1
+          ? { ...i, f: true }
+          : { ...i, f: false };
+      });
+    }, args);
+    this.syncOperation();
+  }
 
-    updateForDraw(args) {
-        this.afterCreateSuccess(() => {
-        }, args)
-    }
+  updateForDraw(args) {
+    this.afterCreateSuccess(() => {}, args);
+  }
 
-    onceDraw(args) {
-        const {data} = args
-        if (Array.isArray(data)) {
-            data.map(i => {
-                if (this.checkMoveTargetInside(i)) {
-                    this.create(i)
-                }
-            })
-            this.updateView()
+  onceDraw(args) {
+    const { data } = args;
+    if (Array.isArray(data)) {
+      data.map((i) => {
+        if (this.checkMoveTargetInside(i)) {
+          this.create(i);
         }
+      });
+      this.updateView();
     }
+  }
 
-    afterCreateSuccess(fn, args) {
-        const {tag} = args
-        if (typeof fn === 'function') {
-            if (this.checkMoveTargetInside(args)) {
-                this.updateViewAfterChange(() => {
-                    this.create(args)
-                    fn()
-                }, tag)
-            }
-        }
-    }
-
-    updateForChange(fn, args, sync) {
-        console.log('ed')
-        if (typeof fn === "function") {
-            const {tag} = args
-            this.updateViewAfterChange(() => {
-                console.log(4)
-                this.editor(fn)
-            }, tag)
-            !!sync && this.syncOperation()
-        }
-    }
-
-    editor(fn) {
-        if (typeof fn === 'function') {
-            Controller.instance.renderModel.iterateChange((i, k) => {
-                console.log(fn, 'fn')
-                const res = fn(i, k)
-                //注意res 类型
-                return {...i, ...res}
-            })
-        }
-    }
-
-    editorAll(args) {
-        Controller.instance.renderModel.iterateChange((i) => {
-            return {...i, ...args}
-        })
-    }
-
-    tagsCheck(tag) {
-        return Controller.instance.tags.includes(tag)
-    }
-
-    updateViewAfterChange(fn, tag) {
-        console.log(this.tagsCheck(tag), 5)
-        if (typeof fn === 'function') {
-            if (this.tagsCheck(tag)) {
-                fn()
-                this.updateView()
-            }
-        }
-    }
-
-    updateForDelete(args) {
-        const {tag, id} = args
+  afterCreateSuccess(fn, args) {
+    const { tag } = args;
+    if (typeof fn === "function") {
+      if (this.checkMoveTargetInside(args)) {
         this.updateViewAfterChange(() => {
-            this.delete(id)
-        }, tag)
-        this.syncOperation()
+          this.create(args);
+          fn();
+        }, tag);
+      }
     }
+  }
 
-    onConnect(id) {
-        Controller.instance.renderModel.openShadow(id)
-        this.updateView()
+  updateForChange(fn, args, sync) {
+    console.log("ed");
+    if (typeof fn === "function") {
+      const { tag } = args;
+      this.updateViewAfterChange(() => {
+        console.log(4);
+        this.editor(fn);
+      }, tag);
+      !!sync && this.syncOperation();
     }
+  }
 
-    hasConnect() {
-        return Controller.instance.renderModel.hasConnect()
+  editor(fn) {
+    if (typeof fn === "function") {
+      Controller.instance.renderModel.iterateChange((i, k) => {
+        console.log(fn, "fn");
+        const res = fn(i, k);
+        //注意res 类型
+        return { ...i, ...res };
+      });
     }
+  }
 
-    closeConnect(id) {
-        Controller.instance.renderModel.closeShadow(id)
-        this.updateView()
-    }
+  editorAll(args) {
+    Controller.instance.renderModel.iterateChange((i) => {
+      return { ...i, ...args };
+    });
+  }
 
-    clearConnect() {
-        Controller.instance.renderModel.closeAllShadow()
-        this.updateView()
-    }
+  tagsCheck(tag) {
+    return Controller.instance.tags.includes(tag);
+  }
 
-    syncOperation() {
-        Controller.instance.renderModel.backUp()
-        Controller.instance.shots = Controller.instance.renderModel.getBackUpHistory()
-        Controller.instance.operationPoint = Controller.instance.shots.length - 1
-        console.log(Controller.instance.shots, Controller.instance.operationPoint, '备份')
+  updateViewAfterChange(fn, tag) {
+    console.log(this.tagsCheck(tag), 5);
+    if (typeof fn === "function") {
+      if (this.tagsCheck(tag)) {
+        fn();
+        this.updateView();
+      }
     }
+  }
 
-    getHistory() {
-        return Controller.instance.shots
-    }
+  updateForDelete(args) {
+    const { tag, id } = args;
+    this.updateViewAfterChange(() => {
+      this.delete(id);
+    }, tag);
+    this.syncOperation();
+  }
 
-    updateView() {
-        new Render().updateProvider(this.getRenderData())
-    }
+  onConnect(id) {
+    Controller.instance.renderModel.openShadow(id);
+    this.updateView();
+  }
 
-    setTags(tags) {
-        Controller.instance.tags = tags
-    }
+  hasConnect() {
+    return Controller.instance.renderModel.hasConnect();
+  }
 
-    bindId(id) {
-        Controller.instance.id = id
-    }
+  closeConnect(id) {
+    Controller.instance.renderModel.closeShadow(id);
+    this.updateView();
+  }
 
-    undo() {
-        return new Promise((resolve) => {
-            Controller.instance.operationPoint = Controller.instance.operationPoint > 0 ? Controller.instance.operationPoint - 1 : 0
-            resolve(Controller.instance.shots[Controller.instance.operationPoint])
-            const linesBackUp = new Lines().getBackUp()
-            new Lines().setLines(linesBackUp[Controller.instance.operationPoint])
-            this.evaluation(Controller.instance.shots[Controller.instance.operationPoint])
-            this.updateView()
-            console.log(Controller.instance.shots[Controller.instance.operationPoint], Controller.instance.shots, Controller.instance.operationPoint, 'Controller.instance.operationPoint ')
-        })
-    }
+  clearConnect() {
+    Controller.instance.renderModel.closeAllShadow();
+    this.updateView();
+  }
 
-    evaluation(data) {
-        Controller.instance.renderModel.setResult(data)
-    }
+  syncOperation() {
+    Controller.instance.renderModel.backUp();
+    Controller.instance.shots =
+      Controller.instance.renderModel.getBackUpHistory();
+    Controller.instance.operationPoint = Controller.instance.shots.length - 1;
+    console.log(
+      Controller.instance.shots,
+      Controller.instance.operationPoint,
+      "备份"
+    );
+  }
 
-    redo() {
-    }
+  getHistory() {
+    return Controller.instance.shots;
+  }
 
-    clearInstance() {
-        Controller.instance.renderModel.clearInstance()
-        Controller.instance = null
-    }
+  updateView() {
+    new Render().updateProvider(this.getRenderData());
+  }
 
-    getInstance() {
-        if (!Controller.instance) {
-            this.renderModel = new RenderModel()
-            this.shots = []
-            this.operationPoint = -1
-            this.tags = []
-            this.id = undefined
-            Controller.instance = this;
-        }
-        return Controller.instance;
-    }
+  setTags(tags) {
+    Controller.instance.tags = tags;
+  }
 
-    getRenderData() {
-        return Controller.instance.renderModel.getItems()
-    }
+  bindId(id) {
+    Controller.instance.id = id;
+  }
 
-    delete(id) {
-        Controller.instance.renderModel.iterateChange((i) => {
-            if (i.id === id) {
-                i.v = false
-            }
-            return i
-        })
-    }
+  undo() {
+    return new Promise((resolve) => {
+      Controller.instance.operationPoint =
+        Controller.instance.operationPoint > 0
+          ? Controller.instance.operationPoint - 1
+          : 0;
+      resolve(Controller.instance.shots[Controller.instance.operationPoint]);
+      const linesBackUp = new Lines().getBackUp();
+      new Lines().setLines(linesBackUp[Controller.instance.operationPoint]);
+      this.evaluation(
+        Controller.instance.shots[Controller.instance.operationPoint]
+      );
+      this.updateView();
+      console.log(
+        Controller.instance.shots[Controller.instance.operationPoint],
+        Controller.instance.shots,
+        Controller.instance.operationPoint,
+        "Controller.instance.operationPoint "
+      );
+    });
+  }
 
-    create({x, y, w, h, f, z, c, tag, m}) {
-        const {
-            left: offsetX,
-            top: offsetY
-        } = window.getComputedStyle(document.getElementById(Controller.instance.id), null)
-        Controller.instance.renderModel.create({
-            x: x - parseFloat(offsetX),
-            y: y - parseFloat(offsetY),
-            m,
-            w,
-            h,
-            f,
-            z,
-            c,
-            tag
-        })
-    }
+  evaluation(data) {
+    Controller.instance.renderModel.setResult(data);
+  }
 
-    checkMoveTargetInside(itemParams) {
-        return Controller.instance.renderModel.hasItemInsideProvider(itemParams, Controller.instance.id)
+  redo() {}
+
+  clearInstance() {
+    Controller.instance.renderModel.clearInstance();
+    Controller.instance = null;
+  }
+
+  getInstance() {
+    if (!Controller.instance) {
+      this.renderModel = new RenderModel();
+      this.shots = [];
+      this.operationPoint = -1;
+      this.tags = [];
+      this.id = undefined;
+      Controller.instance = this;
     }
+    return Controller.instance;
+  }
+
+  getRenderData() {
+    return Controller.instance.renderModel.getItems();
+  }
+
+  delete(id) {
+    Controller.instance.renderModel.iterateChange((i) => {
+      if (i.id === id) {
+        i.v = false;
+      }
+      return i;
+    });
+  }
+
+  create({ x, y, w, h, f, z, c, tag, m }) {
+    const { left: offsetX, top: offsetY } = window.getComputedStyle(
+      document.getElementById(Controller.instance.id),
+      null
+    );
+    Controller.instance.renderModel.create({
+      x: x - parseFloat(offsetX),
+      y: y - parseFloat(offsetY),
+      m,
+      w,
+      h,
+      f,
+      z,
+      c,
+      tag,
+    });
+  }
+
+  checkMoveTargetInside(itemParams) {
+    return Controller.instance.renderModel.hasItemInsideProvider(
+      itemParams,
+      Controller.instance.id
+    );
+  }
 }

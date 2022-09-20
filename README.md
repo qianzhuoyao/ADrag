@@ -426,6 +426,24 @@ Default: `2000`
              firstMounted:boolean
 }
 ```
+#### openAnimation
+params: `(speed,buoyWidth)`<br>
+paramsNote: `(动画速度默认30,动点长度默认10)`<br>
+paramsType: `(number,number)`<br>
+开启动画
+
+```JavaScript
+ this.$refs.provider.openAnimation()
+```
+#### closeAnimation
+params: `-`<br>
+paramsNote: `无`<br>
+paramsType: `undefined`<br>
+关闭动画
+
+```JavaScript
+ this.$refs.provider.openAnimation()
+```
 #### amplification
 params: `px`<br>
 paramsNote: `放大的像素`<br>
@@ -439,7 +457,7 @@ this.$refs.provider.amplification(10)//放大10像素
 params: `px`<br>
 paramsNote: `缩小的像素`<br>
 paramsType: `number`<br>
-同步放大所有组件
+同步缩小所有组件
 
 ```JavaScript
 this.$refs.provider.narrow(10)//缩小10像素
@@ -452,7 +470,7 @@ paramsType: `undefined`<br>
 销毁provider,销毁后 provider将无任何作用，用于重置
 
 ```JavaScript
-this.$refs.provider.clearInstance()
+this.$refs.provider.remove()
 ```
 #### sharkHiddenNodes
 params: `-`<br>

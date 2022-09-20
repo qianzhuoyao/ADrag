@@ -5,6 +5,8 @@
     <div @click="undo">undo</div>
     <div @click="zoomOut">放大</div>
     <div @click="zoomIn">缩小</div>
+    <div @click="opA">开启线动画（建议关闭动画期间拖拽，否则会有点卡顿）</div>
+    <div @click="clA">关闭线动画</div>
     <fragment
         tag="1"
         render-key="123"
@@ -22,10 +24,10 @@
         @fragmentOver="fragmentOver"
     >
       <template #display>
-        <div>123</div>
+        <div>拖拽我</div>
       </template>
       <template #hide>
-        <div>345</div>
+        <div>我在被拖拽</div>
       </template>
     </fragment>
     <provider ref="provider"
@@ -89,6 +91,12 @@ export default {
     })
   },
   methods: {
+    clA() {
+      this.$refs.provider.closeAnimation()
+    },
+    opA() {
+      this.$refs.provider.openAnimation()
+    },
     zoomOut() {
       this.$refs.provider.amplification(10)
     },
