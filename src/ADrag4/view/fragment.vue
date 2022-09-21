@@ -158,6 +158,7 @@ export default {
           overCallback: (pipe, e) => {
             pipe.dragElementHide();
             this.controller.updateForCreate({
+              renderKey:this.renderKey,
               c: this.putComponent,
               m: this.modalComponent,
               tag: this.tag,

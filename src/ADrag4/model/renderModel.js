@@ -44,7 +44,7 @@ export class RenderModel {
         const r = x + w;
         const t = y;
         const b = y + h;
-        return l > leftNum && r < rightNum && t > topNum && b < bottomNum;
+        return l >= leftNum && r <= rightNum && t >= topNum && b <= bottomNum;
     }
 
     computeArea(args) {
@@ -150,10 +150,11 @@ export class RenderModel {
          * id 标识
          * renderData 数据
          * shadow 链接效果
+         * renderKey 组件渲染标识
          * firstMounted 组件是否需要渲染，当你渲染的组件为图表时,这会很实用，你在组件的mounted状态内通过该属性来判断是否需要渲染，从而有效规避数据同步时组件数组指向变化导致的组件多次挂载渲染
          * nodeBackgroundColor 节点背景颜色 默认无，它会遮挡掉线
          */
-        const {x, y, w, h, f, z, c, tag, m, id} = args;
+        const {x, y, w, h, f, z, c, tag, m, id, renderKey} = args;
         const v = true;
         const renderData = Object.seal({});
         const onlyId = id || `node${RenderModel.instance.adderId++}`;
@@ -178,6 +179,7 @@ export class RenderModel {
             center,
             shadow,
             firstMounted,
+            renderKey,
             nodeBackgroundColor,
         });
     }
