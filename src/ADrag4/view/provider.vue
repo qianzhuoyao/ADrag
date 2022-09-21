@@ -30,7 +30,7 @@
           @resizestop="(params) => resizeStop(k, params)"
           @clicked="(params) => click(k, params)"
       >
-        <div @mousedown="closeRestrict">
+        <div @mousedown="closeRestrict" :style="{background:k.nodeBackgroundColor}">
           <component
               :is="k.c"
               :thisData="k"
@@ -258,6 +258,18 @@ export default {
     this.controller.bindId(this.pid);
   },
   methods: {
+    changeFloatPointColor(color) {
+      this.lines.changePointColor(color);
+      this.renderLines = this.lines.getLines();
+    },
+    changeLineWidth(width) {
+      this.lines.changeLineWidth(width);
+      this.renderLines = this.lines.getLines();
+    },
+    changeLineColor(color) {
+      this.lines.changeLineColor(color);
+      this.renderLines = this.lines.getLines();
+    },
     buildDashLine1({id, length, speed, buoyWidth}) {
       if (typeof length === 'number') {
         document.getElementById(`${id}Line1Path`).style.strokeDasharray = `${length - buoyWidth}`
@@ -367,7 +379,7 @@ export default {
                 this.renderData[j].v = data[i].v;
                 this.renderData[j].z = data[i].z;
                 this.renderData[j].shadow = data[i].shadow;
-                this.renderData[j].renderData = data[i].renderData;
+                this.renderData[j].renderData = {...this.renderData[j].renderData, ...data[i].renderData};
               }
             }
           }

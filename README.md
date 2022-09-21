@@ -777,4 +777,4 @@ npm run build
 
 ## License
 
-[MIT license](LICENSE)
+[MIT license]
