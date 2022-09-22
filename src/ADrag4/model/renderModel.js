@@ -155,12 +155,12 @@ export class RenderModel {
          * nodeBackgroundColor 节点背景颜色 默认无，它会遮挡掉线
          */
         const {
-            x, y, w, h, f, z, c, tag, m, id, renderKey, offsetX, providerOffsetY,
+            x, y, w, h, f, z, c, tag, m, id, renderKey, offsetX, providerOffsetY, renderData,
             providerOffsetX,
             offsetY
         } = args;
         const v = true;
-        const renderData = Object.seal({});
+        const renderDataIn = Object.seal(renderData || {});
         const onlyId = id || `node${RenderModel.instance.adderId++}`;
         const center = [x + w / 2, y + h / 2];
         //drop-shadow(2px 2px 7px #1990ff)'
@@ -179,7 +179,7 @@ export class RenderModel {
             m,
             id: onlyId,
             tag,
-            renderData,
+            renderData: renderDataIn,
             center,
             shadow,
             firstMounted,

@@ -231,7 +231,7 @@ export class Controller {
         });
     }
 
-    create({x, y, w, h, f, z, c, tag, m, renderKey, offsetX, offsetY}) {
+    create({x, y, w, h, f, z, c, tag, m, renderKey, offsetX, offsetY,renderData}) {
         const {left: providerOffsetX, top: providerOffsetY} = window.getComputedStyle(
             document.getElementById(Controller.instance.id),
             null
@@ -246,6 +246,7 @@ export class Controller {
             z,
             c,
             tag,
+            renderData,
             renderKey,
             offsetX,
             offsetY,

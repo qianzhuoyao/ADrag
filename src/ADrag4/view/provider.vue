@@ -720,7 +720,7 @@ export default {
       this.menu.style.left =
           offsetX + "px";
       this.menu.style.top =
-          offsetY + "px";
+          foffsetY + "px";
       this.menu.style.visibility = "visible";
     },
     eventRun(event, params) {
