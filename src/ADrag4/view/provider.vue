@@ -698,15 +698,29 @@ export default {
     },
     contextmenu(item, e) {
       this.closeMenu();
-      const {left, top} = window.getComputedStyle(
+      const {left, top, height: pHeight, width: pWidth} = window.getComputedStyle(
           document.getElementById(this.pid),
           null
       );
       this.menu = document.getElementById(`menu${item.id}`);
+      const {width, height} = window.getComputedStyle(
+          this.menu,
+          null
+      )
+      let offsetX = e.pageX - parseFloat(left || "0px") - this.modalX
+      let offsetY = e.pageY - parseFloat(top || "0px") - this.modalY
+      console.log(offsetX, parseFloat(width), parseFloat(left), parseFloat(pWidth), 'px')
+      console.log(offsetY, parseFloat(height), parseFloat(top), parseFloat(pHeight), 'py')
+      if (offsetX + parseFloat(width) > parseFloat(pWidth)) {
+        offsetX = parseFloat(pWidth) - parseFloat(width)
+      }
+      if (offsetY + parseFloat(height) > parseFloat(pHeight)) {
+        offsetY = parseFloat(pHeight) - parseFloat(height)
+      }
       this.menu.style.left =
-          e.pageX - parseFloat(left || "0px") - this.modalX + "px";
+          offsetX + "px";
       this.menu.style.top =
-          e.pageY - parseFloat(top || "0px") - this.modalY + "px";
+          offsetY + "px";
       this.menu.style.visibility = "visible";
     },
     eventRun(event, params) {

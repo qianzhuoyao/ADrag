@@ -34,7 +34,7 @@
               :tags="['1']"
               :modal-offset-x="0"
               :modal-offset-y="0"
-              style="background: antiquewhite;top:300px">
+              style="background: antiquewhite;top:300px;overflow: hidden">
     </provider>
   </div>
 </template>
