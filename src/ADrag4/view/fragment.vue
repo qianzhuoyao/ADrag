@@ -1,17 +1,17 @@
 <template>
   <div>
     <div :id="displayKey()">
-      <slot name="display" />
+      <slot name="display"/>
     </div>
     <div :id="hideKey()">
-      <slot name="hide" />
+      <slot name="hide"/>
     </div>
   </div>
 </template>
 
 <script>
 import PipeEvent from "../event/event";
-import { Controller } from "../controller/controller";
+import {Controller} from "../controller/controller";
 
 export default {
   name: "a-fragment",
@@ -56,11 +56,13 @@ export default {
     },
     putComponent: {
       type: Object,
-      default: () => {},
+      default: () => {
+      },
     },
     modalComponent: {
       type: Object,
-      default: () => {},
+      default: () => {
+      },
     },
   },
   watch: {
@@ -142,36 +144,38 @@ export default {
     },
     registryEvent() {
       new PipeEvent()
-        .setDragElement(this.hideKey())
-        //设置来源元素
-        .setCopyElement(this.displayKey())
-        .dragElementHide()
-        .pipeEventStart({
-          downCallback: (pipe) => {
-            pipe.setOffsetDrag({ x: this.moveX, y: this.moveY });
-            this.$emit("fragmentDown", pipe);
-          },
-          moveCallback: (pipe) => {
-            pipe.dragElementShow();
-            this.$emit("fragmentMove", pipe);
-          },
-          overCallback: (pipe, e) => {
-            pipe.dragElementHide();
-            this.controller.updateForCreate({
-              renderKey:this.renderKey,
-              c: this.putComponent,
-              m: this.modalComponent,
-              tag: this.tag,
-              x: e.x - this.offsetX,
-              y: e.y - this.offsetY,
-              w: this.width,
-              h: this.height,
-              z: this.zIndex,
-              f: true,
-            });
-            this.$emit("fragmentOver", pipe);
-          },
-        });
+          .setDragElement(this.hideKey())
+          //设置来源元素
+          .setCopyElement(this.displayKey())
+          .dragElementHide()
+          .pipeEventStart({
+            downCallback: (pipe) => {
+              pipe.setOffsetDrag({x: this.moveX, y: this.moveY});
+              this.$emit("fragmentDown", pipe);
+            },
+            moveCallback: (pipe) => {
+              pipe.dragElementShow();
+              this.$emit("fragmentMove", pipe);
+            },
+            overCallback: (pipe, e) => {
+              pipe.dragElementHide();
+              this.controller.updateForCreate({
+                renderKey: this.renderKey,
+                c: this.putComponent,
+                m: this.modalComponent,
+                tag: this.tag,
+                x: e.x - this.offsetX,
+                y: e.y - this.offsetY,
+                w: this.width,
+                h: this.height,
+                z: this.zIndex,
+                f: true,
+                offsetX: this.offsetX,
+                offsetY: this.offsetY
+              });
+              this.$emit("fragmentOver", pipe);
+            },
+          });
     },
     checkRenderKey(value) {
       if (!value) {

@@ -515,6 +515,23 @@ export default {
       this.controller.clearConnect();
       this.eventRun(_EVENTS._CC);
     },
+    //与updateComponent 作用相同，免检
+    updateComponentCheck(key, fn) {
+      if (typeof fn === 'function') {
+        this.controller.updateForChange(
+            (i) => {
+              if (!!key && key in i && key !== "renderData") {
+                return {
+                  ...i,
+                  [key]: fn(i)
+                };
+              }
+            },
+            {tag: this.tags[0]}
+        );
+        this.syncPosition();
+      }
+    },
     // 向外暴露的更新方法，fn返回新的非数据即可  更新视图
     updateComponent(key, fn, tag) {
       if (typeof fn === "function") {

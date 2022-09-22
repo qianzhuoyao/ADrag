@@ -154,7 +154,11 @@ export class RenderModel {
          * firstMounted 组件是否需要渲染，当你渲染的组件为图表时,这会很实用，你在组件的mounted状态内通过该属性来判断是否需要渲染，从而有效规避数据同步时组件数组指向变化导致的组件多次挂载渲染
          * nodeBackgroundColor 节点背景颜色 默认无，它会遮挡掉线
          */
-        const {x, y, w, h, f, z, c, tag, m, id, renderKey} = args;
+        const {
+            x, y, w, h, f, z, c, tag, m, id, renderKey, offsetX, providerOffsetY,
+            providerOffsetX,
+            offsetY
+        } = args;
         const v = true;
         const renderData = Object.seal({});
         const onlyId = id || `node${RenderModel.instance.adderId++}`;
@@ -181,6 +185,10 @@ export class RenderModel {
             firstMounted,
             renderKey,
             nodeBackgroundColor,
+            offsetX,
+            offsetY,
+            providerOffsetY,
+            providerOffsetX
         });
     }
 }
