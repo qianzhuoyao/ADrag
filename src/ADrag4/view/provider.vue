@@ -377,7 +377,7 @@ export default {
                 this.renderData[j].v = data[i].v;
                 this.renderData[j].z = data[i].z;
                 this.renderData[j].shadow = data[i].shadow;
-                this.renderData[j].renderData = {...this.renderData[j].renderData, ...data[i].renderData};
+                this.renderData[j].renderData = data[i].renderData;
               }
             }
           }
@@ -549,6 +549,8 @@ export default {
                   ...i,
                   [key]: fn(i)
                 };
+              }else {
+                return i
               }
             },
             {tag: this.tags[0]}
@@ -563,6 +565,8 @@ export default {
             (i) => {
               if (!!key && key in i && key !== "renderData") {
                 return fn(i);
+              }else {
+                return i
               }
             },
             {tag}
@@ -574,7 +578,11 @@ export default {
     updateData(fn, tag) {
       this.controller.updateForChange(
           (i) => {
-            return {...i, renderData: fn(i) || {}};
+            if (fn(i)) {
+              return {...i, renderData: fn(i) || {}};
+            } else {
+              return i
+            }
           },
           {tag}
       );
