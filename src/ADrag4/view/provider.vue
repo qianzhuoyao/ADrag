@@ -103,6 +103,7 @@
               stroke="black"
           />
           <path
+              v-if="viewStatus.animation"
               :id="`${i.id}Line2Path`"
               fill="transparent"
               :style="{
@@ -114,6 +115,7 @@
             } ${i.y3 || 0}`"
           ></path>
           <path
+              v-if="viewStatus.animation"
               :id="`${i.id}Line1Path`"
               fill="transparent"
               :style="{
@@ -207,6 +209,8 @@ export default {
     return {
       viewStatus: {
         aider: false,
+        buoyWidth: 10,
+        animationSpeed: 30,
         connectId: undefined,
         inNode: false,
         animation: false,
@@ -300,11 +304,8 @@ export default {
                      }
                }`
     },
-    deleteKeyFrame() {
-      document.styleSheets[0].deleteRule(0)
-      document.styleSheets[0].deleteRule(0)
-    },
     setKeyFrame({id, length, speed, buoyWidth}) {
+      console.log(this.viewStatus.animation, 'va')
       if (id && typeof length === 'number' && typeof speed === 'number') {
         const dashLine1 = this.buildDashLine1({id, length, speed, buoyWidth});
         const dashLine2 = this.buildDashLine2({id, length, speed, buoyWidth});
@@ -403,9 +404,10 @@ export default {
     },
     closeAnimation() {
       this.viewStatus.animation = false
-      this.deleteKeyFrame()
     },
     openAnimation(speed = 30, buoyWidth = 10) {
+      this.viewStatus.animationSpeed = speed
+      this.viewStatus.buoyWidth = buoyWidth
       this.viewStatus.animation = true
       this.computedLinePathTotal(speed, buoyWidth)
     },
@@ -414,7 +416,11 @@ export default {
         const pathDom = document.getElementById(`${i.id}path`)
         if (pathDom) {
           const curNum = pathDom.getTotalLength();
-          this.setKeyFrame({id: i.id, length: Math.floor(curNum), speed, buoyWidth});
+          if (this.viewStatus.animation) {
+            setTimeout(() => {
+              this.setKeyFrame({id: i.id, length: Math.floor(curNum), speed, buoyWidth})
+            }, 0)
+          }
           return {
             ...i,
             pathTotal: curNum,
@@ -590,7 +596,7 @@ export default {
         // this.updateLine()
         if (this.viewStatus.animation) {
           this.closeAnimation()
-          this.openAnimation()
+          this.openAnimation(this.viewStatus.animationSpeed, this.viewStatus.buoyWidth)
         }
         this.renderLines = this.lines.getLines();
       }
@@ -720,7 +726,7 @@ export default {
       this.menu.style.left =
           offsetX + "px";
       this.menu.style.top =
-          foffsetY + "px";
+          offsetY + "px";
       this.menu.style.visibility = "visible";
     },
     eventRun(event, params) {

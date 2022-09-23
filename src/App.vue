@@ -95,7 +95,7 @@ export default {
       this.$refs.provider.closeAnimation()
     },
     opA() {
-      this.$refs.provider.openAnimation()
+      this.$refs.provider.openAnimation(100,10)
     },
     zoomOut() {
       this.$refs.provider.amplification(10)
