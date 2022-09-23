@@ -19,7 +19,6 @@ export class Aider {
 
   computeAiderLines() {
     const items = new RenderModel().getItems();
-    console.log(items, "items");
     if (Array.isArray(items) && items.length) {
       items.map((i) => {
         const { h: height, w: width, x: left, y: top } = i;
@@ -35,7 +34,6 @@ export class Aider {
   }
 
   getAiderLines() {
-    console.log(Aider.instance.aiderLines, "Aider.instance.aiderLines");
     return Aider.instance.aiderLines;
   }
 }

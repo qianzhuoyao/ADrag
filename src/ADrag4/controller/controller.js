@@ -75,11 +75,9 @@ export class Controller {
     }
 
     updateForChange(fn, args, sync) {
-        console.log("ed");
         if (typeof fn === "function") {
             const {tag} = args;
             this.updateViewAfterChange(() => {
-                console.log(4);
                 this.editor(fn);
             }, tag);
             !!sync && this.syncOperation();
@@ -89,7 +87,6 @@ export class Controller {
     editor(fn) {
         if (typeof fn === "function") {
             Controller.instance.renderModel.iterateChange((i, k) => {
-                console.log(fn, "fn");
                 const res = fn(i, k);
                 //注意res 类型
                 return {...i, ...res};
@@ -108,7 +105,6 @@ export class Controller {
     }
 
     updateViewAfterChange(fn, tag) {
-        console.log(this.tagsCheck(tag), 5);
         if (typeof fn === "function") {
             if (this.tagsCheck(tag)) {
                 fn();
@@ -149,11 +145,6 @@ export class Controller {
         Controller.instance.shots =
             Controller.instance.renderModel.getBackUpHistory();
         Controller.instance.operationPoint = Controller.instance.shots.length - 1;
-        console.log(
-            Controller.instance.shots,
-            Controller.instance.operationPoint,
-            "备份"
-        );
     }
 
     getHistory() {
@@ -185,12 +176,6 @@ export class Controller {
                 Controller.instance.shots[Controller.instance.operationPoint]
             );
             this.updateView();
-            console.log(
-                Controller.instance.shots[Controller.instance.operationPoint],
-                Controller.instance.shots,
-                Controller.instance.operationPoint,
-                "Controller.instance.operationPoint "
-            );
         });
     }
 

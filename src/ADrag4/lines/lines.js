@@ -89,18 +89,14 @@ export class Lines {
     syncMove(nodeId, newCoordinate) {
         const nodes = new RenderModel().find(nodeId);
         this.sharkEmptyNodeForLines();
-        console.log(this.lines, nodes, nodeId, "tl");
         if (nodes[0] && nodes[0].v) {
-            console.log(this.lines, "sync");
             const {x1, y1, x3, y3} = newCoordinate;
             for (let i = 0; i < this.lines.length; i++) {
                 if (nodeId === this.lines[i].AId) {
-                    console.log(this.lines[i], newCoordinate, "A");
                     this.lines[i].x1 = x1 || x3;
                     this.lines[i].y1 = y1 || y3;
                 }
                 if (nodeId === this.lines[i].ZId) {
-                    console.log(this.lines[i], "Z");
                     this.lines[i].x3 = x3 || x1;
                     this.lines[i].y3 = y3 || y1;
                 }
@@ -120,7 +116,6 @@ export class Lines {
 
     computedCenter(x1, y1, x3, y3) {
         let x2, y2;
-        console.log(x1, y1, x3, y3, "x1, y1, x3, y3");
         if (x1 >= x3) {
             x2 = x3 + (x1 - x3) / 2;
         } else {
@@ -180,7 +175,6 @@ export class Lines {
                 Z = i;
             }
         });
-        console.log({A, Z}, "az");
         if (A && Z) {
             const x1 = A.center[0];
             const y1 = A.center[1];

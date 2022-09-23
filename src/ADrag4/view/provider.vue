@@ -305,7 +305,6 @@ export default {
                }`
     },
     setKeyFrame({id, length, speed, buoyWidth}) {
-      console.log(this.viewStatus.animation, 'va')
       if (id && typeof length === 'number' && typeof speed === 'number') {
         const dashLine1 = this.buildDashLine1({id, length, speed, buoyWidth});
         const dashLine2 = this.buildDashLine2({id, length, speed, buoyWidth});
@@ -350,7 +349,6 @@ export default {
       return this.renderLines;
     },
     compare(data) {
-      console.log(data, this.renderData, "d");
       if (Array.isArray(data)) {
         const iLength = data.length;
         const jLength = this.renderData.length;
@@ -371,7 +369,6 @@ export default {
             for (let j = 0; j < jLength; j++) {
               const {id: jId} = this.renderData[j];
               if (iId === jId) {
-                console.log(data[i], iId, "datai");
                 this.renderData[j].x = data[i].x;
                 this.renderData[j].y = data[i].y;
                 this.renderData[j].w = data[i].w;
@@ -388,7 +385,6 @@ export default {
           this.renderData = data;
         }
       }
-      console.log(this.renderData, "rf");
     },
     lineClick(item, event) {
       if (item.willDelete) {
@@ -403,7 +399,33 @@ export default {
       this.renderLines = this.lines.getLines();
     },
     closeAnimation() {
-      this.viewStatus.animation = false
+      this.viewStatus.animation = false;
+      this.deleteAnimation()
+    },
+    deleteAnimation() {
+      this.renderLines.map(() => {
+        [1, 2, 3].map(() => {
+          const animation = this.findAnimation('dashLine')
+          if (animation.styleSheet) {
+            animation.styleSheet.deleteRule(animation.index)
+          }
+        })
+
+      })
+    },
+    findAnimation(name) {
+      const animation = {};
+      // 获取所有的style
+      const ss = document.styleSheets;
+      for (let i = 0; i < ss.length; ++i) {
+        const item = ss[i];
+        if (item.cssRules[0] && item.cssRules[0].name && item.cssRules[0].name.indexOf(name) > -1) {
+          animation.cssRule = item.cssRules[0];
+          animation.styleSheet = ss[i];
+          animation.index = 0;
+        }
+      }
+      return animation;
     },
     openAnimation(speed = 30, buoyWidth = 10) {
       this.viewStatus.animationSpeed = speed
@@ -435,7 +457,6 @@ export default {
       this.updateLine();
     },
     update(items) {
-      console.log("render");
       this.compare(items);
     },
     calibration() {
@@ -457,14 +478,12 @@ export default {
     },
     //绘制
     draw(data) {
-      console.log(data, "data");
       this.controller.onceDraw({data});
       this.targetFocus({id: NaN, tag: this.tags[0]});
       this.controller.syncOperation();
     },
     closeMenu(item) {
       if (this.menu) {
-        console.log("menuUp");
         this.menu.style.visibility = "hidden";
         this.eventRun(_EVENTS._MEU, {item});
       }
@@ -503,7 +522,6 @@ export default {
         e.stopPropagation();
         this.controller.closeConnect(id);
         const lines = this.lines.findLineByNodeId(id);
-        console.log(lines, "line");
         lines.map((i) => {
           this.lines.buildLineParamsById(i.id, {
             ...lineParams,
@@ -576,7 +594,6 @@ export default {
     },
     areaClick(event) {
       if (!this.viewStatus.inNode) {
-        console.log("area cvlick");
         this.clearConnect();
         this.targetFocus({id: NaN, tag: this.tags[0]});
         this.eventRun(_EVENTS._AC, {event});
@@ -594,10 +611,10 @@ export default {
         });
         fn();
         // this.updateLine()
-        if (this.viewStatus.animation) {
-          this.closeAnimation()
-          this.openAnimation(this.viewStatus.animationSpeed, this.viewStatus.buoyWidth)
-        }
+        // if (this.viewStatus.animation) {
+        //   this.closeAnimation()
+        //   this.openAnimation(this.viewStatus.animationSpeed, this.viewStatus.buoyWidth)
+        // }
         this.renderLines = this.lines.getLines();
       }
     },
@@ -617,7 +634,6 @@ export default {
       }
     },
     dragging(item, params) {
-      console.log('dh', this.viewStatus.restrict.restrictDragStop)
       if (!this.viewStatus.restrict.restrictDragStop) {
         const {left: x, top: y, height: h, width: w} = params;
         this.syncLinePosition(
@@ -632,7 +648,6 @@ export default {
             item
         );
       }
-      console.log("di");
     },
     precision(item, params) {
       return (
@@ -664,10 +679,12 @@ export default {
         this.reStartEvent([_EVENTS._HO, _EVENTS._LE]);
       }
       this.changeRestrictDragStop(false);
-      console.log("ds");
+      if (this.viewStatus.animation) {
+        this.closeAnimation()
+        this.openAnimation(this.viewStatus.animationSpeed, this.viewStatus.buoyWidth)
+      }
     },
     closeRestrict() {
-      console.log("click");
       this.changeRestrictDragStop(false);
       this.changeRestrictResizeStop(false);
     },
@@ -690,12 +707,14 @@ export default {
         this.eventRun(_EVENTS._RS, {item});
       }
       this.changeRestrictResizeStop(false);
+      if (this.viewStatus.animation) {
+        this.closeAnimation()
+        this.openAnimation(this.viewStatus.animationSpeed, this.viewStatus.buoyWidth)
+      }
     },
     updateItemForStaticData(newItem, item, sync) {
-      console.log(newItem, item, "ni");
       this.controller.updateForChange(
           (i) => {
-            console.log({...i, ...newItem}, "{...i, ...newItem}");
             return i.id === item.id ? {...i, ...newItem} : i;
           },
           {tag: item.tag},
@@ -715,8 +734,6 @@ export default {
       )
       let offsetX = e.pageX - parseFloat(left || "0px") - this.modalX
       let offsetY = e.pageY - parseFloat(top || "0px") - this.modalY
-      console.log(offsetX, parseFloat(width), parseFloat(left), parseFloat(pWidth), 'px')
-      console.log(offsetY, parseFloat(height), parseFloat(top), parseFloat(pHeight), 'py')
       if (offsetX + parseFloat(width) > parseFloat(pWidth)) {
         offsetX = parseFloat(pWidth) - parseFloat(width)
       }
@@ -753,7 +770,6 @@ export default {
       }
     },
     click(item) {
-      console.log(item, "selfclick");
       if (this.viewStatus.connectId) {
         this.createLine(this.viewStatus.connectId, item.id, {
           width: 4,
@@ -761,7 +777,6 @@ export default {
         });
         this.viewStatus.connectId = undefined;
         this.clearConnect();
-        console.log(this.renderLines, "rs");
       }
       this.targetFocus(item);
       this.eventRun(_EVENTS._CL, {item});
@@ -783,7 +798,6 @@ export default {
       this.changeRestrictDragStop(true);
       if (!this.viewStatus.aider) {
         this.controller.undo().then(() => {
-          console.log(this.renderData, "this.renderData");
           this.syncPosition();
         });
       }
@@ -791,7 +805,6 @@ export default {
     },
     syncPosition() {
       this.renderData.map((i) => {
-        console.log(i, "i");
         const right = this.parentW - i.x - i.w;
         const bottom = this.parentH - i.y - i.h;
         this.$refs[`VDR${i.id}`][0].left = i.x;
@@ -801,11 +814,9 @@ export default {
         this.updateLinesForNode(i);
       });
       this.updateLine();
-      console.log(this.renderLines, "rl");
       // this.closeRestrict()q
     },
     updateLinesForNode(args) {
-      console.log('upn')
       const {x, w, y, h, id} = args;
       const moveCenterX = x + w / 2;
       const moveCenterY = y + h / 2;
