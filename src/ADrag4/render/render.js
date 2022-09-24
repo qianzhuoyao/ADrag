@@ -15,7 +15,6 @@ export class Render {
     }
     return Render.instance;
   }
-
   updateProvider(data) {
     Render.instance.renderData.data = data;
     if (typeof Render.instance.updateCallback === "function") {

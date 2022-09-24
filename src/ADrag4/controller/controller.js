@@ -150,7 +150,46 @@ export class Controller {
     getHistory() {
         return Controller.instance.shots;
     }
-
+    compare(targetData,newData) {
+        let currentData = targetData
+        if (Array.isArray(newData)) {
+            const iLength = newData.length;
+            const jLength = currentData.length;
+            if (iLength > jLength) {
+                const jIds = [];
+                for (let i = 0; i < jLength; i++) {
+                    jIds.push(currentData[i].id);
+                    currentData[i].firstMounted = false;
+                    currentData[i].f = false;
+                }
+                const add = newData.filter((i) => !jIds.includes(i.id));
+                add.map((i) => {
+                    currentData.push({...i, firstMounted: true, f: true});
+                });
+            } else if (iLength === jLength) {
+                for (let i = 0; i < iLength; i++) {
+                    const {id: iId} = newData[i];
+                    for (let j = 0; j < jLength; j++) {
+                        const {id: jId} = currentData[j];
+                        if (iId === jId) {
+                            currentData[j].x = newData[i].x;
+                            currentData[j].y = newData[i].y;
+                            currentData[j].w = newData[i].w;
+                            currentData[j].h = newData[i].h;
+                            currentData[j].f = newData[i].f;
+                            currentData[j].v = newData[i].v;
+                            currentData[j].z = newData[i].z;
+                            currentData[j].shadow = newData[i].shadow;
+                            currentData[j].renderData = newData[i].renderData;
+                        }
+                    }
+                }
+            } else {
+                currentData = newData;
+            }
+        }
+        return currentData
+    }
     updateView() {
         new Render().updateProvider(this.getRenderData());
     }

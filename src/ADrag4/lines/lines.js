@@ -86,6 +86,89 @@ export class Lines {
         return nodesId;
     }
 
+    buildDashLine1({id, length, speed, buoyWidth}) {
+        if (typeof length === 'number') {
+            document.getElementById(`${id}Line1Path`).style.strokeDasharray = `${length - buoyWidth}`
+            document.getElementById(`${id}Line1Path`).style.strokeDashoffset = `${buoyWidth * 2}`
+            document.getElementById(`${id}Line1Path`).style.animation = `dashLine1${id} ${Math.abs(Math.floor(length / speed))}s linear infinite forwards`;
+        }
+        return `@keyframes dashLine1${id}{
+                  from {
+                       stroke-dashoffset: ${length};
+                       }
+                  to {
+                       stroke-dashoffset: ${buoyWidth * 2};
+                     }
+               }`
+    }
+
+    buildDashLine2({id, length, speed, buoyWidth}) {
+        if (typeof length === 'number') {
+            document.getElementById(`${id}Line2Path`).style.strokeDasharray = `${length - buoyWidth}`
+            document.getElementById(`${id}Line2Path`).style.strokeDashoffset = `${length - buoyWidth}`
+            document.getElementById(`${id}Line2Path`).style.animation = `dashLine2${id} ${Math.abs(Math.floor(length / speed))}s linear infinite forwards`;
+        }
+        return `@keyframes dashLine2${id} {
+                  from {
+                       stroke-dashoffset: ${length - 30};
+                       }
+                  to {
+                       stroke-dashoffset: -${buoyWidth * 2};
+                     }
+               }`
+    }
+
+    setKeyFrame({id, length, speed, buoyWidth}) {
+        if (id && typeof length === 'number' && typeof speed === 'number') {
+            setTimeout(() => {
+                const dashLine1 = Lines.instance.buildDashLine1({id, length, speed, buoyWidth});
+                const dashLine2 = Lines.instance.buildDashLine2({id, length, speed, buoyWidth});
+                const sheet = document.styleSheets[0];
+                sheet.insertRule(dashLine1, 0);
+                sheet.insertRule(dashLine2, 0);
+            }, 0)
+        }
+    }
+    deleteAnimation() {
+        Lines.instance.lines.map(() => {
+            [1, 2, 3].map(() => {
+                const animation = Lines.instance.findAnimation('dashLine')
+                if (animation.styleSheet) {
+                    animation.styleSheet.deleteRule(animation.index)
+                }
+            })
+        })
+    }
+    findAnimation(name) {
+        const animation = {};
+        // 获取所有的style
+        const ss = document.styleSheets;
+        for (let i = 0; i < ss.length; ++i) {
+            const item = ss[i];
+            if (item.cssRules[0] && item.cssRules[0].name && item.cssRules[0].name.indexOf(name) > -1) {
+                animation.cssRule = item.cssRules[0];
+                animation.styleSheet = ss[i];
+                animation.index = 0;
+            }
+        }
+        return animation;
+    }
+    computedLinePathTotal(speed, buoyWidth) {
+        return Lines.instance.lines.map((i) => {
+            const pathDom = document.getElementById(`${i.id}path`)
+            if (pathDom) {
+                const curNum = pathDom.getTotalLength();
+                Lines.instance.setKeyFrame({id: i.id, length: Math.floor(curNum), speed, buoyWidth})
+                return {
+                    ...i,
+                    pathTotal: curNum,
+                };
+            } else {
+                return i
+            }
+        });
+    }
+
     syncMove(nodeId, newCoordinate) {
         const nodes = new RenderModel().find(nodeId);
         this.sharkEmptyNodeForLines();

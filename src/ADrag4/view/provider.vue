@@ -274,45 +274,6 @@ export default {
       this.lines.changeLineColor(color);
       this.renderLines = this.lines.getLines();
     },
-    buildDashLine1({id, length, speed, buoyWidth}) {
-      if (typeof length === 'number') {
-        document.getElementById(`${id}Line1Path`).style.strokeDasharray = `${length - buoyWidth}`
-        document.getElementById(`${id}Line1Path`).style.strokeDashoffset = `${buoyWidth * 2}`
-        document.getElementById(`${id}Line1Path`).style.animation = `dashLine1${id} ${Math.abs(Math.floor(length / speed))}s linear infinite forwards`;
-      }
-      return `@keyframes dashLine1${id}{
-                  from {
-                       stroke-dashoffset: ${length};
-                       }
-                  to {
-                       stroke-dashoffset: ${buoyWidth * 2};
-                     }
-               }`
-    },
-    buildDashLine2({id, length, speed, buoyWidth}) {
-      if (typeof length === 'number') {
-        document.getElementById(`${id}Line2Path`).style.strokeDasharray = `${length - buoyWidth}`
-        document.getElementById(`${id}Line2Path`).style.strokeDashoffset = `${length - buoyWidth}`
-        document.getElementById(`${id}Line2Path`).style.animation = `dashLine2${id} ${Math.abs(Math.floor(length / speed))}s linear infinite forwards`;
-      }
-      return `@keyframes dashLine2${id} {
-                  from {
-                       stroke-dashoffset: ${length - 30};
-                       }
-                  to {
-                       stroke-dashoffset: -${buoyWidth * 2};
-                     }
-               }`
-    },
-    setKeyFrame({id, length, speed, buoyWidth}) {
-      if (id && typeof length === 'number' && typeof speed === 'number') {
-        const dashLine1 = this.buildDashLine1({id, length, speed, buoyWidth});
-        const dashLine2 = this.buildDashLine2({id, length, speed, buoyWidth});
-        const sheet = document.styleSheets[0];
-        sheet.insertRule(dashLine1, 0);
-        sheet.insertRule(dashLine2, 0);
-      }
-    },
     clearInstance() {
       this.controller.clearInstance();
       this.render.clearInstance();
@@ -348,44 +309,6 @@ export default {
     getAllLines() {
       return this.renderLines;
     },
-    compare(data) {
-      if (Array.isArray(data)) {
-        const iLength = data.length;
-        const jLength = this.renderData.length;
-        if (iLength > jLength) {
-          const jIds = []; //this.renderData.map(i => i.id)
-          for (let i = 0; i < jLength; i++) {
-            jIds.push(this.renderData[i].id);
-            this.renderData[i].firstMounted = false;
-            this.renderData[i].f = false;
-          }
-          const add = data.filter((i) => !jIds.includes(i.id));
-          add.map((i) => {
-            this.renderData.push({...i, firstMounted: true, f: true});
-          });
-        } else if (iLength === jLength) {
-          for (let i = 0; i < iLength; i++) {
-            const {id: iId} = data[i];
-            for (let j = 0; j < jLength; j++) {
-              const {id: jId} = this.renderData[j];
-              if (iId === jId) {
-                this.renderData[j].x = data[i].x;
-                this.renderData[j].y = data[i].y;
-                this.renderData[j].w = data[i].w;
-                this.renderData[j].h = data[i].h;
-                this.renderData[j].f = data[i].f;
-                this.renderData[j].v = data[i].v;
-                this.renderData[j].z = data[i].z;
-                this.renderData[j].shadow = data[i].shadow;
-                this.renderData[j].renderData = data[i].renderData;
-              }
-            }
-          }
-        } else {
-          this.renderData = data;
-        }
-      }
-    },
     lineClick(item, event) {
       if (item.willDelete) {
         this.lines.deleteById(item.id);
@@ -400,64 +323,23 @@ export default {
     },
     closeAnimation() {
       this.viewStatus.animation = false;
-      this.deleteAnimation()
-    },
-    deleteAnimation() {
-      this.renderLines.map(() => {
-        [1, 2, 3].map(() => {
-          const animation = this.findAnimation('dashLine')
-          if (animation.styleSheet) {
-            animation.styleSheet.deleteRule(animation.index)
-          }
-        })
-
-      })
-    },
-    findAnimation(name) {
-      const animation = {};
-      // 获取所有的style
-      const ss = document.styleSheets;
-      for (let i = 0; i < ss.length; ++i) {
-        const item = ss[i];
-        if (item.cssRules[0] && item.cssRules[0].name && item.cssRules[0].name.indexOf(name) > -1) {
-          animation.cssRule = item.cssRules[0];
-          animation.styleSheet = ss[i];
-          animation.index = 0;
-        }
-      }
-      return animation;
+      this.lines.deleteAnimation();
+      this.renderLines = this.lines.getLines()
     },
     openAnimation(speed = 30, buoyWidth = 10) {
       this.viewStatus.animationSpeed = speed
       this.viewStatus.buoyWidth = buoyWidth
       this.viewStatus.animation = true
-      this.computedLinePathTotal(speed, buoyWidth)
-    },
-    computedLinePathTotal(speed, buoyWidth) {
-      this.renderLines = this.renderLines.map((i) => {
-        const pathDom = document.getElementById(`${i.id}path`)
-        if (pathDom) {
-          const curNum = pathDom.getTotalLength();
-          if (this.viewStatus.animation) {
-            setTimeout(() => {
-              this.setKeyFrame({id: i.id, length: Math.floor(curNum), speed, buoyWidth})
-            }, 0)
-          }
-          return {
-            ...i,
-            pathTotal: curNum,
-          };
-        } else {
-          return i
-        }
-      });
+      if (this.viewStatus.animation) {
+        this.renderLines = this.lines.computedLinePathTotal(speed, buoyWidth)
+      }
     },
     createLine(aid, zid, params) {
       this.lines.createLine(aid, zid, params);
       this.updateLine();
     },
     update(items) {
-      this.compare(items);
+      this.renderData = this.controller.compare(this.renderData, items);
     },
     calibration() {
       this.renderData.map((i) => this.updateLinesForNode(i));
@@ -549,7 +431,7 @@ export default {
                   ...i,
                   [key]: fn(i)
                 };
-              }else {
+              } else {
                 return i
               }
             },
@@ -565,7 +447,7 @@ export default {
             (i) => {
               if (!!key && key in i && key !== "renderData") {
                 return fn(i);
-              }else {
+              } else {
                 return i
               }
             },
@@ -618,11 +500,6 @@ export default {
           id: item.id,
         });
         fn();
-        // this.updateLine()
-        // if (this.viewStatus.animation) {
-        //   this.closeAnimation()
-        //   this.openAnimation(this.viewStatus.animationSpeed, this.viewStatus.buoyWidth)
-        // }
         this.renderLines = this.lines.getLines();
       }
     },
