@@ -715,6 +715,12 @@ export default {
     clearAider() {
       this.aiderLines = [];
     },
+    clearRenderData() {
+      this.controller.clear()
+    },
+    clearHistory() {
+      this.controller.clearShots()
+    },
     openAider() {
       this.viewStatus.aider = true;
     },

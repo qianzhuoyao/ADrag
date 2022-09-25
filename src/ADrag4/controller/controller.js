@@ -150,7 +150,8 @@ export class Controller {
     getHistory() {
         return Controller.instance.shots;
     }
-    compare(targetData,newData) {
+
+    compare(targetData, newData) {
         let currentData = targetData
         if (Array.isArray(newData)) {
             const iLength = newData.length;
@@ -190,6 +191,7 @@ export class Controller {
         }
         return currentData
     }
+
     updateView() {
         new Render().updateProvider(this.getRenderData());
     }
@@ -225,6 +227,15 @@ export class Controller {
     redo() {
     }
 
+    clear() {
+        Controller.instance.renderModel.clear()
+        this.updateView()
+    }
+
+    resetShots() {
+        Controller.instance.renderModel.clearShots()
+    }
+
     clearInstance() {
         Controller.instance.renderModel.clearInstance();
         Controller.instance = null;
@@ -255,7 +266,7 @@ export class Controller {
         });
     }
 
-    create({x, y, w, h, f, z, c, tag, m, renderKey, offsetX, offsetY,renderData}) {
+    create({x, y, w, h, f, z, c, tag, m, renderKey, offsetX, offsetY, renderData}) {
         const {left: providerOffsetX, top: providerOffsetY} = window.getComputedStyle(
             document.getElementById(Controller.instance.id),
             null
