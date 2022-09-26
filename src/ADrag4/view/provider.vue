@@ -2,7 +2,7 @@
   <div
       :id="pid"
       class="provider-class"
-      :style="{ width: parentW + 'px', height: parentH + 'px' }"
+      :style="{ width: parentWSelf + 'px', height: parentHSelf + 'px' }"
       @click.stop.prevent="areaClick"
   >
     <div
@@ -21,8 +21,8 @@
           :h="k.h"
           :z="k.z"
           :isActive="k.f"
-          :parentH="parentH"
-          :parentW="parentW"
+          :parentH="parentHSelf"
+          :parentW="parentWSelf"
           :parentLimitation="true"
           @dragging="(params) => dragging(k, params)"
           @dragstop="(params) => dragStop(k, params)"
@@ -219,6 +219,8 @@ export default {
           restrictResizeStop: false,
         },
       },
+      parentWSelf: 0,
+      parentHSelf: 0,
       renderData: [],
       aiderLines: [],
       renderLines: [],
@@ -234,6 +236,18 @@ export default {
     };
   },
   watch: {
+    parentW: {
+      handler(n) {
+        this.parentWSelf = n;
+      },
+      immediate: true,
+    },
+    parentH: {
+      handler(n) {
+        this.parentHSelf = n;
+      },
+      immediate: true,
+    },
     modalOffsetX: {
       handler(n) {
         this.modalX = n;
@@ -690,8 +704,8 @@ export default {
     },
     syncPosition() {
       this.renderData.map((i) => {
-        const right = this.parentW - i.x - i.w;
-        const bottom = this.parentH - i.y - i.h;
+        const right = this.parentWSelf - i.x - i.w;
+        const bottom = this.parentHSelf - i.y - i.h;
         this.$refs[`VDR${i.id}`][0].left = i.x;
         this.$refs[`VDR${i.id}`][0].top = i.y;
         this.$refs[`VDR${i.id}`][0].right = right;
