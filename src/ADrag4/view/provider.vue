@@ -12,8 +12,9 @@
         @mouseover.prevent="(e) => hover(k, e)"
         @mouseleave.prevent="(e) => leave(k, e)"
     >
-      <VueDragResize
+      <component
           v-if="k.v"
+          is="VueDragResize"
           :ref="`VDR${k.id}`"
           :x="k.x"
           :y="k.y"
@@ -30,20 +31,22 @@
           @resizestop="(params) => resizeStop(k, params)"
           @clicked="(params) => click(k, params)"
       >
-        <div @mousedown="closeRestrict" :style="{background:k.nodeBackgroundColor}">
-          <component
-              :is="k.c"
-              :thisData="k"
-              :updateData="updateData"
-              :change="updateComponent"
-              :connect="(e) => onConnect(k.id, e)"
-              :closeConnect="(e) => openCloseConnect(k.id, e)"
-              :closeOver="(e) => overCloseConnect(k.id, e)"
-              :clearConnect="() => clearBindConnect(k.id)"
-              :style="{ filter: `${k.shadow}` }"
-          ></component>
-        </div>
-      </VueDragResize>
+        <template>
+          <div @mousedown="closeRestrict" :style="{background:k.nodeBackgroundColor}">
+            <component
+                :is="k.c"
+                :thisData="k"
+                :updateData="updateData"
+                :change="updateComponent"
+                :connect="(e) => onConnect(k.id, e)"
+                :closeConnect="(e) => openCloseConnect(k.id, e)"
+                :closeOver="(e) => overCloseConnect(k.id, e)"
+                :clearConnect="() => clearBindConnect(k.id)"
+                :style="{ filter: `${k.shadow}` }"
+            ></component>
+          </div>
+        </template>
+      </component>
       <div
           :id="`menu${k.id}`"
           style="
@@ -133,12 +136,13 @@
 </template>
 
 <script>
-import {Controller} from "../controller/controller";
-import {Render} from "../render/render";
+import {Controller} from "@/lib-components/ADrag4/controller/controller";
+import {Render} from "@/lib-components/ADrag4/render/render";
 import VueDragResize from "vue-drag-resize";
-import {Aider} from "../aider/aider";
-import {Lines} from "../lines/lines";
+import {Aider} from "@/lib-components/ADrag4/aider/aider";
+import {Lines} from "@/lib-components/ADrag4/lines/lines";
 
+console.log(VueDragResize, 'VueDragResize')
 const _CONSTVARS = {
   _Y: "y",
   _X: "x",
@@ -276,6 +280,9 @@ export default {
     this.controller.bindId(this.pid);
   },
   methods: {
+    init(v) {
+      this.controller.bindVueInstance(v)
+    },
     changeFloatPointColor(color) {
       this.lines.changePointColor(color);
       this.renderLines = this.lines.getLines();
@@ -353,7 +360,12 @@ export default {
       this.updateLine();
     },
     update(items) {
-      this.renderData = this.controller.compare(this.renderData, items);
+      setTimeout(() => {
+        this.renderData = this.controller.compare(this.renderData, items);
+        if (this.$options.components.VueDragResize.default) {
+          this.$options.components.VueDragResize = this.$options.components.VueDragResize.default
+        }
+      }, 0)
     },
     calibration() {
       this.renderData.map((i) => this.updateLinesForNode(i));

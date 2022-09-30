@@ -10,8 +10,8 @@
 </template>
 
 <script>
-import PipeEvent from "../event/event";
-import {Controller} from "../controller/controller";
+import PipeEvent from "./ADrag4/event/event";
+import {Controller} from "@/lib-components/ADrag4/controller/controller";
 
 export default {
   name: "a-fragment",
@@ -64,8 +64,18 @@ export default {
       default: () => {
       },
     },
+    providerContainerId: {
+      type: String,
+      default: () => '',
+    },
   },
   watch: {
+    providerContainerId: {
+      handler(n) {
+        this.screenOffset = n;
+      },
+      immediate: true,
+    },
     moveOffsetX: {
       handler(n) {
         this.moveX = n;
@@ -123,6 +133,7 @@ export default {
       offsetX: 0,
       offsetY: 0,
       moveX: 0,
+      screenOffset: '',
       moveY: 0,
       height: 0,
       zIndex: 999,
@@ -142,6 +153,15 @@ export default {
     hideKey() {
       return `${this.renderKey}-hide`;
     },
+    computedScreenOffset() {
+      let x = 0;
+      let y = 0;
+      if (this.screenOffset && typeof this.screenOffset === 'string') {
+        x = document.getElementById(this.screenOffset).scrollLeft || 0
+        y = document.getElementById(this.screenOffset).scrollTop || 0
+      }
+      return {x, y}
+    },
     registryEvent() {
       new PipeEvent()
           .setDragElement(this.hideKey())
@@ -158,14 +178,15 @@ export default {
               this.$emit("fragmentMove", pipe);
             },
             overCallback: (pipe, e) => {
+              const {x: xOffset, y: yOffset} = this.computedScreenOffset()
               pipe.dragElementHide();
               this.controller.updateForCreate({
                 renderKey: this.renderKey,
                 c: this.putComponent,
                 m: this.modalComponent,
                 tag: this.tag,
-                x: e.x - this.offsetX,
-                y: e.y - this.offsetY,
+                x: e.x - this.offsetX + xOffset,
+                y: e.y - this.offsetY + yOffset,
                 w: this.width,
                 h: this.height,
                 z: this.zIndex,

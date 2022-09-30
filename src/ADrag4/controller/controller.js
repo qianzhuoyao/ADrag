@@ -151,6 +151,10 @@ export class Controller {
         return Controller.instance.shots;
     }
 
+    bindVueInstance(VUE) {
+        Controller.instance.vueInstace = VUE
+    }
+
     compare(targetData, newData) {
         let currentData = targetData
         if (Array.isArray(newData)) {
@@ -162,9 +166,11 @@ export class Controller {
                     jIds.push(currentData[i].id);
                     currentData[i].firstMounted = false;
                     currentData[i].f = false;
+                    Controller.instance.autoImport(currentData[i])
                 }
                 const add = newData.filter((i) => !jIds.includes(i.id));
                 add.map((i) => {
+                    Controller.instance.autoImport(i)
                     currentData.push({...i, firstMounted: true, f: true});
                 });
             } else if (iLength === jLength) {
@@ -183,13 +189,28 @@ export class Controller {
                             currentData[j].shadow = newData[i].shadow;
                             currentData[j].renderData = newData[i].renderData;
                         }
+                        Controller.instance.autoImport(currentData[j])
                     }
                 }
             } else {
                 currentData = newData;
+                currentData.map(i => {
+                    Controller.instance.autoImport(i)
+                })
             }
         }
         return currentData
+    }
+
+    //动态引入组件
+    autoImport(item) {
+        const {c, m, id} = item
+        console.log({c, m}, '{cm}')
+        if (Controller.instance.vueInstace) {
+            Controller.instance.vueInstace.$options.components[`${id}c`] = c
+            Controller.instance.vueInstace.$options.components[`${id}m`] = m
+        }
+        console.log(Controller.instance.vueInstace.$options.components, '.$options.components')
     }
 
     updateView() {
@@ -248,6 +269,7 @@ export class Controller {
             this.operationPoint = -1;
             this.tags = [];
             this.id = undefined;
+            this.vueInstace = null;
             Controller.instance = this;
         }
         return Controller.instance;
