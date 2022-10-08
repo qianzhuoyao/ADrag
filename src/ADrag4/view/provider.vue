@@ -12,9 +12,8 @@
         @mouseover.prevent="(e) => hover(k, e)"
         @mouseleave.prevent="(e) => leave(k, e)"
     >
-      <component
+      <VueDragResize
           v-if="k.v"
-          is="VueDragResize"
           :ref="`VDR${k.id}`"
           :x="k.x"
           :y="k.y"
@@ -46,7 +45,7 @@
             ></component>
           </div>
         </template>
-      </component>
+      </VueDragResize>
       <div
           :id="`menu${k.id}`"
           style="
@@ -136,11 +135,9 @@
 </template>
 
 <script>
-import {Controller} from "@/lib-components/ADrag4/controller/controller";
-import {Render} from "@/lib-components/ADrag4/render/render";
+import {Controller} from "@/ADrag4/controller/controller";
+import {Render} from "@/ADrag4/render/render";
 import VueDragResize from "vue-drag-resize";
-import {Aider} from "@/lib-components/ADrag4/aider/aider";
-import {Lines} from "@/lib-components/ADrag4/lines/lines";
 
 console.log(VueDragResize, 'VueDragResize')
 const _CONSTVARS = {
@@ -235,8 +232,6 @@ export default {
       eventMap: {},
       controller: null,
       menu: null,
-      aider: null,
-      lines: null,
     };
   },
   watch: {
@@ -269,8 +264,6 @@ export default {
     //注册控制器
     this.controller = new Controller();
     this.render = new Render();
-    this.aider = new Aider();
-    this.lines = new Lines();
     this.render.watch(this.update);
     this.controller.setTags(this.tags);
     //pid禁止更改
@@ -284,25 +277,21 @@ export default {
       this.controller.bindVueInstance(v)
     },
     changeFloatPointColor(color) {
-      this.lines.changePointColor(color);
-      this.renderLines = this.lines.getLines();
+      this.controller.changePointColorInLine(color)
+      this.renderLines = this.controller.getLines();
     },
     changeLineWidth(width) {
-      this.lines.changeLineWidth(width);
-      this.renderLines = this.lines.getLines();
+      this.controller.changeLineWidth(width);
+      this.renderLines = this.controller.getLines();
     },
     changeLineColor(color) {
-      this.lines.changeLineColor(color);
-      this.renderLines = this.lines.getLines();
+      this.controller.changeLineColor(color);
+      this.renderLines = this.controller.getLines();
     },
     clearInstance() {
       this.controller.clearInstance();
       this.render.clearInstance();
-      this.aider.clearInstance();
-      this.lines.clearInstance();
-      this.aider = null;
       this.render = null;
-      this.lines = null;
       this.controller = null;
     },
     amplification(px) {
@@ -332,7 +321,7 @@ export default {
     },
     lineClick(item, event) {
       if (item.willDelete) {
-        this.lines.deleteById(item.id);
+        this.controller.deleteLineById(item.id);
         this.updateLine();
       }
       this.targetFocus({id: NaN, tag: this.tags[0]});
@@ -340,23 +329,23 @@ export default {
     },
     updateLine() {
       this.calibration();
-      this.renderLines = this.lines.getLines();
+      this.renderLines = this.controller.getLines();
     },
     closeAnimation() {
       this.viewStatus.animation = false;
-      this.lines.deleteAnimation();
-      this.renderLines = this.lines.getLines()
+      this.controller.deleteLineFloatAnimation();
+      this.renderLines = this.controller.getLines()
     },
     openAnimation(speed = 30, buoyWidth = 10) {
       this.viewStatus.animationSpeed = speed
       this.viewStatus.buoyWidth = buoyWidth
       this.viewStatus.animation = true
       if (this.viewStatus.animation) {
-        this.renderLines = this.lines.computedLinePathTotal(speed, buoyWidth)
+        this.renderLines = this.controller.computedLinePathTotal(speed, buoyWidth)
       }
     },
     createLine(aid, zid, params) {
-      this.lines.createLine(aid, zid, params);
+      this.controller.createLine(aid, zid, params);
       this.updateLine();
     },
     update(items) {
@@ -369,6 +358,13 @@ export default {
     },
     calibration() {
       this.renderData.map((i) => this.updateLinesForNode(i));
+    },
+    syncGetRenderData() {
+      return new Promise(resolve => {
+        setTimeout(() => {
+          resolve(this.renderData)
+        }, 0)
+      })
     },
     drawEach(item) {
       const {c, m, tag, x, y, w, h, z, f = false} = item;
@@ -407,11 +403,11 @@ export default {
       }
     },
     clearBindConnect(id) {
-      this.lines.deleteByNodeId(id);
+      this.controller.deleteLineByNodeId(id);
       this.updateLine();
     },
     openCloseConnect(id, e) {
-      const willSet = this.lines.getWillDeleteLineParams();
+      const willSet = this.controller.getWillDeleteLineParams();
       this.closeConnectOperation(id, e, {
         ...willSet,
       });
@@ -420,7 +416,7 @@ export default {
       this.eventRun(_EVENTS._MIC, {item});
     },
     overCloseConnect(id, e) {
-      const normalParams = this.lines.getNormalLineParams();
+      const normalParams = this.controller.getNormalLineParams();
       this.closeConnectOperation(id, e, {
         ...normalParams,
       });
@@ -429,9 +425,9 @@ export default {
       if (e) {
         e.stopPropagation();
         this.controller.closeConnect(id);
-        const lines = this.lines.findLineByNodeId(id);
+        const lines = this.controller.findLineByNodeId(id);
         lines.map((i) => {
-          this.lines.buildLineParamsById(i.id, {
+          this.controller.buildLineParamsById(i.id, {
             ...lineParams,
           });
         });
@@ -526,7 +522,7 @@ export default {
           id: item.id,
         });
         fn();
-        this.renderLines = this.lines.getLines();
+        this.renderLines = this.controller.getLines();
       }
     },
     resizing(item, params) {
@@ -731,12 +727,12 @@ export default {
       const {x, w, y, h, id} = args;
       const moveCenterX = x + w / 2;
       const moveCenterY = y + h / 2;
-      const role = this.lines.checkRole(id);
+      const role = this.controller.checkLineRole(id);
       const newCoordinate =
           role === "A"
               ? {x1: moveCenterX, y1: moveCenterY}
               : {x3: moveCenterX, y3: moveCenterY};
-      this.lines.syncMove(id, newCoordinate);
+      this.controller.syncLinesForNodeMove(id, newCoordinate);
     },
     clearAider() {
       this.aiderLines = [];
@@ -869,10 +865,11 @@ export default {
       const {id} = item;
       if (this.viewStatus.aider) {
         this.clearAider();
-        this.aider.computeAiderLines();
-        const lines = this.aider.getAiderLines();
+        this.controller.computeAiderLines();
+        const lines = this.controller.getAiderLines();
         const container = document.getElementById(this.pid);
         const {height, width} = window.getComputedStyle(container, null);
+        console.log(lines, 'lines')
         this.renderData.map((i) => {
           if (id !== i.id) {
             const {xR, xL, yT, yB} = lines[String(i.id)];
@@ -939,40 +936,5 @@ export default {
   width: 100%;
   height: 100%;
   position: absolute;
-}
-
-svg {
-  display: block;
-  position: absolute;
-}
-
-svg .line1 {
-  stroke-dasharray: 340;
-  stroke-dashoffset: 40;
-  animation: dash 10s linear infinite forwards;
-}
-
-svg .line2 {
-  stroke-dasharray: 320;
-  stroke-dashoffset: 320;
-  animation: dash2 10s linear infinite forwards;
-}
-
-@keyframes dash {
-  from {
-    stroke-dashoffset: 360;
-  }
-  to {
-    stroke-dashoffset: 40;
-  }
-}
-
-@keyframes dash2 {
-  from {
-    stroke-dashoffset: 280;
-  }
-  to {
-    stroke-dashoffset: -40;
-  }
 }
 </style>

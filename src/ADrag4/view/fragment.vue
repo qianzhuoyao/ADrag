@@ -10,8 +10,8 @@
 </template>
 
 <script>
-import PipeEvent from "./ADrag4/event/event";
-import {Controller} from "@/lib-components/ADrag4/controller/controller";
+import PipeEvent from "@/ADrag4/event/event";
+import {Controller} from "@/ADrag4/controller/controller";
 
 export default {
   name: "a-fragment",

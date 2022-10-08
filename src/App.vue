@@ -95,7 +95,7 @@ export default {
       this.$refs.provider.closeAnimation()
     },
     opA() {
-      this.$refs.provider.openAnimation(100,10)
+      this.$refs.provider.openAnimation(100, 10)
     },
     zoomOut() {
       this.$refs.provider.amplification(10)
@@ -130,7 +130,7 @@ export default {
     fragmentOver(p) {
       console.log(p, 'fragmentOver')
     },
-    beforeStart() {
+    async beforeStart() {
       const {nameMap} = config
       const draw = data.map((i) => {
         return {
@@ -145,7 +145,8 @@ export default {
         }
       })
       this.$refs.provider.draw(draw)
-      const nodes = this.$refs.provider.renderData
+      const nodes = await this.$refs.provider.syncGetRenderData()
+      console.log(nodes,nodes[0],nodes[1], 'nodes')
       this.$refs.provider.createLine(nodes[0].id, nodes[1].id, {width: 4, isDashed: true})
     }
   },

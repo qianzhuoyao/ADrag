@@ -1,6 +1,7 @@
 import {RenderModel} from "../model/renderModel";
 import {Render} from "../render/render";
 import {Lines} from "../lines/lines";
+import {Aider} from "@/ADrag4/aider/aider";
 
 export class Controller {
     constructor() {
@@ -166,11 +167,9 @@ export class Controller {
                     jIds.push(currentData[i].id);
                     currentData[i].firstMounted = false;
                     currentData[i].f = false;
-                    Controller.instance.autoImport(currentData[i])
                 }
                 const add = newData.filter((i) => !jIds.includes(i.id));
                 add.map((i) => {
-                    Controller.instance.autoImport(i)
                     currentData.push({...i, firstMounted: true, f: true});
                 });
             } else if (iLength === jLength) {
@@ -189,29 +188,15 @@ export class Controller {
                             currentData[j].shadow = newData[i].shadow;
                             currentData[j].renderData = newData[i].renderData;
                         }
-                        Controller.instance.autoImport(currentData[j])
                     }
                 }
             } else {
                 currentData = newData;
-                currentData.map(i => {
-                    Controller.instance.autoImport(i)
-                })
             }
         }
         return currentData
     }
 
-    //动态引入组件
-    autoImport(item) {
-        const {c, m, id} = item
-        console.log({c, m}, '{cm}')
-        if (Controller.instance.vueInstace) {
-            Controller.instance.vueInstace.$options.components[`${id}c`] = c
-            Controller.instance.vueInstace.$options.components[`${id}m`] = m
-        }
-        console.log(Controller.instance.vueInstace.$options.components, '.$options.components')
-    }
 
     updateView() {
         new Render().updateProvider(this.getRenderData());
@@ -252,19 +237,90 @@ export class Controller {
         Controller.instance.renderModel.clear()
         this.updateView()
     }
+    computedLinePathTotal(s, b) {
+        return Controller.instance.linesModel.computedLinePathTotal(s, b)
+    }
+
+    syncLinesForNodeMove(id, c) {
+        Controller.instance.linesModel.syncMove(id, c)
+    }
+
+    checkLineRole(id) {
+        Controller.instance.linesModel.checkRole(id)
+    }
+
+    getNormalLineParams() {
+        Controller.instance.linesModel.getNormalLineParams()
+    }
+
+    buildLineParamsById(l, p) {
+        Controller.instance.linesModel.buildLineParamsById(l, p)
+    }
+
+    findLineByNodeId(id) {
+        Controller.instance.linesModel.findLineByNodeId(id)
+    }
 
     resetShots() {
         Controller.instance.renderModel.clearShots()
     }
 
+    deleteLineByNodeId(id) {
+        Controller.instance.linesModel.deleteByNodeId(id)
+    }
+
+    getWillDeleteLineParams() {
+        Controller.instance.linesModel.getWillDeleteLineParams()
+    }
+
+    createLine(a, z, p) {
+        Controller.instance.linesModel.createLine(a, z, p)
+    }
+
+    deleteLineById(id) {
+        Controller.instance.linesModel.deleteById(id);
+    }
+
+    deleteLineFloatAnimation() {
+        Controller.instance.linesModel.deleteAnimation();
+    }
+
     clearInstance() {
         Controller.instance.renderModel.clearInstance();
+        Controller.instance.aiderModel.clearInstance();
+        Controller.instance.linesModel.clearInstance();
         Controller.instance = null;
+    }
+
+    computeAiderLines() {
+        Controller.instance.aiderModel.computeAiderLines()
+    }
+
+    getAiderLines() {
+        return Controller.instance.aiderModel.getAiderLines()
+    }
+
+    getLines() {
+        return Controller.instance.linesModel.getLines()
+    }
+
+    changePointColorInLine(color) {
+        Controller.instance.linesModel.changePointColor(color);
+    }
+
+    changeLineWidth(width) {
+        Controller.instance.linesModel.changeLineWidth(width);
+    }
+
+    changeLineColor(color) {
+        Controller.instance.linesModel.changeLineColor(color);
     }
 
     getInstance() {
         if (!Controller.instance) {
             this.renderModel = new RenderModel();
+            this.aiderModel = new Aider();
+            this.linesModel = new Lines();
             this.shots = [];
             this.operationPoint = -1;
             this.tags = [];
