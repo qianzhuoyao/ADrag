@@ -20,7 +20,7 @@ export default {
   data: () => {
     return {
       s: 'success',
-      v:'单行文字'
+      v:'A节点'
     }
   },
   mounted() {

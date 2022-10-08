@@ -20,10 +20,11 @@
           :w="k.w"
           :h="k.h"
           :z="k.z"
-          :isActive="k.f"
+          :isActive="!!k.cf&&k.f"
           :parentH="parentHSelf"
           :parentW="parentWSelf"
           :parentLimitation="true"
+          :isResizable="!!k.cf"
           @dragging="(params) => dragging(k, params)"
           @dragstop="(params) => dragStop(k, params)"
           @resizing="(params) => resizing(k, params)"
@@ -139,7 +140,6 @@ import {Controller} from "@/ADrag4/controller/controller";
 import {Render} from "@/ADrag4/render/render";
 import VueDragResize from "vue-drag-resize";
 
-console.log(VueDragResize, 'VueDragResize')
 const _CONSTVARS = {
   _Y: "y",
   _X: "x",
@@ -273,27 +273,43 @@ export default {
     this.controller.bindId(this.pid);
   },
   methods: {
-    init(v) {
-      this.controller.bindVueInstance(v)
-    },
+    /**
+     * 更新动点颜色
+     * @param color
+     */
     changeFloatPointColor(color) {
       this.controller.changePointColorInLine(color)
       this.renderLines = this.controller.getLines();
     },
+    /**
+     * 更新线条宽度
+     * @param width
+     */
     changeLineWidth(width) {
       this.controller.changeLineWidth(width);
       this.renderLines = this.controller.getLines();
     },
+    /**
+     * 更新线条颜色
+     * @param color
+     */
     changeLineColor(color) {
       this.controller.changeLineColor(color);
       this.renderLines = this.controller.getLines();
     },
+    /**
+     * 清空控制器，此时操作逻辑将失效
+     */
     clearInstance() {
       this.controller.clearInstance();
       this.render.clearInstance();
       this.render = null;
       this.controller = null;
     },
+    /**
+     * 放大
+     * @param px
+     */
     amplification(px) {
       if (typeof px === "number") {
         this.controller.amplification(px);
@@ -302,6 +318,10 @@ export default {
         throw new Error("放大参数需要是number");
       }
     },
+    /**
+     * 缩小
+     * @param px
+     */
     narrow(px) {
       if (typeof px === "number") {
         this.controller.narrow(px);
@@ -310,15 +330,32 @@ export default {
         throw new Error("缩小参数需要是number");
       }
     },
+    /**
+     * 获取有效节点
+     * @returns {*[]}
+     */
     sharkHiddenNodes() {
       return this.renderData.filter((i) => i.v);
     },
+    /**
+     * 获取所有节点
+     * @returns {[]}
+     */
     getAllData() {
       return this.renderData;
     },
+    /**
+     * 获取所有线
+     * @returns {[]}
+     */
     getAllLines() {
       return this.renderLines;
     },
+    /**
+     * 线条点击
+     * @param item
+     * @param event
+     */
     lineClick(item, event) {
       if (item.willDelete) {
         this.controller.deleteLineById(item.id);
@@ -327,15 +364,26 @@ export default {
       this.targetFocus({id: NaN, tag: this.tags[0]});
       this.eventRun(_EVENTS._LC, {item, event});
     },
+    /**
+     * 更新线条并规整后绘制
+     */
     updateLine() {
       this.calibration();
       this.renderLines = this.controller.getLines();
     },
+    /**
+     * 关闭动画
+     */
     closeAnimation() {
       this.viewStatus.animation = false;
       this.controller.deleteLineFloatAnimation();
       this.renderLines = this.controller.getLines()
     },
+    /**
+     * 开启动画
+     * @param speed
+     * @param buoyWidth
+     */
     openAnimation(speed = 30, buoyWidth = 10) {
       this.viewStatus.animationSpeed = speed
       this.viewStatus.buoyWidth = buoyWidth
@@ -344,10 +392,20 @@ export default {
         this.renderLines = this.controller.computedLinePathTotal(speed, buoyWidth)
       }
     },
+    /**
+     * 新建线
+     * @param aid
+     * @param zid
+     * @param params
+     */
     createLine(aid, zid, params) {
       this.controller.createLine(aid, zid, params);
       this.updateLine();
     },
+    /**
+     * 统一更新视图
+     * @param items
+     */
     update(items) {
       setTimeout(() => {
         this.renderData = this.controller.compare(this.renderData, items);
@@ -356,9 +414,16 @@ export default {
         }
       }, 0)
     },
+    /**
+     * 规整线条
+     */
     calibration() {
       this.renderData.map((i) => this.updateLinesForNode(i));
     },
+    /**
+     * 同步获取数据
+     * @returns {Promise<unknown>}
+     */
     syncGetRenderData() {
       return new Promise(resolve => {
         setTimeout(() => {
@@ -366,6 +431,10 @@ export default {
         }, 0)
       })
     },
+    /**
+     * 绘制单个节点
+     * @param item
+     */
     drawEach(item) {
       const {c, m, tag, x, y, w, h, z, f = false} = item;
       this.controller.updateForDraw({
@@ -380,18 +449,30 @@ export default {
         f,
       });
     },
-    //绘制
+    /**
+     * 批量绘制节点
+     * @param data
+     */
     draw(data) {
       this.controller.onceDraw({data});
       this.targetFocus({id: NaN, tag: this.tags[0]});
       this.controller.syncOperation();
     },
+    /**
+     * 关闭菜单
+     * @param item
+     */
     closeMenu(item) {
       if (this.menu) {
         this.menu.style.visibility = "hidden";
         this.eventRun(_EVENTS._MEU, {item});
       }
     },
+    /**
+     * 开始连线
+     * @param id
+     * @param e
+     */
     onConnect(id, e) {
       if (e) {
         e.stopPropagation();
@@ -402,25 +483,49 @@ export default {
         throw new Error("你需要在connect函数内传入事件参数");
       }
     },
+    /**
+     * 清楚连线
+     * @param id
+     */
     clearBindConnect(id) {
       this.controller.deleteLineByNodeId(id);
       this.updateLine();
     },
+    /**
+     * 开启取消连线的状态，此时你可以点击单条线进行删除
+     * @param id
+     * @param e
+     */
     openCloseConnect(id, e) {
       const willSet = this.controller.getWillDeleteLineParams();
       this.closeConnectOperation(id, e, {
         ...willSet,
       });
     },
+    /**
+     * 菜单点击
+     * @param item
+     */
     menuItemClick(item) {
       this.eventRun(_EVENTS._MIC, {item});
     },
+    /**
+     * 结束单条线删除状态
+     * @param id
+     * @param e
+     */
     overCloseConnect(id, e) {
       const normalParams = this.controller.getNormalLineParams();
       this.closeConnectOperation(id, e, {
         ...normalParams,
       });
     },
+    /**
+     * 关闭连接动作
+     * @param id
+     * @param e
+     * @param lineParams
+     */
     closeConnectOperation(id, e, lineParams) {
       if (e) {
         e.stopPropagation();
@@ -436,9 +541,16 @@ export default {
         throw new Error("你需要在closeConnect函数内传入事件参数");
       }
     },
+    /**
+     * 视图是否具备线
+     * @returns {*}
+     */
     hasConnect() {
       return this.controller.hasConnect();
     },
+    /**
+     * 删除所有连线
+     */
     clearConnect() {
       this.controller.clearConnect();
       this.eventRun(_EVENTS._CC);
@@ -478,6 +590,12 @@ export default {
         this.syncPosition();
       }
     },
+    /**
+     * 重绘视图
+     */
+    reRender() {
+      this.controller.updateView()
+    },
     // 向外暴露的更新方法，fn返回新数据即可  更新数据
     updateData(fn, tag) {
       this.controller.updateForChange(
@@ -504,6 +622,10 @@ export default {
     toSubscribe(e, c) {
       this.on(e, c);
     },
+    /**
+     * 空白面板点击
+     * @param event
+     */
     areaClick(event) {
       if (!this.viewStatus.inNode) {
         this.clearConnect();
@@ -511,6 +633,12 @@ export default {
         this.eventRun(_EVENTS._AC, {event});
       }
     },
+    /**
+     * 同步线的初始与结束点位置
+     * @param fn
+     * @param params
+     * @param item
+     */
     syncLinePosition(fn, params, item) {
       if (typeof fn === "function") {
         const {left: x, top: y, height: h, width: w} = params;
@@ -525,12 +653,17 @@ export default {
         this.renderLines = this.controller.getLines();
       }
     },
+    /**
+     * 节点大小操作中回调
+     * @param item
+     * @param params
+     */
     resizing(item, params) {
       if (!this.viewStatus.restrict.restrictResizeStop) {
         const {left: x, top: y, height: h, width: w} = params;
         this.syncLinePosition(
             () => {
-              this.updateItemForStaticData({w, h, f: true}, item, false);
+              this.updateItemForStaticData({w, h, f: !!item.cf}, item, false);
               this.aiderComputed(item);
               this.recommendAider({x, y, w, h});
               this.eventRun(_EVENTS._RI, {item});
@@ -540,12 +673,17 @@ export default {
         );
       }
     },
+    /**
+     * 移动中回调
+     * @param item
+     * @param params
+     */
     dragging(item, params) {
       if (!this.viewStatus.restrict.restrictDragStop) {
         const {left: x, top: y, height: h, width: w} = params;
         this.syncLinePosition(
             () => {
-              this.updateItemForStaticData({x, y, f: true}, item, false);
+              this.updateItemForStaticData({x, y, f: !!item.cf}, item, false);
               this.aiderComputed(item);
               this.recommendAider({x, y, w, h});
               this.eventStop([_EVENTS._HO, _EVENTS._LE]);
@@ -556,21 +694,40 @@ export default {
         );
       }
     },
+    /**
+     * 有效误差
+     * @param item
+     * @param params
+     * @returns {boolean}
+     */
     precision(item, params) {
       return (
           Math.abs(item.x - params.left) < 5 && Math.abs(item.y - params.top) < 5
       );
     },
+    /**
+     * 拖拽条件
+     * @param state
+     */
     changeRestrictDragStop(state) {
       this.viewStatus.restrict.restrictDragStop = !!state;
     },
+    /**
+     * 尺寸变化条件
+     * @param state
+     */
     changeRestrictResizeStop(state) {
       this.viewStatus.restrict.restrictResizeStop = !!state;
     },
+    /**
+     * 拖拽结束回调
+     * @param item
+     * @param params
+     */
     dragStop(item, params) {
       if (!this.viewStatus.restrict.restrictDragStop) {
         this.updateItemForStaticData(
-            {x: params.left, y: params.top, f: true},
+            {x: params.left, y: params.top, f: !!item.cf},
             item,
             true
         );
@@ -591,22 +748,40 @@ export default {
         this.openAnimation(this.viewStatus.animationSpeed, this.viewStatus.buoyWidth)
       }
     },
+    /**
+     * 取消拖拽与尺寸变化限制
+     */
     closeRestrict() {
       this.changeRestrictDragStop(false);
       this.changeRestrictResizeStop(false);
     },
+    /**
+     * 鼠标离开节点回调
+     * @param item
+     * @param event
+     */
     leave(item, event) {
       this.viewStatus.inNode = false;
       this.eventRun(_EVENTS._LE, {item, event});
     },
+    /**
+     * 鼠标悬浮在节点状态
+     * @param item
+     * @param event
+     */
     hover(item, event) {
       this.viewStatus.inNode = true;
       this.eventRun(_EVENTS._HO, {item, event});
     },
+    /**
+     * 尺寸变化结束
+     * @param item
+     * @param params
+     */
     resizeStop(item, params) {
       if (!this.viewStatus.restrict.restrictResizeStop) {
         this.updateItemForStaticData(
-            {w: params.width, h: params.height, f: true},
+            {w: params.width, h: params.height, f: !!item.cf},
             item,
             true
         );
@@ -619,6 +794,12 @@ export default {
         this.openAnimation(this.viewStatus.animationSpeed, this.viewStatus.buoyWidth)
       }
     },
+    /**
+     * 绑定数据与节点，在节点移动时同步操作记录
+     * @param newItem
+     * @param item
+     * @param sync
+     */
     updateItemForStaticData(newItem, item, sync) {
       this.controller.updateForChange(
           (i) => {
@@ -628,6 +809,11 @@ export default {
           !!sync
       );
     },
+    /**
+     * 菜单栏
+     * @param item
+     * @param e
+     */
     contextmenu(item, e) {
       this.closeMenu();
       const {left, top, height: pHeight, width: pWidth} = window.getComputedStyle(
@@ -653,6 +839,11 @@ export default {
           offsetY + "px";
       this.menu.style.visibility = "visible";
     },
+    /**
+     * 事件指执行
+     * @param event
+     * @param params
+     */
     eventRun(event, params) {
       if (
           typeof this.eventMap[event] === "function" &&
@@ -688,11 +879,14 @@ export default {
       this.targetFocus(item);
       this.eventRun(_EVENTS._CL, {item});
       // this.closeRestrict()
+      setTimeout(()=>{
+        console.log( this.$refs[`VDRnode0`],'d')
+      },0)
     },
     targetFocus(item) {
       this.controller.updateForChange(
           (i) => {
-            return {...i, f: i.id === item.id};
+            return {...i, f:!!item.cf&&(i.id === item.id)};
           },
           {tag: item.tag}
       );

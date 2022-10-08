@@ -42,6 +42,10 @@ export default {
         default: "",
       },
     },
+    defaultCanFocus: {
+      type: Boolean,
+      default: true,
+    },
     defaultComponentWidth: {
       type: Number,
       default: 100,
@@ -70,6 +74,12 @@ export default {
     },
   },
   watch: {
+    defaultCanFocus: {
+      handler(n) {
+        this.focus = n;
+      },
+      immediate: true,
+    },
     providerContainerId: {
       handler(n) {
         this.screenOffset = n;
@@ -137,6 +147,7 @@ export default {
       moveY: 0,
       height: 0,
       zIndex: 999,
+      focus: true
     };
   },
   mounted() {
@@ -190,7 +201,8 @@ export default {
                 w: this.width,
                 h: this.height,
                 z: this.zIndex,
-                f: true,
+                f: this.focus,
+                cf: this.focus,
                 offsetX: this.offsetX,
                 offsetY: this.offsetY
               });

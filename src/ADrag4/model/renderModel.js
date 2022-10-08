@@ -153,9 +153,10 @@ export class RenderModel {
          * renderKey 组件渲染标识
          * firstMounted 组件是否需要渲染，当你渲染的组件为图表时,这会很实用，你在组件的mounted状态内通过该属性来判断是否需要渲染，从而有效规避数据同步时组件数组指向变化导致的组件多次挂载渲染
          * nodeBackgroundColor 节点背景颜色 默认无，它会遮挡掉线
+         * cf 该节点被允许被拒聚焦此时一并被限制无法编辑大小
          */
         const {
-            x, y, w, h, f, z, c, tag, m, id, renderKey, offsetX, providerOffsetY, renderData,
+            x, y, w, h, f, z, c, cf, tag, m, id, renderKey, offsetX, providerOffsetY, renderData,
             providerOffsetX,
             offsetY
         } = args;
@@ -174,6 +175,7 @@ export class RenderModel {
             h,
             f,
             z,
+            cf,
             c,
             v,
             m,

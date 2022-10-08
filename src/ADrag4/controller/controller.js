@@ -39,7 +39,7 @@ export class Controller {
         this.afterCreateSuccess(() => {
             this.editor((i, k) => {
                 return k === this.getRenderData().length - 1
-                    ? {...i, f: true}
+                    ? {...i, f: i.cf}
                     : {...i, f: false};
             });
         }, args);
@@ -197,7 +197,7 @@ export class Controller {
         return currentData
     }
 
-
+    //立即更新视图
     updateView() {
         new Render().updateProvider(this.getRenderData());
     }
@@ -237,6 +237,7 @@ export class Controller {
         Controller.instance.renderModel.clear()
         this.updateView()
     }
+
     computedLinePathTotal(s, b) {
         return Controller.instance.linesModel.computedLinePathTotal(s, b)
     }
@@ -246,11 +247,11 @@ export class Controller {
     }
 
     checkLineRole(id) {
-        Controller.instance.linesModel.checkRole(id)
+        return Controller.instance.linesModel.checkRole(id)
     }
 
     getNormalLineParams() {
-        Controller.instance.linesModel.getNormalLineParams()
+        return Controller.instance.linesModel.getNormalLineParams()
     }
 
     buildLineParamsById(l, p) {
@@ -258,7 +259,7 @@ export class Controller {
     }
 
     findLineByNodeId(id) {
-        Controller.instance.linesModel.findLineByNodeId(id)
+        return Controller.instance.linesModel.findLineByNodeId(id)
     }
 
     resetShots() {
@@ -270,7 +271,7 @@ export class Controller {
     }
 
     getWillDeleteLineParams() {
-        Controller.instance.linesModel.getWillDeleteLineParams()
+        return Controller.instance.linesModel.getWillDeleteLineParams()
     }
 
     createLine(a, z, p) {
@@ -344,7 +345,7 @@ export class Controller {
         });
     }
 
-    create({x, y, w, h, f, z, c, tag, m, renderKey, offsetX, offsetY, renderData}) {
+    create({x, y, w, h, f, z, c, tag, cf, m, renderKey, offsetX, offsetY, renderData}) {
         const {left: providerOffsetX, top: providerOffsetY} = window.getComputedStyle(
             document.getElementById(Controller.instance.id),
             null
@@ -358,6 +359,7 @@ export class Controller {
             f,
             z,
             c,
+            cf,
             tag,
             renderData,
             renderKey,

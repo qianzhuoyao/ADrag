@@ -12,8 +12,9 @@
         render-key="123"
         :put-component="components[0]"
         :modal-component="components[2]"
-        :default-component-height="100"
-        :default-component-width="100"
+        :default-component-height="30"
+        :default-component-width="30"
+        :default-can-focus="false"
         :put-offset-x="10"
         :put-offset-y="20"
         :move-offset-y="0"
@@ -142,12 +143,15 @@ export default {
           w: i.w,
           h: i.h,
           z: i.z,
+          cf:i.cf
         }
       })
       this.$refs.provider.draw(draw)
       const nodes = await this.$refs.provider.syncGetRenderData()
-      console.log(nodes,nodes[0],nodes[1], 'nodes')
+      console.log(nodes, nodes[0], nodes[1], 'nodes')
       this.$refs.provider.createLine(nodes[0].id, nodes[1].id, {width: 4, isDashed: true})
+      this.$refs.provider.createLine(nodes[1].id, nodes[2].id, {width: 4, isDashed: true})
+
     }
   },
 

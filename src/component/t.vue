@@ -21,7 +21,7 @@ export default {
   data: () => {
     return {
       s: 'success',
-      v:'多行文字'
+      v:'B节点'
     }
   },
   mounted() {
