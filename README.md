@@ -1,5 +1,6 @@
 ## Install and basic usage
-
+### 一个可以帮助你控制并管理拖拽流程的开箱即用的VUE组件(vue2)
+![](https://media.giphy.com/media/kZcIgukLK6qHv5pKjg/giphy.gif)
 ```bash
 $ npm i -s adrag
 ```
@@ -24,20 +25,20 @@ Use the component:
     <div @click="zoomOut">放大</div>
     <div @click="zoomIn">缩小</div>
     <fragment
-            tag="1"
-            render-key="123"
-            :put-component="components[0]"
-            :modal-component="components[2]"
-            :default-component-height="100"
-            :default-component-width="100"
-            :put-offset-x="10"
-            :put-offset-y="20"
-            :move-offset-y="0"
-            :move-offset-x="0"
-            :default-component-z-index="999"
-            @fragmentDown="fragmentDown"
-            @fragmentMove="fragmentMove"
-            @fragmentOver="fragmentOver"
+        tag="1"
+        render-key="123"
+        :put-component="components[0]"
+        :modal-component="components[2]"
+        :default-component-height="100"
+        :default-component-width="100"
+        :put-offset-x="10"
+        :put-offset-y="20"
+        :move-offset-y="0"
+        :move-offset-x="0"
+        :default-component-z-index="999"
+        @fragmentDown="fragmentDown"
+        @fragmentMove="fragmentMove"
+        @fragmentOver="fragmentOver"
     >
       <template #display>
         <div>123</div>
@@ -151,7 +152,7 @@ export default {
 ### Props of fragment
 
 #### tag
-Type: `Boolean` |`String`|`Number` <br>
+Type: `Boolean`|`String`|`Number` <br>
 Required: `false`<br>
 Default: `a_default_fragment`
 
@@ -288,9 +289,9 @@ paramsType: `EventPipe`<br>
 ```
 ```JavaScript
 methods:{
-  fragmentDown(pipe){
-  ...
-  }
+    fragmentDown(pipe){
+        ...
+    }
 }
 ```
 #### fragmentMove
@@ -303,9 +304,9 @@ paramsType: `EventPipe`<br>
 ```
 ```JavaScript
 methods:{
-  fragmentMove(pipe){
-  ...
-  }
+    fragmentMove(pipe){
+        ...
+    }
 }
 ```
 #### fragmentOver
@@ -318,9 +319,9 @@ paramsType: `EventPipe`<br>
 ```
 ```JavaScript
 methods:{
-  fragmentOver(pipe){
-  ...
-  }
+    fragmentOver(pipe){
+        ...
+    }
 }
 ```
 ### Props of provider
@@ -406,22 +407,22 @@ Default: `2000`
          * shadow 链接效果
          * firstMounted 组件是否需要渲染，当你渲染的组件为图表时,这会很实用，你在组件的mounted状态内通过该属性来判断是否需要渲染，从而有效规避数据同步时组件数组指向变化导致的组件多次挂载渲染
          */
-interface render {
-  x:number,
-  y:number,
-  w:number,
-  h:number,
-  f:boolean,
-  z:number,
-  c:VueCompoent,
-  v:boolean,
-  m:VueCompoent,
-  id:(number|string)[],
-  tag:number|string|boolean,
-  renderData:any,
-  center:number[],
-  shadow:string,
-  firstMounted:boolean
+        interface render {
+             x:number, 
+             y:number, 
+             w:number,
+             h:number, 
+             f:boolean, 
+             z:number, 
+             c:VueCompoent, 
+             v:boolean, 
+             m:VueCompoent,
+             id:(number|string)[],
+             tag:number|string|boolean, 
+             renderData:any,
+             center:number[],
+             shadow:string,
+             firstMounted:boolean
 }
 ```
 #### openAnimation
@@ -507,13 +508,13 @@ paramsType: `(Object.keys(render).filter(i=>i!=='renderData'),fn,tag)`<br>
 
 ```JavaScript
 props:{
-  thisData:{} //所有组件都会被注入的本组件信息
+    thisData:{} //所有组件都会被注入的本组件信息
 }
 this.$refs.provider.updateComponent('v',(i)=>{
-  if(i.id===this.thisData.id){
-    return ...
-  ...
-  }},this.thisData.tag)
+    if(i.id===this.thisData.id){
+        return ...
+    ...
+}},this.thisData.tag)
 ```
 
 #### updateData
@@ -524,13 +525,13 @@ paramsType: `(fn,tag)`<br>
 
 ```JavaScript
 props:{
-  thisData:{} //所有组件都会被注入的本组件信息
+    thisData:{} //所有组件都会被注入的本组件信息
 }
 this.$refs.provider.updateData((i)=>{
-  if(i.id===this.thisData.id){
-    return {...}
-  ...
-  }},this.thisData.tag)
+    if(i.id===this.thisData.id){
+        return {...}
+    ...
+}},this.thisData.tag)
 ```
 #### undo
 params: `-`<br>
@@ -568,9 +569,9 @@ this.$refs.provider.closeAider()
   触发事件
 ```JavaScript
 const _event={
-  //弹窗点击
-  _MIC: 'menuItemClick',
-  //弹窗鼠标抬起，与menuItemClick区别为menuItemClick会接受弹窗组件的发出值，而menuUp不会
+    //弹窗点击
+ _MIC: 'menuItemClick',
+ //弹窗鼠标抬起，与menuItemClick区别为menuItemClick会接受弹窗组件的发出值，而menuUp不会
   _MEU: 'menuUp',
   //鼠标放起
   _MU: 'mouseUp',
