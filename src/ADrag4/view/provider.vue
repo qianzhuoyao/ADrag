@@ -809,22 +809,12 @@ export default {
           !!sync
       );
     },
-    computedScreenOffset() {
-      let x = 0;
-      let y = 0;
-      if (this.pid && typeof this.pid === 'string') {
-        x = document.getElementById(this.pid).scrollLeft || 0
-        y = document.getElementById(this.pid).scrollTop || 0
-      }
-      return {x, y}
-    },
     /**
      * 菜单栏
      * @param item
      * @param e
      */
     contextmenu(item, e) {
-      const {x, y} = this.computedScreenOffset()
       this.closeMenu();
       const {left, top, height: pHeight, width: pWidth} = window.getComputedStyle(
           document.getElementById(this.pid),
@@ -835,13 +825,13 @@ export default {
           this.menu,
           null
       )
-      let offsetX = e.pageX - parseFloat(left || "0px") + x - this.modalX
-      let offsetY = e.pageY - parseFloat(top || "0px") + y - this.modalY
-      if (offsetX + parseFloat(width) > parseFloat(pWidth)) {
-        offsetX = parseFloat(pWidth) - parseFloat(width)
+      let offsetX = e.pageX - parseFloat(left || "0px") - this.modalX
+      let offsetY = e.pageY - parseFloat(top || "0px") - this.modalY
+      if (offsetX + parseFloat(width) > parseFloat(document.getElementById(this.pid).style.width || pWidth)) {
+        offsetX = parseFloat(document.getElementById(this.pid).style.width || pWidth) - parseFloat(width)
       }
-      if (offsetY + parseFloat(height) > parseFloat(pHeight)) {
-        offsetY = parseFloat(pHeight) - parseFloat(height)
+      if (offsetY + parseFloat(height) > parseFloat(document.getElementById(this.pid).style.height || pHeight)) {
+        offsetY = parseFloat(document.getElementById(this.pid).style.height || pHeight) - parseFloat(height)
       }
       this.menu.style.left =
           offsetX + "px";
