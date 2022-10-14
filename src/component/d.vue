@@ -43,7 +43,7 @@ export default {
     }
   },
   mounted() {
-
+    console.log('nn')
   },
   watch: {
     thisData: {

@@ -29,8 +29,8 @@ export class RenderModel {
         const computedContainer = window.getComputedStyle(provider, null);
         const {height, width, left, top} = computedContainer;
         const area = this.computeArea({
-            height: parseFloat(height),
-            width: parseFloat(width),
+            height: parseFloat(provider.style.height || height),
+            width: parseFloat(provider.style.width || width),
             left: parseFloat(left),
             top: parseFloat(top),
         });

@@ -809,12 +809,22 @@ export default {
           !!sync
       );
     },
+    computedScreenOffset() {
+      let x = 0;
+      let y = 0;
+      if (this.pid && typeof this.pid === 'string') {
+        x = document.getElementById(this.pid).scrollLeft || 0
+        y = document.getElementById(this.pid).scrollTop || 0
+      }
+      return {x, y}
+    },
     /**
      * 菜单栏
      * @param item
      * @param e
      */
     contextmenu(item, e) {
+      const {x, y} = this.computedScreenOffset()
       this.closeMenu();
       const {left, top, height: pHeight, width: pWidth} = window.getComputedStyle(
           document.getElementById(this.pid),
@@ -825,8 +835,8 @@ export default {
           this.menu,
           null
       )
-      let offsetX = e.pageX - parseFloat(left || "0px") - this.modalX
-      let offsetY = e.pageY - parseFloat(top || "0px") - this.modalY
+      let offsetX = e.pageX - parseFloat(left || "0px") + x - this.modalX
+      let offsetY = e.pageY - parseFloat(top || "0px") + y - this.modalY
       if (offsetX + parseFloat(width) > parseFloat(pWidth)) {
         offsetX = parseFloat(pWidth) - parseFloat(width)
       }
@@ -878,15 +888,11 @@ export default {
       }
       this.targetFocus(item);
       this.eventRun(_EVENTS._CL, {item});
-      // this.closeRestrict()
-      setTimeout(()=>{
-        console.log( this.$refs[`VDRnode0`],'d')
-      },0)
     },
     targetFocus(item) {
       this.controller.updateForChange(
           (i) => {
-            return {...i, f:!!item.cf&&(i.id === item.id)};
+            return {...i, f: !!item.cf && (i.id === item.id)};
           },
           {tag: item.tag}
       );
