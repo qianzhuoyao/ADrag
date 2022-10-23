@@ -204,7 +204,8 @@ export default {
                 f: this.focus,
                 cf: this.focus,
                 offsetX: this.offsetX,
-                offsetY: this.offsetY
+                offsetY: this.offsetY,
+                providerContainerId: this.screenOffset
               });
               this.$emit("fragmentOver", pipe);
             },

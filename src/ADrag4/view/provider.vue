@@ -809,6 +809,15 @@ export default {
           !!sync
       );
     },
+    computedScreenOffset(providerContainer) {
+      let x = 0;
+      let y = 0;
+      if (providerContainer && typeof providerContainer === 'string') {
+        x = document.getElementById(providerContainer).scrollLeft || 0
+        y = document.getElementById(providerContainer).scrollTop || 0
+      }
+      return {x, y}
+    },
     /**
      * 菜单栏
      * @param item
@@ -820,13 +829,15 @@ export default {
           document.getElementById(this.pid),
           null
       );
+      const {providerContainerId} = item
+      const {x: scrollProviderLeft, y: scrollProviderTop} = this.computedScreenOffset(providerContainerId)
       this.menu = document.getElementById(`menu${item.id}`);
       const {width, height} = window.getComputedStyle(
           this.menu,
           null
       )
-      let offsetX = e.pageX - parseFloat(left || "0px") - this.modalX
-      let offsetY = e.pageY - parseFloat(top || "0px") - this.modalY
+      let offsetX = e.pageX - parseFloat(left || "0px") + scrollProviderLeft - this.modalX
+      let offsetY = e.pageY - parseFloat(top || "0px") + scrollProviderTop - this.modalY
       if (offsetX + parseFloat(width) > parseFloat(document.getElementById(this.pid).style.width || pWidth)) {
         offsetX = parseFloat(document.getElementById(this.pid).style.width || pWidth) - parseFloat(width)
       }
