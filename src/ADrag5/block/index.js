@@ -33,18 +33,18 @@ export default class Block {
     }
 
     setX(x) {
-        this.x = x
+        this.x = typeof x === 'number' ? x : 0
     }
 
     setY(y) {
-        this.y = y
+        this.y = typeof y === 'number' ? y : 0
     }
 
     setWidth(w) {
-        this.width = w
+        this.width = typeof w === 'number' ? w : 0
     }
 
     setHeight(h) {
-        this.height = h
+        this.height = typeof h === 'number' ? h : 0
     }
 }

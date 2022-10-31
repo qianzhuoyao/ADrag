@@ -1,4 +1,3 @@
-import {BoxGraph} from "../helper/index";
 import Render from "../render";
 
 export default class Controller {
@@ -9,7 +8,6 @@ export default class Controller {
     singleton() {
         if (!Controller.instance) {
             this.render = null;
-            this.box = null;
             this.init();
             Controller.instance = this;
         }
@@ -17,8 +15,7 @@ export default class Controller {
     }
 
     init() {
-        this.box = new BoxGraph();
-        this.render = new Render(this.box)
+        this.render = new Render()
     }
 
     create(value) {

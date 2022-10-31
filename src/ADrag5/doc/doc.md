@@ -27,9 +27,38 @@
 | 面板内容应该可以支持 api 调用    |      | 3      |
 
 ### 实现
+ - template定义模板，模板由render类+mixture生成（pack(基础滑动单元),fragment（颗粒度复制单元）,provider（操作台））//
+ - render 会 调用block（渲染层面）+boxGraph（数据层面）来生成基础单元 mixture 与编辑
+ - controller 宏观调控provider与slider的关系
+ - service 服务
+ - message mixture间通讯
+ - observation 负责 将数据与视图绑定，数据更新视图一并更新
+
+   message<=>controller<=>service=!=>observation=>render(template)
+  
+
+   mixture
+   --------
+   template
+   --------------
+   block+boxGraph
+
+    
+
+    message
+    ----------
+    controller
+    -------
+    service
+    -----------
+    observation
+    ------
+    render
+
 
 ```typescript
- interface block{
+//可拖拽的滑块 
+interface block{
     id:string,//reandom
     x:number,//toFixed(2) default 0
     y:number,//toFixed(2) default 0
