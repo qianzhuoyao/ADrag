@@ -1,29 +1,74 @@
 import Block from "@/ADrag5/block";
 import {BoxGraph} from "../helper/index";
+import Template from "../template";
 
 
 export default class Render {
     constructor() {
-        this.box = new BoxGraph();
-        this.block = new Block()
-        this.box.root({})
+        this.singleton()
     }
 
-    create(_package) {
+    singleton() {
+        if (!Render.instance) {
+            this.box = new BoxGraph();
+            this.box.root({});
+            this.provider = null;
+            Render.instance = this;
+        }
+        return Render.instance;
+    }
+
+    remove(key, cut) {
+        const deleteItem = this.get()[key]
+        Render.instance.box.remove(key, cut)
+        return deleteItem
+    }
+
+    insert({pre, _package, key}) {
         this.box.insert({
-            pre: 'root',
-            key: `child-${this.box.takeKeys().length}`,
+            pre,
+            key,
             value: {
                 _package,
-                _block: this.block
-            },
+                _block: new Block()
+            }
         })
-        return this
+    }
+
+    mixinPack({_key, pre, _package, downCallback, moveCallback, overCallback}) {
+        this.insert({
+            key: _key,
+            _package,
+            pre,
+        })
+        new Template({_key}).makePack({
+            downCallback, moveCallback, overCallback
+        })
+    }
+
+    mixinFragment({_key, pre, _package, _originId, _moverId, downCallback, moveCallback, overCallback}) {
+        new Template({_moverId, _originId}).makeFragment({
+            downCallback, moveCallback, overCallback: (p, e) => {
+                this.insert({
+                    key: _key,
+                    _package,
+                    pre,
+                })
+                typeof overCallback === 'function' && overCallback(p, e)
+            }
+        })
+    }
+
+    mixinProvider({_providerId}) {
+        Render.instance.provider = new Template({_providerId}).makeProvider()
+    }
+
+    takeBox() {
+        return Render.instance.box
     }
 
     get() {
-        return this.box.take()
+        return Render.instance.box.take()
     }
 }
 
-console.log(new Render().create().get())

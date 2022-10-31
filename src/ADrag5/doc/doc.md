@@ -28,7 +28,7 @@
 
 ### 实现
  - template定义模板，模板由render类+mixture生成（pack(基础滑动单元),fragment（颗粒度复制单元）,provider（操作台））//
- - render 会 调用block（渲染层面）+boxGraph（数据层面）来生成基础单元 mixture 与编辑
+ - render 会 调用block（渲染层面）+boxGraph（数据层面） + event(事件层面) 来生成基础单元 mixture 与编辑
  - controller 宏观调控provider与slider的关系
  - service 服务
  - message mixture间通讯

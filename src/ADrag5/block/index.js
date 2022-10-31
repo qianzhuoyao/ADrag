@@ -2,6 +2,7 @@ export default class Block {
     constructor() {
         this.x = 0;
         this.y = 0;
+        this.z = 10;
         this.width = 0;
         this.height = 0;
         this.visible = true;
@@ -10,18 +11,24 @@ export default class Block {
     }
 
     build(arg) {
-        const {x, y, width, height, visible, dragble, resizable} = arg
-        this.setX(x)
-        this.setY(y)
-        this.setResizable(resizable)
-        this.setDragble(dragble)
-        this.setWidth(width)
-        this.setHeight(height)
-        this.setVisible(visible)
+        const {x, y, width, z, height, visible, dragble, resizable} = arg
+        this.setX(x || this.x)
+        this.setY(y || this.y)
+        this.setResizable(resizable || this.resizable)
+        this.setDragble(dragble || this.dragble)
+        this.setWidth(width || this.width)
+        this.setHeight(height || this.height)
+        this.setVisible(visible || this.visible)
+        this.setZ(z || this.z)
+        return this
     }
 
     setVisible(v) {
         this.visible = !!v
+    }
+
+    setZ(z) {
+        this.z = typeof z === 'number' ? z : 10
     }
 
     setDragble(d) {

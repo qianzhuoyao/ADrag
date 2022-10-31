@@ -1,4 +1,5 @@
-import Render from "../render";
+import Service from "../service";
+
 
 export default class Controller {
     constructor() {
@@ -7,18 +8,39 @@ export default class Controller {
 
     singleton() {
         if (!Controller.instance) {
-            this.render = null;
+            this.service = null;
             this.init();
             Controller.instance = this;
         }
         return Controller.instance;
     }
 
-    init() {
-        this.render = new Render()
+    init(id) {
+        this.service = new Service()
+        this.service.createProvider(id)
     }
 
-    create(value) {
-        this.render.create(value)
+    /**
+     * 创建普通块
+     * @param id
+     * @param down fn
+     * @param move fn
+     * @param up fn
+     */
+    createPack({id, down, move, up}) {
+        this.service.createPack({id, down, move, up})
+        this.service.paint()
+    }
+
+    /**
+     * 创建复制块
+     * @param id
+     * @param down fn
+     * @param move fn
+     * @param up fn
+     */
+    createFragment({id, down, move, up}) {
+        this.service.createFragment({id, down, move, up})
+        this.service.paint()
     }
 }

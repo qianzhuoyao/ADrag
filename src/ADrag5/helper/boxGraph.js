@@ -1,3 +1,5 @@
+import Block from "@/ADrag5/block";
+
 export default class BoxGraph {
     constructor() {
         this.boxGraph = {};
@@ -16,13 +18,22 @@ export default class BoxGraph {
             const nextValue = compare ? this.boxGraph[key].next : [];
             this.boxGraph[key] = {
                 _key: key,
-                value,
+                value: value,
                 pre: pre,
                 next: next || nextValue,
             };
             this.keys.push(key)
         }
         return this;
+    }
+
+    updateValue({key, autoValue}) {
+        if (this.keys.includes(key)) {
+            this.boxGraph[key] = {
+                ...this.boxGraph[key],
+                value: typeof autoValue === 'function' && autoValue(this.boxGraph[key].value)
+            }
+        }
     }
 
     /**
@@ -50,6 +61,14 @@ export default class BoxGraph {
             this.boxGraph[pre].next.push(key);
         }
         return this;
+    }
+
+    /**
+     * 最近一次被添加的key
+     */
+    recentKey() {
+        const latest = this.takeKeys().length
+        return this.takeKeys()[latest - 1]
     }
 
     /**

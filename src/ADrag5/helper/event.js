@@ -1,5 +1,6 @@
-import { concatAll, fromEvent, takeUntil, withLatestFrom } from "rxjs";
-import { map } from "rxjs/operators";
+import {concatAll, fromEvent, takeUntil, withLatestFrom} from "rxjs";
+import {map} from "rxjs/operators";
+
 const dragIndex = "99999";
 const _STYLE = {
     _DISPLAY: {
@@ -34,7 +35,7 @@ const domHide = (dom) => {
     }
 };
 
-const domPosition = ({ dom, x, y }) => {
+const domPosition = ({dom, x, y}) => {
     if (dom) {
         dom.style.left = typeof x === "number" ? x + "px" : x;
         dom.style.top = typeof y === "number" ? y + "px" : y;
@@ -78,7 +79,7 @@ export default class PipeEvent {
         return this;
     }
 
-    dragElementPosition({ x, y }) {
+    dragElementPosition({x, y}) {
         domPosition({
             dom: this.dragElement,
             x,
@@ -86,7 +87,7 @@ export default class PipeEvent {
         });
     }
 
-    setOffsetDrag({ x, y }) {
+    setOffsetDrag({x, y}) {
         this.offset = {
             x,
             y,
@@ -96,6 +97,16 @@ export default class PipeEvent {
 
     dragElementAbsolute() {
         setAbsolute(this.dragElement);
+        return this;
+    }
+
+    copyElementHide() {
+        domHide(this.copyElement);
+        return this;
+    }
+
+    copyElementShow() {
+        isShow(this.copyElement) || domShow(this.copyElement);
         return this;
     }
 
@@ -114,14 +125,14 @@ export default class PipeEvent {
         this.mouseMoveObservable = fromEvent(document, "mousemove");
     }
 
-    pipeEventStart({ downCallback, moveCallback, overCallback }) {
+    pipeEventStart({downCallback, moveCallback, overCallback}) {
         if (this.copyElement) {
             this.mouseDownObservable = fromEvent(this.copyElement, "mousedown");
             this.mouseDownObservable
                 .pipe(
-                    map(() => {
+                    map((e) => {
                         if (typeof downCallback === "function") {
-                            downCallback.call(this, this);
+                            downCallback.call(this, this,e);
                         }
                         return this.mouseMoveObservable.pipe(
                             takeUntil(
@@ -137,12 +148,13 @@ export default class PipeEvent {
                     }),
                     concatAll(),
                     withLatestFrom(this.mouseDownObservable, (move) => {
-                        const { pageX: mx, pageY: my } = move;
+                        const {pageX: mx, pageY: my} = move;
                         //const {pageX:dx, pageX:dy} = down
                         return {
                             //偏移量TODO
                             x: mx,
                             y: my,
+                            move,
                         };
                     })
                 )
