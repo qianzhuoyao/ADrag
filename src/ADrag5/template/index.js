@@ -52,30 +52,32 @@ export default class Template {
     }
 
     makeProvider(arg) {
-        const {click, mousemove, mouseover, mouseleave, mousedown, mouseup, mixtureDrag} = arg
-        this.globalEvent.mixtureDrag = mixtureDrag
-        const container = document.getElementById(this._providerId)
-        if (container) {
-            container.style.position = 'absolute'
-            container.addEventListener('click', (event) => {
-                typeof click === 'function' && click(event)
-            })
-            container.addEventListener('mousedown', (event) => {
-                typeof mousedown === 'function' && mousedown(event)
-            })
-            container.addEventListener('mouseup', (event) => {
-                typeof mouseup === 'function' && mouseup(event)
-            })
-            container.addEventListener('mouseover', (event) => {
-                typeof mouseover === 'function' && mouseover(event)
-            })
-            container.addEventListener('mousemove', (event) => {
-                typeof mousemove === 'function' && mousemove(event)
-            })
-            container.addEventListener('mouseleave', (event) => {
-                typeof mouseleave === 'function' && mouseleave(event)
-            })
+        if (arg) {
+            const {click, mousemove, mouseover, mouseleave, mousedown, mouseup, mixtureDrag} = arg
+            this.globalEvent.mixtureDrag = mixtureDrag
+            const container = document.getElementById(this._providerId)
+            if (container) {
+                container.style.position = 'absolute'
+                container.addEventListener('click', (event) => {
+                    typeof click === 'function' && click(event)
+                })
+                container.addEventListener('mousedown', (event) => {
+                    typeof mousedown === 'function' && mousedown(event)
+                })
+                container.addEventListener('mouseup', (event) => {
+                    typeof mouseup === 'function' && mouseup(event)
+                })
+                container.addEventListener('mouseover', (event) => {
+                    typeof mouseover === 'function' && mouseover(event)
+                })
+                container.addEventListener('mousemove', (event) => {
+                    typeof mousemove === 'function' && mousemove(event)
+                })
+                container.addEventListener('mouseleave', (event) => {
+                    typeof mouseleave === 'function' && mouseleave(event)
+                })
+            }
+            return container
         }
-        return container
     }
 }

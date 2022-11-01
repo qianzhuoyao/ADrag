@@ -11,7 +11,6 @@ export default class Render {
     singleton() {
         if (!Render.instance) {
             this.box = new BoxGraph();
-            this.box.root({});
             this.provider = null;
             Render.instance = this;
         }
@@ -24,8 +23,18 @@ export default class Render {
         return deleteItem
     }
 
+    create({key, _package}) {
+        Render.instance.box.create({
+            key,
+            value: {
+                _package,
+                _block: new Block()
+            }
+        })
+    }
+
     insert({pre, _package, key}) {
-        this.box.insert({
+        Render.instance.box.insert({
             pre,
             key,
             value: {
@@ -59,8 +68,8 @@ export default class Render {
         })
     }
 
-    mixinProvider({_providerId}) {
-        Render.instance.provider = new Template({_providerId}).makeProvider()
+    mixinProvider({_providerId, event}) {
+        Render.instance.provider = new Template({_providerId}).makeProvider(event)
     }
 
     takeBox() {

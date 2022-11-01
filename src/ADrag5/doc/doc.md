@@ -131,8 +131,7 @@ interface provider{
      */
     data:{},
     id:string, //容器的DOMid
-    MESSAGE:()=>message, // 编辑,在组件内使用refs调用实例化一个message,从而开启编辑
-    VIEW:()=>controller,//查阅,
+    MESSAGE:()=>message, // 控制
 }
 
 ```
@@ -142,5 +141,4 @@ template:
 <provider ref='provider'></provider>
 script:
 this.msg = this.$refs.provider.MESSAGE()
-this.container = this.$refs.provider.VIEW()
 ```

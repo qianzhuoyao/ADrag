@@ -1,5 +1,4 @@
-import Service from "../service";
-
+import {BoxService, MsgService} from '../service'
 
 export default class Controller {
     constructor() {
@@ -15,8 +14,33 @@ export default class Controller {
         return Controller.instance;
     }
 
+    runInstructions(connectName, from, to, msg) {
+        new MsgService().sendMsg(connectName, from, to, msg)
+    }
+
+
+    defineInstructions(initiator, connect, msg, fn) {
+        new MsgService(Controller.instance.service).acceptMsg(initiator, connect, msg, fn)
+    }
+
+    updateMsgPackPackage(to, Package) {
+        Controller.instance.service.updatePackPackage(to, Package)
+    }
+
+    updateMsgFragmentPackage(to, Package) {
+        Controller.instance.service.updateFragmentPackage(to, Package)
+    }
+
+    updateMsgFragmentBlock(to, Package) {
+        Controller.instance.service.updateFragmentBlock(to, Package)
+    }
+
+    updateMsgPackBlock(to, Block) {
+        Controller.instance.service.updatePackBlock(to, Block)
+    }
+
     init(id) {
-        this.service = new Service()
+        this.service = new BoxService()
         this.service.createProvider(id)
     }
 
@@ -28,8 +52,14 @@ export default class Controller {
      * @param up fn
      */
     createPack({id, down, move, up}) {
-        this.service.createPack({id, down, move, up})
-        this.service.paint()
+        Controller.instance.service.createPack({id, down, move, up})
+        Controller.instance.service.paint()
+    }
+
+    createBox({_package, key}) {
+        Controller.instance.service.createBox({
+            _package, key
+        })
     }
 
     /**
@@ -40,7 +70,11 @@ export default class Controller {
      * @param up fn
      */
     createFragment({id, down, move, up}) {
-        this.service.createFragment({id, down, move, up})
-        this.service.paint()
+        Controller.instance.service.createFragment({id, down, move, up})
+        Controller.instance.service.paint()
+    }
+
+    getBox() {
+        return Controller.instance.service.getBox()
     }
 }

@@ -23,6 +23,13 @@ export default class Block {
         return this
     }
 
+    take() {
+        const {x, y, z, width, height, visible, resizable, dragble} = this
+        return {
+            x, y, z, width, height, visible, resizable, dragble
+        }
+    }
+
     setVisible(v) {
         this.visible = !!v
     }

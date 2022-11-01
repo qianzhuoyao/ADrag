@@ -1,5 +1,3 @@
-import Block from "@/ADrag5/block";
-
 export default class BoxGraph {
     constructor() {
         this.boxGraph = {};
@@ -13,7 +11,7 @@ export default class BoxGraph {
      * key  值     是否覆盖  前指针 后指针  是否合并
      * @returns
      */
-    create({key, value, cover, pre, next, compare}) {
+    _create({key, value, cover, pre, next, compare}) {
         if (cover || !(key in this.boxGraph)) {
             const nextValue = compare ? this.boxGraph[key].next : [];
             this.boxGraph[key] = {
@@ -40,8 +38,15 @@ export default class BoxGraph {
      * 创建根节点
      */
     root({value}) {
-        this.create({key: "root", value});
+        this._create({key: "root", value});
         return this;
+    }
+
+    create({key, value}) {
+        this._create({
+            key,
+            value,
+        });
     }
 
     /**
@@ -51,7 +56,7 @@ export default class BoxGraph {
      */
     insert({pre, key, value, cover, compare}) {
         if (this.boxGraph[pre] && key) {
-            this.create({
+            this._create({
                 pre,
                 key,
                 value,
@@ -79,31 +84,54 @@ export default class BoxGraph {
     remove(key, cutLink = false) {
         if (this.boxGraph[key]) {
             if (cutLink) {
-                this.boxGraph[key].next.map((i) => {
-                    this.boxGraph[i].pre = undefined;
-                });
+                //清除key组节点的所有pre节点
+                this.clearTargetNodesPreParam(key)
             } else {
                 const {pre} = this.boxGraph[key];
-                this.boxGraph[key].next.map((i) => {
-                    this.boxGraph[i].pre = pre;
-                    //指针偏移
-                    this.boxGraph[pre].next = this.boxGraph[pre].next.concat(
-                        this.boxGraph[key].next
-                    );
-                    //避免复写时存在的指向首位
-                    this.boxGraph[i].next = this.boxGraph[i].next.filter(
-                        (i) => i !== key
-                    );
-                });
+                //偏移key节点pre节点的next为当前key节点的next
+                this.offsetPoint(key, pre)
                 //清除前指针内容的next节点存在的被删除的内容
-                this.boxGraph[pre].next = this.boxGraph[pre].next.filter(
-                    (i) => i !== key
-                );
+                this.shakeTargetPointKey(pre, key)
             }
             delete this.boxGraph[key];
-            this.keys = this.keys.filter(i => i !== key)
+            //同步更新keys
+            this.filterSameKey(key)
         }
         return this;
+    }
+
+    clearTargetNodesPreParam(key) {
+        this.boxGraph[key].next.map((i) => {
+            this.boxGraph[i].pre = undefined;
+        });
+    }
+
+    filterSameKey(key) {
+        this.keys = this.keys.filter(i => i !== key)
+    }
+
+    shakeTargetPointKey(preKey, checkKey) {
+        this.boxGraph[preKey].next = this.boxGraph[preKey].next.filter(
+            (i) => i !== checkKey
+        );
+    }
+
+    concatTargetNextKeys(preKey, currentKey) {
+        this.boxGraph[preKey].next = this.boxGraph[preKey].next.concat(
+            this.boxGraph[currentKey].next
+        );
+    }
+
+    offsetPoint(currentKey, preKey) {
+        if (this.boxGraph[currentKey]) {
+            this.boxGraph[currentKey].next.map((i) => {
+                this.boxGraph[i].pre = preKey;
+                //指针偏移
+                this.concatTargetNextKeys(preKey, currentKey)
+                //避免复写时存在的指向首位
+                this.shakeTargetPointKey(i, currentKey)
+            });
+        }
     }
 
     find(key) {
