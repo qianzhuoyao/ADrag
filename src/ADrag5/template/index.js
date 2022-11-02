@@ -1,5 +1,13 @@
 import {PipeEvent} from "../helper/index";
 
+/**
+ * pack mixture 与 fragment mixture 区别：
+ * pack mixture 必须依附于 provider ，它直接可以移动
+ * fragment mixture 会存在两层元素（origin，mover），origin表示静止组件，所有的移动都是在使用mover
+ * 也只有mover可以作用在容器上。mover必须依附于provider，而origin则不需要
+ * 相比较而言，如果你是操作面板编辑多于创建则pack mixture更合适
+ * 反之 fragment mixture 更好用
+ */
 export default class Template {
     constructor({_key, _originId, _moverId, _providerId}) {
         //mixture
@@ -10,6 +18,12 @@ export default class Template {
         this.globalEvent = {}
     }
 
+    /**
+     * 创建pack mixture
+     * @param downCallback
+     * @param moveCallback
+     * @param overCallback
+     */
     makePack({downCallback, moveCallback, overCallback}) {
         this._key && new PipeEvent()
             .setCopyElement(this._key)
@@ -29,7 +43,12 @@ export default class Template {
             })
     }
 
-
+    /**
+     * 创建fragment mixture
+     * @param downCallback
+     * @param moveCallback
+     * @param overCallback
+     */
     makeFragment({downCallback, moveCallback, overCallback}) {
         this._originId && this._moverId && new PipeEvent()
             .setCopyElement(this._originId)
@@ -51,6 +70,11 @@ export default class Template {
             })
     }
 
+    /**
+     * 创建 容器
+     * @param arg
+     * @returns {HTMLElement}
+     */
     makeProvider(arg) {
         if (arg) {
             const {click, mousemove, mouseover, mouseleave, mousedown, mouseup, mixtureDrag} = arg

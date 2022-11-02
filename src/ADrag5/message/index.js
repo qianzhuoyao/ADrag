@@ -16,6 +16,12 @@ export default class Message {
         return Message.instance;
     }
 
+    /**
+     * 发起消息
+     * @param from
+     * @param to
+     * @param msg
+     */
     send(from, to, msg) {
         if (this.connect) {
             new Controller().runInstructions(this.connect, from, to, msg)

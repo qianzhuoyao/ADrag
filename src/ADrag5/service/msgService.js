@@ -23,6 +23,13 @@ export default class MsgService {
         return MsgService.instance;
     }
 
+    /**
+     * 接收消息
+     * @param initiator
+     * @param connect
+     * @param msg
+     * @param fn
+     */
     acceptMsg(initiator, connect, msg, fn) {
         if (connect && typeof fn === "function" && MsgService.instance.service) {
             MsgService.instance.instructions[connect] = MsgService.instance.instructions[connect] || {}
@@ -47,6 +54,13 @@ export default class MsgService {
         }
     }
 
+    /**
+     * 发送消息
+     * @param connectName
+     * @param from
+     * @param to
+     * @param msg
+     */
     sendMsg(connectName, from, to, msg) {
         console.log(MsgService.instance.instructions[connectName])
         if (MsgService.instance.instructions[connectName]) {
