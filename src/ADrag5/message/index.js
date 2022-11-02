@@ -10,58 +10,10 @@ export default class Message {
 
     singleton() {
         if (!Message.instance) {
-            this.connect = {}
-            this.nameList = []
+            this.connect = undefined
             Message.instance = this;
         }
         return Message.instance;
-    }
-
-    find(name) {
-        return Message.instance.connect[name]
-    }
-
-    createConnect(name) {
-        if (name && !(name in Message.instance.connect)) {
-            Message.instance.connect[name] = this.createMsg({})
-            Message.instance.nameList.push(name)
-            return true
-        }
-        return false
-    }
-
-    createMsg({from, to, msg}) {
-        return {
-            from,
-            to,
-            msg
-        }
-    }
-
-    /**
-     * 通知某pack组件主动更新
-     * @param to
-     * @param Block
-     * @param Package
-     */
-    callPackToUpdate(to, Block, Package) {
-        if (this.connect) {
-            new Controller().updateMsgPackPackage(to, Package)
-            new Controller().updateMsgPackBlock(to, Block)
-        }
-    }
-
-    /**
-     * 通知某fragment组件主动更新
-     * @param to
-     * @param Block
-     * @param Package
-     */
-    callFragmentToUpdate(to, Block, Package) {
-        if (this.connect) {
-            new Controller().updateMsgFragmentPackage(to, Package)
-            new Controller().updateMsgFragmentBlock(to, Block)
-        }
     }
 
     send(from, to, msg) {

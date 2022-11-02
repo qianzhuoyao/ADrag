@@ -1,5 +1,5 @@
-import BoxService from "@/ADrag5/service/boxService";
-import MsgService from "@/ADrag5/service/msgService";
+import BoxService from "../service/boxService";
+import MsgService from "../service/msgService";
 
 export {
     BoxService,
