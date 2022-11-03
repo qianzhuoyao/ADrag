@@ -65,6 +65,6 @@ new Message().send('keyD', 'keyF', 'update')
  */
 new Message('noRecover').send('keyD', '', 'update')
 /**
- * 由于无源头，此消息发送成功后将会被不接收器接收，connectD会接收到update的消息
+ * 由于无源头，此消息发送成功后将会被不记名连接接收器接收，connectD会接收到update的消息
  */
 new Message('noSender').send('', 'keyH', 'update')

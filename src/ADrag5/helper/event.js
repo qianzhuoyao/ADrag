@@ -71,6 +71,8 @@ export default class PipeEvent {
         return this;
     }
 
+
+
     setDragElement(id) {
         this.dragElement = this.getDom(id);
         if (this.dragElement) {
@@ -132,7 +134,7 @@ export default class PipeEvent {
                 .pipe(
                     map((e) => {
                         if (typeof downCallback === "function") {
-                            downCallback.call(this, this,e);
+                            downCallback.call(this, this, e);
                         }
                         return this.mouseMoveObservable.pipe(
                             takeUntil(
