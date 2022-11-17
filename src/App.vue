@@ -48,6 +48,7 @@ import o from '@/component/o'
 import f from '@/component/p'
 import {data} from "@/ADrag4/model/requestModel";
 import {config} from "@/ADrag4/config/config";
+import {Container} from "@/ADrag6/publicProvider/container";
 
 export default {
   name: "App",
@@ -59,6 +60,14 @@ export default {
     };
   },
   mounted() {
+    const a = new Container()
+    a.createNode({a: 1})
+    a.createNode({b: 1})
+    setTimeout(() => {
+      a.updateNode('node-0', 'node-1', {b: 2})
+      console.log(a.getAll(), 'new Container().getAll()end')
+    }, 2000)
+    console.log(a.getAll(), 'new Container().getAll()')
     this.beforeStart()
     this.$refs.provider.on('componentClick', (o) => {
       console.log(o, 'componentClick')
@@ -143,7 +152,7 @@ export default {
           w: i.w,
           h: i.h,
           z: i.z,
-          cf:i.cf
+          cf: i.cf
         }
       })
       this.$refs.provider.draw(draw)
