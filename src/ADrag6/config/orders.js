@@ -6,4 +6,5 @@ export const ORDER = Object.freeze({
   FIND: "FIND",
   GET: "GET",
   INITORDER: "INITORDER",
+  HISTORY_COMMAND:"HISTORY_COMMAND"
 });

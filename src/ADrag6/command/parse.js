@@ -1,15 +1,15 @@
 import { messageHead, messagesBody } from "../traits/traits";
 import { carrier } from "./carrier";
 
-export const parseTrait = (sender, accepter, order, payload) => {
-  const msgKey = messageHead(sender, accepter).msgKey;
+export const parseTrait = (sender, accept, order, payload,origin) => {
+  const msgKey = messageHead(sender, accept).msgKey;
   const toCall = (args) =>
-    carrier(sender, accepter, {
+    carrier(sender, accept, {
       from: sender,
-      to: accepter,
+      to: accept,
       operation: order,
       ...args,
-    });
+    },origin);
 
   return {
     key: msgKey,
