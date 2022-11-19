@@ -1,35 +1,20 @@
-import {messageHead, messagesBody} from "../traits/traits";
-import {ORDER} from "../config/orders";
-import {carrier} from "./carrier";
-import {CURRENT, TARGET} from "../config/exchange";
+import { messageHead, messagesBody } from "../traits/traits";
+import { carrier } from "./carrier";
 
-export const parseTrait = (order, payload) => {
-    let msgKey = undefined;
-    let toCall = new Function("");
+export const parseTrait = (sender, accepter, order, payload) => {
+  const msgKey = messageHead(sender, accepter).msgKey;
+  const toCall = (args) =>
+    carrier(sender, accepter, {
+      from: sender,
+      to: accepter,
+      operation: order,
+      ...args,
+    });
 
-    if (
-        order === ORDER.CREATE ||
-        order === ORDER.REMOVE ||
-        order === ORDER.CLEAR ||
-        order === ORDER.GET
-    ) {
-        msgKey = messageHead(CURRENT.CONTAINER, TARGET.CONTAINER).msgKey;
-        toCall = (args) => carrier(CURRENT.CONTAINER, TARGET.CONTAINER, {
-            from: CURRENT.CONTAINER,
-            to: TARGET.CONTAINER,
-            operation: order,
-            ...args,
-        });
-    } else if (order === ORDER.UPDATE) {
-        const {from, to} = payload;
-        msgKey = messageHead(from, to).msgKey;
-        toCall = (args) => carrier(from, to, {from, to, operation: order, ...args});
-    }
-
-    return {
-        key: msgKey,
-        operation: order,
-        body: messagesBody(payload, msgKey).value,
-        toCall,
-    };
+  return {
+    key: msgKey,
+    operation: order,
+    body: messagesBody(payload, msgKey),
+    toCall,
+  };
 };
