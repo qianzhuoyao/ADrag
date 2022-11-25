@@ -6,9 +6,15 @@ export class Service {
     autoGenKey() {
         return `node-${Object.keys(this.nodes).length}`;
     }
-    getCommandHistory(){
+
+    insideCheck(key) {
+        return key in this.nodes
+    }
+
+    getCommandHistory() {
         return this.commandHistory;
     }
+
     backUpCommand(from, to, patchOrder, payload) {
         if (this.commandHistory) {
             this.commandHistory.push({from, to, patchOrder, payload})
@@ -19,13 +25,15 @@ export class Service {
      * 增加
      * @param {} payload
      */
-    create(payload) {
-        console.log(payload, "createPayload");
+    create(from, to, payload) {
         const key = this.autoGenKey();
         this.edit(key, {
-            body: payload.body,
+            body: payload,
+            from,
+            to,
             key: key,
-        });
+        }, true);
+        return key
     }
 
     /**
@@ -47,7 +55,7 @@ export class Service {
     }
 
     init() {
-        this.msgKey = undefined;
+        // this.msgKey = undefined;
         this.commandHistory = []
         this.nodes = {};
     }
@@ -60,26 +68,24 @@ export class Service {
         return JSON.parse(JSON.stringify(this.nodes));
     }
 
-    currentMsgKek(key) {
-        this.msgKey = key;
-    }
+    // currentMsgKey(key) {
+    //     this.msgKey = key;
+    // }
 
-    edit(key, payload) {
+    edit(key, payload, syncAdd = false) {
         if (!this._stopOperation) {
-            if (key) {
-                const {from, to} = payload;
-                console.log("更新来源", from, "更新目标", to, "payload", payload);
+            if (key in this.nodes || syncAdd) {
                 this.nodes[key] = {
                     ...this.nodes[key],
                     ...payload,
-                    body: {
-                        ...payload.body,
-                        msgKey: this.msgKey,
-                    },
                 };
             }
         }
         this.unStop();
+    }
+
+    clear() {
+        this.nodes = {}
     }
 
     remove(key) {

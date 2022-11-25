@@ -49,7 +49,20 @@ import f from '@/component/p'
 import {data} from "@/ADrag4/model/requestModel";
 import {config} from "@/ADrag4/config/config";
 import {Container} from "@/ADrag6/publicProvider/container";
+// import {reducer, buildCustomOrder} from "@/ADrag6/controller/make";
 
+/**
+ * 自定义命令用法
+ * buildCustomOrder({
+ *   order1:'...'
+ * })
+ * reducer((i,s,o,p,b)=>{
+ * if(o===order1){
+ *   s.xxx
+ * }
+ *   ....
+ * })
+ */
 export default {
   name: "App",
   components: {fragment, provider},
@@ -60,45 +73,50 @@ export default {
     };
   },
   mounted() {
+    // reducer((instance, service, order, payload, orderMap)=>{
+    //       if()
+    // })
     const a = new Container()
     a.createNode({a: 1})
     a.createNode({b: 1})
+    console.log(a.findNode('node-0'), 'find')
     setTimeout(() => {
-      a.updateNode('node-0', 'node-1', {b: 2})
+      //a.clearNode()
+      a.updateNode('node-1', {b: 2})
       console.log(a.getAll(), 'new Container().getAll()end')
     }, 2000)
-    console.log(a.getAll(), 'new Container().getAll()')
-    this.beforeStart()
-    this.$refs.provider.on('componentClick', (o) => {
-      console.log(o, 'componentClick')
-    })
-    this.$refs.provider.on('dragging', (o) => {
-      console.log(o, 'dragging')
-    })
-    this.$refs.provider.on('dragStop', (o) => {
-      console.log(o, 'dragStop')
-    })
-    this.$refs.provider.on('resizing', (o) => {
-      console.log(o, 'resizing')
-    })
-    this.$refs.provider.on('areaClick', (o) => {
-      console.log(o, 'areaClick')
-    })
-    this.$refs.provider.on('resizeStop', (o) => {
-      console.log(o, 'resizeStop')
-    })
-    this.$refs.provider.on('hover', (o) => {
-      console.log(o, 'hover')
-    })
-    this.$refs.provider.on('leave', (o) => {
-      console.log(o, 'leave')
-    })
-    this.$refs.provider.on('lineClick', (o) => {
-      console.log(o, 'lineClick')
-    })
-    this.$refs.provider.on('menuItemClick', (o) => {
-      console.log(o, 'menuItemClick')
-    })
+    console.log(a.getAll(), 'new Container().getAll()start')
+    // this.beforeStart()
+    // this.$refs.provider.on('componentClick', (o) => {
+    //   console.log(o, 'componentClick')
+    // })
+    // this.$refs.provider.on('dragging', (o) => {
+    //   console.log(o, 'dragging')
+    // })
+    // this.$refs.provider.on('dragStop', (o) => {
+    //   console.log(o, 'dragStop')
+    // })
+    // this.$refs.provider.on('resizing', (o) => {
+    //   console.log(o, 'resizing')
+    // })
+    // this.$refs.provider.on('areaClick', (o) => {
+    //   console.log(o, 'areaClick')
+    // })
+    // this.$refs.provider.on('resizeStop', (o) => {
+    //   console.log(o, 'resizeStop')
+    // })
+    // this.$refs.provider.on('hover', (o) => {
+    //   console.log(o, 'hover')
+    // })
+    // this.$refs.provider.on('leave', (o) => {
+    //   console.log(o, 'leave')
+    // })
+    // this.$refs.provider.on('lineClick', (o) => {
+    //   console.log(o, 'lineClick')
+    // })
+    // this.$refs.provider.on('menuItemClick', (o) => {
+    //   console.log(o, 'menuItemClick')
+    // })
   },
   methods: {
     clA() {
