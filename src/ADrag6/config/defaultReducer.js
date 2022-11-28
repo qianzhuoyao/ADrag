@@ -15,10 +15,10 @@ export const defaultReducer = (instance, service, order, payload) => {
 
         service.backUpCommand(defaultOperationCurrent, defaultOperationTarget, order, body)
     } else if (order === ORDER.CREATE) {
-        return service.create(customOperationCurrent,defaultOperationTarget,body)
+        return service.create(customOperationCurrent, defaultOperationTarget, body)
     } else if (order === ORDER.UPDATE) {
         //操作项限制
-        if (service.insideCheck(customOperationCurrent) || customOperationCurrent === CURRENT.CONTAINER) {
+        if (service.roleCheck(customOperationCurrent) || customOperationCurrent === CURRENT.CONTAINER) {
             return service.edit(customOperationTarget, {
                 body,
                 from: customOperationCurrent,

@@ -7,7 +7,7 @@ export class Service {
         return `node-${Object.keys(this.nodes).length}`;
     }
 
-    insideCheck(key) {
+    roleCheck(key) {
         return key in this.nodes
     }
 
