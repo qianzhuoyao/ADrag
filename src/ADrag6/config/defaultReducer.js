@@ -9,14 +9,24 @@ import {CURRENT} from "@/ADrag6/config/exchange";
  * @param payload
  */
 export const defaultReducer = (instance, service, order, payload) => {
+
     const {from: customOperationCurrent, to: customOperationTarget} = instance
-    const {from: defaultOperationCurrent, to: defaultOperationTarget, body} = payload
+    const {to: defaultOperationTarget, body} = payload
+
     if (order === ORDER.HISTORY_COMMAND) {
 
-        service.backUpCommand(defaultOperationCurrent, defaultOperationTarget, order, body)
+        return service.backUpCommand()
+
+    } else if (order === ORDER.GET_HISTORY_COMMAND) {
+
+        return service.getCommandHistory()
+
     } else if (order === ORDER.CREATE) {
+
         return service.create(customOperationCurrent, defaultOperationTarget, body)
+
     } else if (order === ORDER.UPDATE) {
+
         //操作项限制
         if (service.roleCheck(customOperationCurrent) || customOperationCurrent === CURRENT.CONTAINER) {
             return service.edit(customOperationTarget, {
@@ -25,19 +35,24 @@ export const defaultReducer = (instance, service, order, payload) => {
                 to: customOperationTarget
             })
         }
+
     } else if (order === ORDER.GET) {
 
         return service.getAll()
+
     } else if (order === ORDER.FIND) {
 
         const {findKey} = body.value
         return service.find(findKey)
+
     } else if (order === ORDER.REMOVE) {
 
         const {removeKey} = body.value
         return service.remove(removeKey)
+
     } else if (order === ORDER.CLEAR) {
 
         return service.clear()
+
     }
 }

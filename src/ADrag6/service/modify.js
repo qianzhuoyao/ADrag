@@ -70,7 +70,6 @@ const modify = (
         )
             .subscribe(moveEventParam => {
                 typeof moveCallback === 'function' && moveCallback(moveEventParam)
-                console.log(moveEventParam, ',m')
                 pretenderDOM.style.display = DISPLAY
                 pretenderDOM.style.top = moveEventParam.y + 'px'
                 pretenderDOM.style.left = moveEventParam.x + 'px'

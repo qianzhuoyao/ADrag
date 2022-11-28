@@ -1,12 +1,9 @@
 <template>
-  <!--  <div :id="thisData.id" :style="{width:thisData.w+'px',height:thisData.h+'px'}"></div>-->
-  <div class="fs" :style="{width:thisData.w+'px',height:thisData.h+'px'}">
-    <div style="width: 5px;height: 5px;border-radius: 50%;background: black"></div>
-  </div>
+  <div :id="thisData.id" :style="{width:thisData.w+'px',height:thisData.h+'px'}"></div>
 </template>
 
 <script>
-// import * as echarts from 'echarts';
+import * as echarts from 'echarts';
 
 export default {
   name: "view-c",
@@ -43,23 +40,14 @@ export default {
     }
   },
   mounted() {
-    console.log('nn')
+    this.chartDom = document.getElementById(this.thisData.id);
+    this.myChart = echarts.init(this.chartDom);
+    console.log(this.thisData, this.chartDom, "view");
+    this.option && this.myChart.setOption(this.option);
+    this.s = this.thisData.id
   },
-  watch: {
-    thisData: {
-      handler() {
-        // this.myChart && this.myChart.resize()
-      }, immediate: true,
-      deep: true
-    }
-  }
 };
 </script>
 
 <style scoped>
-.fs {
-  display: flex;
-  justify-content: center;
-  align-items: center
-}
 </style>

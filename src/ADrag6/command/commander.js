@@ -8,7 +8,7 @@ const defaultOrderKey = Object.keys(ORDER)
  * @returns {*}
  */
 export const commanderSend = (traitCommand) => {
-    const { body, toCall, operation} = traitCommand;
+    const {body, toCall, operation} = traitCommand;
     return toCall({operation, body});
 };
 
@@ -25,8 +25,11 @@ export const commanderReceiver = (from, to, patchOrder, payload) => {
     if (patchOrder) {
         const command = parseTrait(from, to, patchOrder, payload, defaultOrderKey.includes(patchOrder));
         //记录消息
-        const historyAddCommand = parseTrait(from, to, ORDER.HISTORY_COMMAND, payload, true);
-        commanderSend(historyAddCommand)
+        if ([ORDER.CREATE, ORDER.REMOVE, ORDER.UPDATE].includes(patchOrder)) {
+            const historyAddCommand = parseTrait(from, to, ORDER.HISTORY_COMMAND, payload, true);
+            commanderSend(historyAddCommand)
+        }
+
         return commanderSend(command);
     }
 };

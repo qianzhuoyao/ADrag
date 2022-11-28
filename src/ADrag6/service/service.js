@@ -11,14 +11,20 @@ export class Service {
         return key in this.nodes
     }
 
+    /**
+     * 获取备份
+     * @returns {[]}
+     */
     getCommandHistory() {
         return this.commandHistory;
     }
 
-    backUpCommand(from, to, patchOrder, payload) {
-        if (this.commandHistory) {
-            this.commandHistory.push({from, to, patchOrder, payload})
-        }
+    /**
+     * 备份命令
+     * @param payload
+     */
+    backUpCommand() {
+        this.commandHistory.push(JSON.parse(JSON.stringify(this.nodes)))
     }
 
     /**

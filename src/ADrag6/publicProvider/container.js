@@ -45,6 +45,13 @@ export class Container {
     }
 
     /**
+     * 获取备份
+     */
+    getCommandHistory() {
+        return this.callCommander(CURRENT.CONTAINER, TARGET.CONTAINER, ORDER.GET_HISTORY_COMMAND, {})
+    }
+
+    /**
      * 获取全部
      * @returns {*}
      */
