@@ -1,8 +1,12 @@
 const DEFAULT_HEIGHT = 0;
 const DEFAULT_WIDTH = 0;
+const DEFAULT_X = 0;
+const DEFAULT_Y = 0;
 import {commanderReceiver} from "../command/commander";
 import {ORDER} from "../config/orders";
 import {CURRENT, TARGET} from "../config/exchange";
+import {buildEvent} from "@/ADrag6/service/modify";
+
 
 /**
  * 容器
@@ -11,17 +15,77 @@ import {CURRENT, TARGET} from "../config/exchange";
 export class Container {
     constructor(id) {
         this.container = {};
+        this.components = {};
         //初始化容器DOM
         this.initDom(id);
     }
 
     createNode(nodePayload) {
-        return this.callCommander(
-            CURRENT.CONTAINER,
-            TARGET.CONTAINER,
-            ORDER.CREATE,
-            nodePayload
-        );
+        const {x, y, w, h} = nodePayload;
+        //校验位置
+        this.findParamsOfContainer()
+        console.log({x, y, w, h})
+        const {heightOfContainer, widthOfContainer, xOfContainer, yOfContainer} = this.container
+        console.log({heightOfContainer, widthOfContainer, xOfContainer, yOfContainer})
+        if ([x, y, w, h].some(i => i !== undefined)) {
+            if (x >= xOfContainer && y >= yOfContainer && (x + w) <= (xOfContainer + widthOfContainer) && (y + h) <= (yOfContainer + heightOfContainer)) {
+                const usefulLoad = {...nodePayload, x: x - xOfContainer, y: y - yOfContainer}
+                return this.callCommander(
+                    CURRENT.CONTAINER,
+                    TARGET.CONTAINER,
+                    ORDER.CREATE,
+                    usefulLoad
+                );
+            }
+        }
+    }
+
+    /**
+     * 初始定义components 无法重新定义
+     * @param mapList
+     */
+    templateMap(mapList) {
+        if (!Object.keys(this.components).length) {
+            this.components = mapList
+        }
+    }
+
+    /**
+     * 返回组件
+     */
+    capture(name) {
+        return this.components[name]
+    }
+
+    /**
+     * 动态的对应到一个组件
+     */
+    caught(name, component) {
+        this.components[name] = component
+    }
+
+    /**
+     * 获取偏移量
+     */
+    getOffset() {
+        return {
+            left: Math.floor(this.container.xOfContainer),
+            top: Math.floor(this.container.yOfContainer)
+        }
+    }
+
+    /**
+     * 装饰事件
+     */
+    decorate({downCallback, moveCallback, overCallback}) {
+        this.findParamsOfContainer()
+        return buildEvent({
+            downCallback,
+            moveCallback,
+            overCallback,
+            offsetXOfMoving: Math.floor(this.container.xOfContainer),
+            offsetYOfMoving: Math.floor(this.container.yOfContainer)
+        })
     }
 
     /**
@@ -52,6 +116,20 @@ export class Container {
     }
 
     /**
+     * 返回上一步的节点集合
+     */
+    backToPreviousStep() {
+        return this.callCommander(CURRENT.CONTAINER, TARGET.CONTAINER, ORDER.BACK_TO_HISTORY_COMMAND, {})
+    }
+
+    /**
+     * 备份
+     */
+    backUp() {
+        return this.callCommander(CURRENT.CONTAINER, TARGET.CONTAINER, ORDER.HISTORY_COMMAND, {})
+    }
+
+    /**
      * 获取全部
      * @returns {*}
      */
@@ -65,7 +143,7 @@ export class Container {
      * @param payload
      * @param from 必须是存在的节点或者容器CONTAINER
      */
-    updateNode(to = TARGET.CONTAINER, payload, from = CURRENT.CONTAINER,) {
+    updateNode(to = TARGET.CONTAINER, payload, from = CURRENT.CONTAINER) {
         this.callCommander(from, to, ORDER.UPDATE, payload);
     }
 
@@ -113,16 +191,38 @@ export class Container {
         this.container.widthOfContainer = DEFAULT_WIDTH;
     }
 
+    retrieveTheCorrectDomValue(anything, dom, key, _default = undefined) {
+        if (dom instanceof HTMLElement)
+            return parseFloat(String(anything) || window.getComputedStyle(dom, null)[key] || _default) || _default
+    }
+
     //获取一些必要的属性
     findParamsOfContainer() {
         if (this.container.containerDom instanceof HTMLElement) {
 
             //获取可用的长宽
-            this.container.heightOfContainer =
-                parseFloat(this.container.containerDom.style.height) || DEFAULT_HEIGHT;
+            this.container.heightOfContainer = this.retrieveTheCorrectDomValue(
+                this.container.containerDom.style.height,
+                this.container.containerDom,
+                "height",
+                DEFAULT_HEIGHT)
+            this.container.widthOfContainer = this.retrieveTheCorrectDomValue(
+                this.container.containerDom.style.width,
+                this.container.containerDom,
+                "width",
+                DEFAULT_WIDTH)
 
-            this.container.widthOfContainer =
-                parseFloat(this.container.containerDom.style.width) || DEFAULT_WIDTH;
+            //获取可用的坐标
+            this.container.xOfContainer = this.retrieveTheCorrectDomValue(
+                this.container.containerDom.style.left,
+                this.container.containerDom,
+                "left",
+                DEFAULT_X)
+            this.container.yOfContainer = this.retrieveTheCorrectDomValue(
+                this.container.containerDom.style.top,
+                this.container.containerDom,
+                "top",
+                DEFAULT_Y)
         }
     }
 }

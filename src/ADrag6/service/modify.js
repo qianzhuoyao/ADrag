@@ -14,21 +14,28 @@ const defineUpper = () => {
 export const buildEvent = ({
                                downCallback,
                                moveCallback,
-                               overCallback
+                               overCallback,
+                               offsetXOfMoving,
+                               offsetYOfMoving
                            }) => {
     clogDefaultDrag()
     return (DOM, pretenderDOM) =>
         modify(
             DOM,
             pretenderDOM,
+            offsetXOfMoving,
+            offsetYOfMoving,
             downCallback,
             moveCallback,
             overCallback)
 }
+
 /**
  *
  * @param DOM
  * @param pretenderDOM
+ * @param offsetXOfMoving
+ * @param offsetYOfMoving
  * @param downCallback
  * @param moveCallback
  * @param overCallback
@@ -36,6 +43,8 @@ export const buildEvent = ({
 const modify = (
     DOM,
     pretenderDOM,
+    offsetXOfMoving,
+    offsetYOfMoving,
     downCallback,
     moveCallback,
     overCallback) => {
@@ -44,16 +53,38 @@ const modify = (
         pretenderDOM.style.position = ABSOLUTE
         pretenderDOM.style.display = HIDDEN
         pretenderDOM.style.zIndex = zIndex
+        additionDragEvent(DOM, {
+            down: (downEventParam) => {
+                typeof downCallback === 'function' && downCallback(downEventParam)
+                pretenderDOM.style.display = HIDDEN
+            },
+            move: (moveEventParam) => {
+                typeof moveCallback === 'function' && moveCallback(moveEventParam)
+                pretenderDOM.style.display = DISPLAY
+                pretenderDOM.style.top = moveEventParam.y - offsetYOfMoving + 'px'
+                pretenderDOM.style.left = moveEventParam.x - offsetXOfMoving + 'px'
+            },
+            over: (upEventParam) => {
+                typeof overCallback === 'function' && overCallback(upEventParam)
+                pretenderDOM.style.display = HIDDEN
+            }
+        })
+    } else {
+        throw new Error('类型不正确,无法找到元素')
+    }
+}
+
+export const additionDragEvent = (DOM, {down, move, over}) => {
+    if (DOM instanceof HTMLElement) {
         const origin = fromEvent(DOM, "mousedown")
         origin.pipe(
             map((downEventParam) => {
-                typeof downCallback === 'function' && downCallback(downEventParam)
+                typeof down === 'function' && down(downEventParam)
                 return defineMover().pipe(
                     takeUntil(
                         defineUpper().pipe(
                             map(upEventParam => {
-                                typeof overCallback === 'function' && overCallback(upEventParam)
-                                pretenderDOM.style.display = HIDDEN
+                                typeof over === 'function' && over(upEventParam)
                             })
                         )
                     )
@@ -69,13 +100,8 @@ const modify = (
             })
         )
             .subscribe(moveEventParam => {
-                typeof moveCallback === 'function' && moveCallback(moveEventParam)
-                pretenderDOM.style.display = DISPLAY
-                pretenderDOM.style.top = moveEventParam.y + 'px'
-                pretenderDOM.style.left = moveEventParam.x + 'px'
+                typeof move === 'function' && move(moveEventParam)
             })
-    } else {
-        throw new Error('类型不正确,无法找到元素')
     }
 }
 

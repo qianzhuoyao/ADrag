@@ -4,11 +4,42 @@ export class Service {
     }
 
     autoGenKey() {
-        return `node-${Object.keys(this.nodes).length}`;
+        return `node-${this.upCount++}`;
     }
 
     roleCheck(key) {
         return key in this.nodes
+    }
+
+    resetPointer() {
+        this.prePointer = undefined
+    }
+
+    /**
+     * redo
+     */
+    reDo() {
+        if (typeof this.prePointer === "number") {
+            const pointer = this.prePointer < 0 ? 0 : this.prePointer + 1
+            this.prePointer++
+            this.nodes = JSON.parse(JSON.stringify(this.commandHistory[pointer] || {}))
+            return this.nodes
+        }
+    }
+
+    /**
+     * undo
+     * @returns {*}
+     */
+    backToPre() {
+        if (this.prePointer === undefined) {
+            this.prePointer = this.commandHistory.length - 1
+        }
+        const pointer = this.prePointer < 0 ? 0 : this.prePointer - 1
+        this.prePointer--
+        this.nodes = JSON.parse(JSON.stringify(this.commandHistory[pointer] || {}))
+        console.log(this.prePointer, 'this.prePointer')
+        return this.nodes
     }
 
     /**
@@ -24,14 +55,18 @@ export class Service {
      * @param payload
      */
     backUpCommand() {
+        console.log(this.commandHistory, 'this.nodes备份')
         this.commandHistory.push(JSON.parse(JSON.stringify(this.nodes)))
     }
 
     /**
      * 增加
+     * @param from
+     * @param to
      * @param {} payload
      */
     create(from, to, payload) {
+        console.log('c')
         const key = this.autoGenKey();
         this.edit(key, {
             body: payload,
@@ -62,7 +97,9 @@ export class Service {
 
     init() {
         // this.msgKey = undefined;
-        this.commandHistory = []
+        this.commandHistory = [];
+        this.upCount = 0;
+        this.prePointer = undefined;
         this.nodes = {};
     }
 
@@ -74,19 +111,28 @@ export class Service {
         return JSON.parse(JSON.stringify(this.nodes));
     }
 
-    // currentMsgKey(key) {
-    //     this.msgKey = key;
-    // }
 
     edit(key, payload, syncAdd = false) {
         if (!this._stopOperation) {
             if (key in this.nodes || syncAdd) {
+                console.log(syncAdd)
+                if (syncAdd) {
+                    this.nodes[key] = {
+                        body: {
+                            value: {}
+                        }
+                    }
+                }
                 this.nodes[key] = {
-                    ...this.nodes[key],
+                    ...JSON.parse(JSON.stringify(this.nodes[key] || {})),
                     ...payload,
+                    body: {
+                        value: Object.assign(this.nodes[key].body.value, payload.body.value)
+                    }
                 };
             }
         }
+        this.resetPointer()
         this.unStop();
     }
 

@@ -26,7 +26,6 @@ export const defaultReducer = (instance, service, order, payload) => {
         return service.create(customOperationCurrent, defaultOperationTarget, body)
 
     } else if (order === ORDER.UPDATE) {
-
         //操作项限制
         if (service.roleCheck(customOperationCurrent) || customOperationCurrent === CURRENT.CONTAINER) {
             return service.edit(customOperationTarget, {
@@ -53,6 +52,10 @@ export const defaultReducer = (instance, service, order, payload) => {
     } else if (order === ORDER.CLEAR) {
 
         return service.clear()
+
+    }else if(order === ORDER.BACK_TO_HISTORY_COMMAND){
+
+        return service.backToPre()
 
     }
 }

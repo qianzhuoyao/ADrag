@@ -30,5 +30,13 @@ export const ORDER = Object.freeze({
     /**
      * 获取备份
      */
-    GET_HISTORY_COMMAND: "GET_HISTORY_COMMAND"
+    GET_HISTORY_COMMAND: "GET_HISTORY_COMMAND",
+    /**
+     *获取上一步数据
+     */
+    BACK_TO_HISTORY_COMMAND: "BACK_TO_HISTORY_COMMAND",
+    /**
+     * 重置历史指针
+     */
+    RESET_POINTER:"RESET_POINTER"
 });
