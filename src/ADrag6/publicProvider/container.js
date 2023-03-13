@@ -20,14 +20,18 @@ export class Container {
         this.initDom(id);
     }
 
+    /**
+     * 创建节点
+     * @param nodePayload
+     * @returns {*}
+     */
     createNode(nodePayload) {
         const {x, y, w, h} = nodePayload;
         //校验位置
         this.findParamsOfContainer()
-        console.log({x, y, w, h})
         const {heightOfContainer, widthOfContainer, xOfContainer, yOfContainer} = this.container
-        console.log({heightOfContainer, widthOfContainer, xOfContainer, yOfContainer})
         if ([x, y, w, h].some(i => i !== undefined)) {
+            //是否在容器内的有效节点判断
             if (x >= xOfContainer && y >= yOfContainer && (x + w) <= (xOfContainer + widthOfContainer) && (y + h) <= (yOfContainer + heightOfContainer)) {
                 const usefulLoad = {...nodePayload, x: x - xOfContainer, y: y - yOfContainer}
                 return this.callCommander(
@@ -185,12 +189,23 @@ export class Container {
     //初始化容器DOM
     initDom(id) {
         this.container.containerDom = document.getElementById(id);
-
+        this.container.containerDom.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+            return false
+        })
         //初始化长宽
         this.container.heightOfContainer = DEFAULT_HEIGHT;
         this.container.widthOfContainer = DEFAULT_WIDTH;
     }
 
+    /**
+     * 有效值取定
+     * @param anything
+     * @param dom
+     * @param key
+     * @param _default
+     * @returns {number|undefined}
+     */
     retrieveTheCorrectDomValue(anything, dom, key, _default = undefined) {
         if (dom instanceof HTMLElement)
             return parseFloat(String(anything) || window.getComputedStyle(dom, null)[key] || _default) || _default

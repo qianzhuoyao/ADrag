@@ -66,7 +66,6 @@ export class Service {
      * @param {} payload
      */
     create(from, to, payload) {
-        console.log('c')
         const key = this.autoGenKey();
         this.edit(key, {
             body: payload,

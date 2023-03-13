@@ -10,8 +10,8 @@
 </template>
 
 <script>
-import PipeEvent from "@/ADrag4/event/event";
-import {Controller} from "@/ADrag4/controller/controller";
+import PipeEvent from "../event/event";
+import {Controller} from "../controller";
 
 export default {
   name: "a-fragment",
@@ -42,10 +42,6 @@ export default {
         default: "",
       },
     },
-    defaultCanFocus: {
-      type: Boolean,
-      default: true,
-    },
     defaultComponentWidth: {
       type: Number,
       default: 100,
@@ -63,29 +59,17 @@ export default {
       default: () => {
       },
     },
+    screenContainerId: {
+      type: String,
+      default: () => "",
+    },
     modalComponent: {
       type: Object,
       default: () => {
       },
     },
-    providerContainerId: {
-      type: String,
-      default: () => '',
-    },
   },
   watch: {
-    defaultCanFocus: {
-      handler(n) {
-        this.focus = n;
-      },
-      immediate: true,
-    },
-    providerContainerId: {
-      handler(n) {
-        this.screenOffset = n;
-      },
-      immediate: true,
-    },
     moveOffsetX: {
       handler(n) {
         this.moveX = n;
@@ -101,6 +85,12 @@ export default {
     putOffsetX: {
       handler(n) {
         this.offsetX = n;
+      },
+      immediate: true,
+    },
+    screenContainerId: {
+      handler(n) {
+        this.containerId = n;
       },
       immediate: true,
     },
@@ -143,11 +133,10 @@ export default {
       offsetX: 0,
       offsetY: 0,
       moveX: 0,
-      screenOffset: '',
       moveY: 0,
       height: 0,
       zIndex: 999,
-      focus: true
+      containerId: '',
     };
   },
   mounted() {
@@ -164,14 +153,14 @@ export default {
     hideKey() {
       return `${this.renderKey}-hide`;
     },
-    computedScreenOffset() {
-      let x = 0;
-      let y = 0;
-      if (this.screenOffset && typeof this.screenOffset === 'string') {
-        x = document.getElementById(this.screenOffset).scrollLeft || 0
-        y = document.getElementById(this.screenOffset).scrollTop || 0
+    computeScreenOffset() {
+      let xOffset = 0
+      let yOffset = 0
+      if (this.containerId && typeof this.containerId === 'string') {
+        xOffset = document.getElementById(this.containerId).scrollLeft || 0
+        yOffset = document.getElementById(this.containerId).scrollTop || 0
       }
-      return {x, y}
+      return {xOffset, yOffset}
     },
     registryEvent() {
       new PipeEvent()
@@ -189,25 +178,24 @@ export default {
               this.$emit("fragmentMove", pipe);
             },
             overCallback: (pipe, e) => {
-              const {x: xOffset, y: yOffset} = this.computedScreenOffset()
+              const {xOffset, yOffset} = this.computeScreenOffset()
               pipe.dragElementHide();
               this.controller.updateForCreate({
                 renderKey: this.renderKey,
                 c: this.putComponent,
                 m: this.modalComponent,
                 tag: this.tag,
-                x: e.x - this.offsetX + xOffset,
-                y: e.y - this.offsetY + yOffset,
+                x: parseFloat(pipe.dragElement.style.left) - this.offsetX + xOffset,
+                y: parseFloat(pipe.dragElement.style.top) - this.offsetY + yOffset,
                 w: this.width,
                 h: this.height,
                 z: this.zIndex,
-                f: this.focus,
-                cf: this.focus,
+                f: true,
                 offsetX: this.offsetX,
                 offsetY: this.offsetY,
-                providerContainerId: this.screenOffset
+                providerContainerId: this.containerId
               });
-              this.$emit("fragmentOver", pipe);
+              this.$emit("fragmentOver", pipe, e);
             },
           });
     },

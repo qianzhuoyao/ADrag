@@ -75,6 +75,12 @@ export class Controller {
         }
     }
 
+    /**
+     * 指向
+     * @param from
+     * @param to
+     * @returns {Controller}
+     */
     assigned(from, to) {
         Controller.instance.from = from;
         Controller.instance.to = to;
