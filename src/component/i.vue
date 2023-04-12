@@ -1,40 +1,52 @@
 <template>
-  <div @click="cc">
-    <input ref="areatext"
-           v-model="v"
-           :style="{fontSize:Math.min(thisData.w,thisData.h)*0.5+'px',width:thisData.w+'px',height:thisData.h+'px',outline:'none',border:'none',background:'antiquewhite'}"/>
-  </div>
+    <div class="rule-manager">
+        <h2>规则管理</h2>
+        <div>
+            <label for="start-date">生效开始时间：</label>
+            <input type="date" id="start-date" v-model="startDate" />
+            <label for="end-date">生效结束时间：</label>
+            <input type="date" id="end-date" v-model="endDate" />
+        </div>
+
+        <div>
+            <rule-group v-model="ruleGroup" />
+        </div>
+
+        <button @click="addRuleGroup">新增规则组</button>
+    </div>
 </template>
 
 <script>
+import RuleGroup from "./d.vue";
+
 export default {
-  name: "view-i",
-  props: {
-    thisData: {
-      type: Object,
-      default: () => {
-        return {};
-      },
+    name: "RuleManager",
+    components: {
+        RuleGroup
     },
-  },
-  data: () => {
-    return {
-      s: 'success',
-      v:'A节点'
+    data() {
+        return {
+            startDate: "",
+            endDate: "",
+            ruleGroup: {}
+        };
+    },
+    methods: {
+        addRuleGroup() {
+            this.ruleGroup = {
+                operator: "",
+                conditions: [],
+                groups: []
+            };
+        }
     }
-  },
-  mounted() {
-    this.s = this.thisData.id
-    //this.thisData.firstMounted && console.log(this.thisData, "updatae");
-  },
-  methods: {
-    cc() {
-      console.log('cc')
-      this.$refs.areatext.focus()
-    }
-  }
 };
 </script>
 
 <style scoped>
+.rule-manager {
+    font-family: Arial, sans-serif;
+    max-width: 800px;
+    margin: 0 auto;
+}
 </style>

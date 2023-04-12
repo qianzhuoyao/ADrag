@@ -1,112 +1,118 @@
-<template>
-
-  <div
-
-      :id="pid"
-
-      class="provider-class"
-
-      :style="{ width: parentWSelf + 'px', height: parentHSelf + 'px' }"
-
-      @click.stop.prevent="areaClick"
-
-  >
+﻿<template>
 
     <div
 
-        v-for="(k, i) in renderData"
+            :id="pid"
 
-        :key="i"
+            class="provider-class"
 
-        @contextmenu.prevent="(e) => contextmenu(k, e)"
+            :style="{ width: parentWSelf + 'px', height: parentHSelf + 'px' }"
 
-        @mouseover.prevent="(e) => hover(k, e)"
-
-        @mouseleave.prevent="(e) => leave(k, e)"
+            @click.stop.prevent="areaClick"
 
     >
 
-      <VueDragResize
+        <div
 
-          v-if="k.v"
+                v-for="(k, i) in renderData"
 
-          :ref="`VDR${k.id}`"
+                :key="i"
 
-          :x="k.x"
+                @contextmenu.prevent="(e) => contextmenu(k, e)"
 
-          :y="k.y"
+                @mouseover.prevent="(e) => hover(k, e)"
 
-          :w="k.w"
+                @mouseleave.prevent="(e) => leave(k, e)"
 
-          :h="k.h"
+        >
 
-          :z="k.z"
+            <VueDragResize
 
-          :isActive="k.f"
+                    v-if="k.v"
 
-          :isDraggable="!k.notDrag"
+                    :ref="`VDR${k.id}`"
 
-          :parentH="parentHSelf"
+                    :x="k.x"
 
-          :parentW="parentWSelf"
+                    :y="k.y"
 
-          :minw="20"
+                    :w="k.w"
 
-          :minh="20"
+                    :h="k.h"
 
-          :parentLimitation="true"
+                    :z="k.z"
 
-          @dragging="(params) => dragging(k, params)"
+                    :isActive="k.f"
 
-          @dragstop="(params) => dragStop(k, params)"
+                    :isDraggable="!k.notDrag"
 
-          @resizing="(params) => resizing(k, params)"
+                    :parentH="parentHSelf"
 
-          @resizestop="(params) => resizeStop(k, params)"
+                    :parentW="parentWSelf"
 
-          @clicked="(params) => click(k, params)"
+                    :minw="20"
 
-      >
+                    :minh="20"
 
-        <div @mousedown="closeRestrict" :style="{background:k.nodeBackgroundColor}">
+                    :parentLimitation="true"
 
-          <component
+                    @dragging="(params) => dragging(k, params)"
 
-              :is="k.c"
+                    @dragstop="(params) => dragStop(k, params)"
 
-              :thisData="k"
+                    @resizing="(params) => resizing(k, params)"
 
-              :updateData="updateData"
+                    @resizestop="(params) => resizeStop(k, params)"
 
-              :change="updateComponent"
+                    @clicked="(params) => click(k, params)"
 
-              :connect="(e) => onConnect(k.id, e)"
+            >
 
-              :closeConnect="(e) => openCloseConnect(k.id, e)"
+                <div @mousedown="closeRestrict" :style="{background:k.nodeBackgroundColor}" style="width: 100%;height: 100%">
 
-              :closeOver="(e) => overCloseConnect(k.id, e)"
+                    <component
 
-              :clearConnect="() => clearBindConnect(k.id)"
+                            :ref="k.id+'ref'"
 
-              :subscribe="(a,b)=>toSubscribe(a,b,k.id)"
+                            :is="k.c"
 
-              :subscribeAreaClick="(a,b)=>toSubscribe(a,b,'_areaClick')"
+                            :thisData="k"
 
-              :subscribeCloseConnect="(a,b)=>toSubscribe(a,b,'_closeConnect')"
+                            :updateData="updateData"
 
-              :style="{ filter: `${k.shadow}` }"
+                            :change="updateComponent"
 
-          ></component>
+                            :connect="(e) => onConnect(k.id, e)"
 
-        </div>
+                            :closeConnect="(e) => openCloseConnect(k.id, e)"
 
-      </VueDragResize>
+                            :closeOver="(e) => overCloseConnect(k.id, e)"
 
-      <div
+                            :clearConnect="() => clearBindConnect(k.id)"
 
-          :id="`menu${k.id}`"
+                            :subscribe="(a,b)=>toSubscribe(a,b,k.id)"
 
-          style="
+                            :sender="(params,filter)=>toMsg(k,filter,params)"
+
+                            :receiver="({origin,callback})=>getMsg(origin,k,callback)"
+
+                            :subscribeAreaClick="(a,b)=>toSubscribe(a,b,'_areaClick')"
+
+                            :subscribeCloseConnect="(a,b)=>toSubscribe(a,b,'_closeConnect')"
+
+                            :style="{ filter: `${k.shadow}` }"
+
+                    ></component>
+
+                </div>
+
+            </VueDragResize>
+
+            <div
+
+                    :id="`menu${k.id}`"
+
+                    style="
 
           visibility: hidden;
 
@@ -120,55 +126,57 @@
 
         "
 
-          @mouseup="() => closeMenu(k)"
+                    @mouseup="() => closeMenu(k)"
 
-      >
+            >
 
-        <component
+                <component
 
-            :is="k.m"
+                        :is="k.m"
 
-            :thisData="k"
+                        :thisData="k"
 
-            :updateData="updateData"
+                        :updateData="updateData"
 
-            :change="updateComponent"
+                        :change="updateComponent"
 
-            :clearConnect="() => clearBindConnect(k.id)"
+                        :clearConnect="() => clearBindConnect(k.id)"
 
-            :connect="(e) => onConnect(k.id, e)"
+                        :connect="(e) => onConnect(k.id, e)"
 
-            :closeConnect="(e) => openCloseConnect(k.id, e)"
+                        :closeConnect="(e) => openCloseConnect(k.id, e)"
 
-            :closeOver="(e) => overCloseConnect(k.id, e)"
+                        :closeOver="(e) => overCloseConnect(k.id, e)"
 
-            :menuItemClick="menuItemClick"
+                        :menuItemClick="(e)=>menuItemClick({id:k.id,...e})"
 
-        ></component>
+                        :closable="menuClosable"
 
-      </div>
+                ></component>
 
-    </div>
+            </div>
 
-    <div id="aiderLinesContainer" class="svgC">
+        </div>
 
-      <svg width="100%" height="100%">
+        <div v-if="aiderLines.length" id="aiderLinesContainer" class="svgC">
 
-        <line
+            <svg width="100%" height="100%">
 
-            v-for="(i, k) in aiderLines"
+                <line
 
-            :key="k"
+                        v-for="(i, k) in aiderLines"
 
-            :x1="i.x1"
+                        :key="k"
 
-            :y1="i.y1"
+                        :x1="i.x1"
 
-            :x2="i.x2"
+                        :y1="i.y1"
 
-            :y2="i.y2"
+                        :x2="i.x2"
 
-            :style="{
+                        :y2="i.y2"
+
+                        :style="{
 
             stroke: i.lineColor,
 
@@ -176,57 +184,57 @@
 
             strokeDasharray: '5,5',
 
-           }"
+          }"
 
-        ></line>
+                ></line>
 
-      </svg>
+            </svg>
 
-    </div>
+        </div>
 
-    <div id="renderLine" class="svgC">
+        <div id="renderLine" class="svgC">
 
-      <svg width="100%" height="100%">
+            <svg width="100%" height="100%">
 
-        <a
+                <a
 
-            v-for="(i, k) in renderLines"
+                        v-for="(i, k) in renderLines"
 
-            :key="k"
+                        :key="k"
 
-            :id="i.id"
+                        :id="i.id"
 
-            @click.stop="(e) => lineClick(i, e)"
+                        @click.stop="(e) => lineClick(i, e)"
 
-        >
+                >
 
-          <path
+                    <path
 
-              :id="`${i.id}path`"
+                            :id="`${i.id}path`"
 
-              fill="transparent"
+                            fill="transparent"
 
-              :d="`M${i.x1 || 0} ${i.y1 || 0} Q ${i.x2 || 0} ${i.y2 || 0} ${
+                            :d="`M${i.x1 || 0} ${i.y1 || 0} Q ${i.x2 || 0} ${i.y2 || 0} ${
 
               i.x3 || 0
 
             } ${i.y3 || 0}`"
 
-              :style="{ stroke: i.lineColor, strokeWidth: i.width + 'px' }"
+                            :style="{ stroke: i.lineColor, strokeWidth: i.width + 'px' }"
 
-              stroke="black"
+                            stroke="black"
 
-          />
+                    />
 
-          <path
+                    <path
 
-              v-if="viewStatus.animation"
+                            v-if="viewStatus.animation"
 
-              :id="`${i.id}Line2Path`"
+                            :id="`${i.id}Line2Path`"
 
-              fill="transparent"
+                            fill="transparent"
 
-              :style="{
+                            :style="{
 
               stroke: i.floatPointColor,
 
@@ -234,23 +242,23 @@
 
             }"
 
-              :d="`M${i.x1 || 0} ${i.y1 || 0} Q ${i.x2 || 0} ${i.y2 || 0} ${
+                            :d="`M${i.x1 || 0} ${i.y1 || 0} Q ${i.x2 || 0} ${i.y2 || 0} ${
 
               i.x3 || 0
 
             } ${i.y3 || 0}`"
 
-          ></path>
+                    ></path>
 
-          <path
+                    <path
 
-              v-if="viewStatus.animation"
+                            v-if="viewStatus.animation"
 
-              :id="`${i.id}Line1Path`"
+                            :id="`${i.id}Line1Path`"
 
-              fill="transparent"
+                            fill="transparent"
 
-              :style="{
+                            :style="{
 
               stroke: i.lineColor,
 
@@ -258,1702 +266,1954 @@
 
             }"
 
-              :d="`M${i.x1 || 0} ${i.y1 || 0} Q ${i.x2 || 0} ${i.y2 || 0} ${
+                            :d="`M${i.x1 || 0} ${i.y1 || 0} Q ${i.x2 || 0} ${i.y2 || 0} ${
 
               i.x3 || 0
 
             } ${i.y3 || 0}`"
 
-          ></path>
+                    ></path>
 
-        </a>
+                </a>
 
-      </svg>
+            </svg>
+
+        </div>
 
     </div>
-
-  </div>
 
 </template>
 
 
+
 <script>
 
-import {Controller} from "../controller/controller";
+import {Controller} from "@/views/visualization/ADrag4/controller/controller";
 
 import VueDragResize from "vue-drag-resize";
 
-import {Render} from "../render/render";
+import {Render} from "@/views/visualization/ADrag4/render/render";
 
-import {Aider} from "../aider/aider";
+import {Aider} from "@/views/visualization/ADrag4/aider/aider";
 
-import {Lines} from "../lines/lines";
+import {Lines} from "@/views/visualization/ADrag4/lines/lines";
 
+import Responder from "../event/response";
+
+
+
+const _RESPONSE_NAMESPACE = 'TASK'
+
+const _SCENE = 'scene'
 
 const _CONSTVARS = {
 
-  _Y: "y",
+    _Y: "y",
 
-  _X: "x",
+    _X: "x",
 
-  _TS: "topSide",
+    _TS: "topSide",
 
-  _LS: "leftSide",
+    _LS: "leftSide",
 
-  _RS: "rightSide",
+    _RS: "rightSide",
 
-  _BS: "bottomSide",
+    _BS: "bottomSide",
 
 };
 
 const _EVENTS = {
 
-  //更新信号回调，优化方式
+    //更新信号回调，优化方式
 
-  _UP_MSG_CALLBACK: 'itemUpdateMessage',
+    _SUB: 'subscribeMsg',
 
-  _MIC: "menuItemClick",
+    _INIT: 'init',
 
-  _MEU: "menuUp",
+    _UP_MSG_CALLBACK: 'itemUpdateMessage',
 
-  //_MC: 'menuClick',
+    _MIC: "menuItemClick",
 
-  _CS: "connectStart",
+    _MEU: "menuUp",
 
-  _CI: "connectIng",
+    //_MC: 'menuClick',
 
-  _CE: "connectEnd",
+    _CS: "connectStart",
 
-  _CC: "closeAllConnect",
+    _CI: "connectIng",
 
-  //鼠标放起
+    _CE: "connectEnd",
 
-  _MU: "mouseUp",
+    _CC: "closeAllConnect",
 
-  //连线点击
+    //鼠标放起
 
-  _LC: "lineClick",
+    _MU: "mouseUp",
 
-  //组件点击
+    //连线点击
 
-  _CL: "componentClick",
+    _LC: "lineClick",
 
-  //组件拖动中
+    //组件点击
 
-  _DI: "dragging",
+    _CL: "componentClick",
 
-  //组件拖动结束
+    //组件拖动中
 
-  _DS: "dragStop",
+    _DI: "dragging",
 
-  //组件缩放中
+    //组件拖动结束
 
-  _RI: "resizing",
+    _DS: "dragStop",
 
-  //面板点击
+    //组件缩放中
 
-  _AC: "areaClick",
+    _RI: "resizing",
 
-  //组件缩放结束
+    //面板点击
 
-  _RS: "resizeStop",
+    _AC: "areaClick",
 
-  //组件鼠标悬浮
+    //组件缩放结束
 
-  _HO: "hover",
+    _RS: "resizeStop",
 
-  //鼠标离开组件上
+    //组件鼠标悬浮
 
-  _LE: "leave",
+    _HO: "hover",
+
+    //鼠标离开组件上
+
+    _LE: "leave",
 
 };
 
 export default {
 
-  name: "a-provider",
+    name: "a-provider",
 
-  props: {
+    props: {
 
-    pid: {
+        pid: {
 
-      type: String,
+            type: String,
 
-      default: "providerId",
-
-    },
-
-    tags: {
-
-      type: Array,
-
-      default: () => ["a_default_fragment"],
-
-    },
-
-    parentH: {
-
-      type: Number,
-
-      default: 2000,
-
-    },
-
-    parentW: {
-
-      type: Number,
-
-      default: 2000,
-
-    },
-
-  },
-
-  components: {VueDragResize},
-
-  data: () => {
-
-    return {
-
-      viewStatus: {
-
-        aider: false,
-
-        buoyWidth: 10,
-
-        animationSpeed: 30,
-
-        connectId: undefined,
-
-        inNode: false,
-
-        animation: false,
-
-        restrict: {
-
-          restrictDragStop: false,
-
-          restrictResizeStop: false,
+            default: "providerId",
 
         },
 
-      },
+        tags: {
 
-      parentWSelf: 0,
+            type: Array,
 
-      parentHSelf: 0,
+            default: () => ["a_default_fragment"],
 
-      renderData: [],
+        },
 
-      aiderLines: [],
+        parentH: {
 
-      renderLines: [],
+            type: Number,
 
-      eventStopList: [],
+            default: 2000,
 
-      modalY: 0,
+        },
 
-      modalX: 0,
+        parentW: {
 
-      render: null,
+            type: Number,
 
-      eventMap: {},
+            default: 2000,
 
-      controller: null,
-
-      menu: null,
-
-      aider: null,
-
-      lines: null,
-
-    };
-
-  },
-
-  watch: {
-
-    parentW: {
-
-      handler(n) {
-
-        this.parentWSelf = n;
-
-      },
-
-      immediate: true,
+        },
 
     },
 
-    parentH: {
+    components: {VueDragResize},
 
-      handler(n) {
+    data: () => {
 
-        this.parentHSelf = n;
+        return {
 
-      },
 
-      immediate: true,
 
-    },
+            viewStatus: {
 
-  },
+                closable: true,
 
-  mounted() {
+                aider: false,
 
-    //注册控制器
+                buoyWidth: 10,
 
-    this.controller = new Controller();
+                animationSpeed: 30,
 
-    this.render = new Render();
+                connectId: undefined,
 
-    this.aider = new Aider();
+                inNode: false,
 
-    this.lines = new Lines();
+                animation: false,
 
-    this.render.watch(this.update);
+                restrict: {
 
-    this.controller.setTags(this.tags);
+                    restrictDragStop: false,
 
-    //pid禁止更改
+                    restrictResizeStop: false,
 
-    if (!this.pid) {
-
-      throw new Error("PID 必须为truth类型的数据存在");
-
-    }
-
-    this.controller.bindId(this.pid);
-
-  },
-
-  methods: {
-
-    outputInstance() {
-
-      return this
-
-    },
-
-    changeLineColorByNodeAId(nodeId, color) {
-
-      this.lines.changeSomeParamsByNodeAId(nodeId, 'lineColor', color || 'black')
-
-    },
-
-    /**
-
-     * 依赖线查找关系
-
-     */
-
-    findRelationShip() {
-
-    },
-
-    changeFloatPointColor(color) {
-
-      this.lines.changePointColor(color);
-
-      this.renderLines = this.lines.getLines();
-
-    },
-
-    changeLineWidth(width) {
-
-      this.lines.changeLineWidth(width);
-
-      this.renderLines = this.lines.getLines();
-
-    },
-
-    changeLineColor(color) {
-
-      this.lines.changeLineColor(color);
-
-      this.renderLines = this.lines.getLines();
-
-    },
-
-    clearInstance() {
-
-      this.controller.clearInstance();
-
-      this.render.clearInstance();
-
-      this.aider.clearInstance();
-
-      this.lines.clearInstance();
-
-      this.aider = null;
-
-      this.render = null;
-
-      this.lines = null;
-
-      this.controller = null;
-
-    },
-
-    amplification(px) {
-
-      if (typeof px === "number") {
-
-        this.controller.amplification(px);
-
-        this.syncPosition();
-
-        this.getAllData().map(item => {
-
-          this.eventRun(_EVENTS._RS, {item}, item.id);
-
-        })
-
-      } else {
-
-        throw new Error("放大参数需要是number");
-
-      }
-
-    },
-
-    narrow(px) {
-
-      if (typeof px === "number") {
-
-        this.controller.narrow(px);
-
-        this.syncPosition();
-
-        this.getAllData().map(item => {
-
-          this.eventRun(_EVENTS._RS, {item}, item.id);
-
-        })
-
-      } else {
-
-        throw new Error("缩小参数需要是number");
-
-      }
-
-    },
-
-    sharkHiddenNodes() {
-
-      return this.renderData.filter((i) => i.v);
-
-    },
-
-    getAllData() {
-
-      return this.renderData;
-
-    },
-
-    getAllLines() {
-
-      return this.renderLines;
-
-    },
-
-    lineClick(item, event) {
-
-      if (item.willDelete) {
-
-        this.lines.deleteById(item.id);
-
-        this.updateLine();
-
-      }
-
-      this.targetFocus({id: NaN, tag: this.tags[0]});
-
-      this.eventRun(_EVENTS._LC, {item, event}, item.id);
-
-    },
-
-    updateLine() {
-
-      this.calibration();
-
-      this.renderLines = this.lines.getLines();
-
-    },
-
-    closeAnimation() {
-
-      this.viewStatus.animation = false;
-
-      this.lines.deleteAnimation();
-
-      this.renderLines = this.lines.getLines()
-
-    },
-
-    openAnimation(speed = 30, buoyWidth = 10) {
-
-      this.viewStatus.animationSpeed = speed
-
-      this.viewStatus.buoyWidth = buoyWidth
-
-      this.viewStatus.animation = true
-
-      if (this.viewStatus.animation) {
-
-        this.renderLines = this.lines.computedLinePathTotal(speed, buoyWidth)
-
-      }
-
-    },
-
-    createLine(aid, zid, params) {
-
-      this.lines.createLine(aid, zid, params);
-
-      this.updateLine();
-
-    },
-
-    update(items) {
-
-      this.renderData = this.controller.compare(this.renderData, items);
-
-    },
-
-    calibration() {
-
-      this.renderData.map((i) => this.updateLinesForNode(i));
-
-    },
-
-    drawEach(item) {
-
-      const {c, m, tag, x, y, w, h, z, f = false} = item;
-
-      this.controller.updateForDraw({
-
-        c,
-
-        m,
-
-        tag,
-
-        x,
-
-        y,
-
-        w,
-
-        h,
-
-        z,
-
-        f,
-
-      });
-
-    },
-
-    //绘制
-
-    draw(data) {
-
-      return new Promise((resolve) => {
-
-        setTimeout(() => {
-
-          this.controller.onceDraw({data});
-
-          this.targetFocus({id: NaN, tag: this.tags[0]});
-
-          this.controller.syncOperation();
-
-          this.controller.updateView()
-
-        }, 10)
-
-        resolve()
-
-      })
-
-    },
-
-    closeMenu(item) {
-
-      if (this.menu) {
-
-        this.menu.style.visibility = "hidden";
-
-        this.eventRun(_EVENTS._MEU, {item}, item.id);
-
-      }
-
-    },
-
-    onConnect(id, e) {
-
-      if (e) {
-
-        e.stopPropagation();
-
-        this.controller.onConnect(id);
-
-        this.viewStatus.connectId = id;
-
-        this.eventRun(_EVENTS._CS, {id, e}, id);
-
-      } else {
-
-        throw new Error("你需要在connect函数内传入事件参数");
-
-      }
-
-    },
-
-    clearBindConnect(id) {
-
-      this.lines.deleteByNodeId(id);
-
-      this.updateLine();
-
-    },
-
-    openCloseConnect(id, e) {
-
-      const willSet = this.lines.getWillDeleteLineParams();
-
-      this.closeConnectOperation(id, e, {
-
-        ...willSet,
-
-      });
-
-    },
-
-    toCall(item) {
-
-      this.eventRun(_EVENTS._UP_MSG_CALLBACK, {item}, item.id);
-
-    },
-
-    menuItemClick(item) {
-
-      this.eventRun(_EVENTS._MIC, {item}, item.id);
-
-    },
-
-    overCloseConnect(id, e) {
-
-      const normalParams = this.lines.getNormalLineParams();
-
-      this.closeConnectOperation(id, e, {
-
-        ...normalParams,
-
-      });
-
-    },
-
-    closeConnectOperation(id, e, lineParams) {
-
-      if (e) {
-
-        e.stopPropagation();
-
-        this.controller.closeConnect(id);
-
-        const lines = this.lines.findLineByNodeId(id);
-
-        lines.map((i) => {
-
-          this.lines.buildLineParamsById(i.id, {
-
-            ...lineParams,
-
-          });
-
-        });
-
-        this.updateLine();
-
-      } else {
-
-        throw new Error("你需要在closeConnect函数内传入事件参数");
-
-      }
-
-    },
-
-    hasConnect() {
-
-      return this.controller.hasConnect();
-
-    },
-
-    clearConnect() {
-
-      this.controller.clearConnect();
-
-      this.eventRun(_EVENTS._CC, undefined, '_closeConnect');
-
-    },
-
-    //与updateComponent 作用相同，免检
-
-    updateComponentCheck(key, fn) {
-
-      if (typeof fn === 'function') {
-
-        this.controller.updateForChange(
-            (i) => {
-
-              if (!!key && key in i && key !== "renderData") {
-
-                return {
-
-                  ...i,
-
-                  [key]: fn(i)
-
-                };
-
-              } else {
-
-                return i
-
-              }
+                },
 
             },
 
-            {tag: this.tags[0]}
-        );
+            parentWSelf: 0,
 
-        this.syncPosition();
+            parentHSelf: 0,
 
-      }
+            renderData: [],
+
+            aiderLines: [],
+
+            renderLines: [],
+
+            eventStopList: [],
+
+            modalY: 0,
+
+            modalX: 0,
+
+            render: null,
+
+            renderKeyHooks: [],
+
+            eventMap: {},
+
+            controller: null,
+
+            menu: null,
+
+            aider: null,
+
+            resp: null,
+
+            lines: null,
+
+        };
 
     },
 
-    // 向外暴露的更新方法，fn返回新的非数据即可  更新视图
+    watch: {
 
-    updateComponent(key, fn, tag) {
+        parentW: {
 
-      setTimeout(() => {
+            handler(n) {
 
-        if (typeof fn === "function") {
+                this.parentWSelf = n;
 
-          this.controller.updateForChange(
-              (i) => {
+            },
 
-                if (!!key && key in i && key !== "renderData") {
+            immediate: true,
 
-                  console.log(key, fn(i), 'ds')
+        },
 
-                  return fn(i);
+        parentH: {
 
-                } else {
+            handler(n) {
 
-                  return i
+                this.parentHSelf = n;
 
-                }
+            },
 
-              },
+            immediate: true,
 
-              {tag}
-          );
+        },
 
-          this.syncPosition();
+    },
+
+    mounted() {
+
+        //注册事件
+
+        this.resp = new Responder()
+
+        //注册控制器
+
+        this.controller = new Controller();
+
+        this.render = new Render();
+
+        this.aider = new Aider();
+
+        this.lines = new Lines();
+
+        this.render.watch(this.update);
+
+        this.controller.setTags(this.tags);
+
+        //pid禁止更改
+
+        if (!this.pid) {
+
+            throw new Error("PID 必须为truth类型的数据存在");
 
         }
 
-      }, 0)
+        this.controller.bindId(this.pid);
 
     },
 
-    // 向外暴露的更新方法，fn返回新数据即可  更新数据
+    methods: {
 
-    updateData(fn, tag) {
+        sceneSubscribe(e, c) {
 
-      setTimeout(() => {
+            this.toSubscribe(e, c, _SCENE)
 
-        this.controller.updateForChange(
-            (i) => {
+        },
 
-              if (fn(i)) {
+        removeAllNode() {
 
-                return {...i, renderData: fn(i) || {}};
+            this.controller.remove()
 
-              } else {
+            this.controller.updateView()
 
-                return i
+        },
 
-              }
+        outputInstance() {
 
-            },
+            return this
 
-            {tag}
-        );
+        },
 
-      }, 0)
+        changeLineColorByNodeAId(nodeId, color) {
 
-    },
+            this.lines.changeSomeParamsByNodeAId(nodeId, 'lineColor', color || 'black')
 
-    //向外公布on方法与回调  操作
+        },
 
-    on(event, callback, id) {
+        /**
 
-      const EVENTS = Object.values(_EVENTS);
+         * 依赖线查找关系
 
-      if (EVENTS.includes(event)) {
+         */
 
-        if (typeof callback === "function") {
+        findRelationShip() {
 
-          //覆盖事件
+        },
 
-          if (this.eventMap[event]) {
+        changeFloatPointColor(color) {
 
-            this.eventMap[event][id] = callback
+            this.lines.changePointColor(color);
 
-          } else {
+            this.renderLines = this.lines.getLines();
 
-            this.eventMap[event] = {}
+        },
 
-            this.eventMap[event][id] = callback;
+        changeLineWidth(width) {
 
-          }
+            this.lines.changeLineWidth(width);
 
-          console.log(this.eventMap, 'this.eventMap')
+            this.renderLines = this.lines.getLines();
 
-        }
+        },
 
-      }
+        changeLineColor(color) {
 
-    },
+            this.lines.changeLineColor(color);
 
-    toSubscribe(e, c, id) {
+            this.renderLines = this.lines.getLines();
 
-      this.on(e, c, id);
+        },
 
-    },
+        clearInstance() {
 
-    areaClick(event) {
+            this.controller.clearInstance();
 
-      if (!this.viewStatus.inNode) {
+            this.render.clearInstance();
 
-        this.clearConnect();
+            this.aider.clearInstance();
 
-        this.targetFocus({id: NaN, tag: this.tags[0]});
+            this.lines.clearInstance();
 
-        this.eventRun(_EVENTS._AC, {event}, '_areaClick');
+            this.aider = null;
 
-      }
+            this.render = null;
 
+            this.lines = null;
 
-    },
+            this.controller = null;
 
-    syncLinePosition(fn, params, item) {
+        },
 
-      if (typeof fn === "function") {
+        amplification(px) {
 
-        const {left: x, top: y, height: h, width: w} = params;
+            if (typeof px === "number") {
 
-        this.updateLinesForNode({
+                this.controller.amplification(px);
 
-          x,
+                this.syncPosition();
 
-          w,
+                this.getAllData().map(item => {
 
-          y,
+                    this.eventRun(_EVENTS._RS, {item}, item.id);
 
-          h,
-
-          id: item.id,
-
-        });
-
-        fn();
-
-        this.renderLines = this.lines.getLines();
-
-      }
-
-    },
-
-    resizing(item, params) {
-
-      if (!this.viewStatus.restrict.restrictResizeStop) {
-
-        const {left: x, top: y, height: h, width: w} = params;
-
-        this.syncLinePosition(
-            () => {
-
-              this.updateItemForStaticData({w, h, f: true}, item, false);
-
-              this.aiderComputed(item);
-
-              this.recommendAider({x, y, w, h});
-
-              this.eventRun(_EVENTS._RI, {item}, item.id);
-
-            },
-
-            params,
-
-            item
-        );
-
-      }
-
-    },
-
-    dragging(item, params) {
-
-      if (!this.viewStatus.restrict.restrictDragStop) {
-
-        const {left: x, top: y, height: h, width: w} = params;
-
-        this.syncLinePosition(
-            () => {
-
-              this.updateItemForStaticData({x, y, f: true}, item, false);
-
-              this.aiderComputed(item);
-
-              this.recommendAider({x, y, w, h});
-
-              this.eventStop([_EVENTS._HO, _EVENTS._LE]);
-
-              this.eventRun(_EVENTS._DI, {item}, item.id);
-
-            },
-
-            params,
-
-            item
-        );
-
-      }
-
-    },
-
-    precision(item, params) {
-
-      return (
-
-          Math.abs(item.x - params.left) < 5 && Math.abs(item.y - params.top) < 5
-
-      );
-
-    },
-
-    changeRestrictDragStop(state) {
-
-      this.viewStatus.restrict.restrictDragStop = !!state;
-
-    },
-
-    changeRestrictResizeStop(state) {
-
-      this.viewStatus.restrict.restrictResizeStop = !!state;
-
-    },
-
-    dragStop(item, params) {
-
-      console.log('dragStop')
-
-      if (!this.viewStatus.restrict.restrictDragStop) {
-
-        this.updateItemForStaticData(
-            {w: params.width, h: params.height, x: params.left, y: params.top, f: true},
-
-            item,
-
-            true
-        );
-
-        this.adsorption({
-
-          id: item.id,
-
-          x: params.left,
-
-          y: params.top,
-
-          w: params.width,
-
-          h: params.height,
-
-        });
-
-        this.clearAider();
-
-        this.eventRun(_EVENTS._DS, {item}, item.id);
-
-        this.reStartEvent([_EVENTS._HO, _EVENTS._LE]);
-
-      }
-
-      this.changeRestrictDragStop(false);
-
-      if (this.viewStatus.animation) {
-
-        this.closeAnimation()
-
-        this.openAnimation(this.viewStatus.animationSpeed, this.viewStatus.buoyWidth)
-
-      }
-
-    },
-
-    closeRestrict() {
-
-      this.changeRestrictDragStop(false);
-
-      this.changeRestrictResizeStop(false);
-
-    },
-
-    leave(item, event) {
-
-      this.viewStatus.inNode = false;
-
-      this.eventRun(_EVENTS._LE, {item, event}, item.id);
-
-    },
-
-    hover(item, event) {
-
-      this.viewStatus.inNode = true;
-
-      this.eventRun(_EVENTS._HO, {item, event}, item.id);
-
-    },
-
-    resizeStop(item, params) {
-
-      if (!this.viewStatus.restrict.restrictResizeStop) {
-
-        this.updateItemForStaticData(
-            {w: params.width, h: params.height, x: params.left, y: params.top, f: true},
-
-            item,
-
-            true
-        );
-
-        this.clearAider();
-
-        this.eventRun(_EVENTS._RS, {item}, item.id);
-
-      }
-
-      this.changeRestrictResizeStop(false);
-
-      if (this.viewStatus.animation) {
-
-        this.closeAnimation()
-
-        this.openAnimation(this.viewStatus.animationSpeed, this.viewStatus.buoyWidth)
-
-      }
-
-    },
-
-    updateItemForStaticData(newItem, item, sync) {
-
-      this.controller.updateForChange(
-          (i) => {
-
-            return i.id === item.id ? {...i, ...newItem} : i;
-
-          },
-
-          {tag: item.tag},
-
-          !!sync
-      );
-
-    },
-
-    computedParentScroll(id) {
-
-      let scrollX = document.getElementById(id).scrollLeft || 0
-
-      let scrollY = document.getElementById(id).scrollTop || 0
-
-      return {scrollX, scrollY}
-
-    },
-
-
-    contextmenu(item, e) {
-
-      this.closeMenu(item);
-
-      console.log(e, document.getElementById(item.providerContainerId || this.pid), 'e')
-
-      this.menu = document.getElementById(`menu${item.id}`);
-
-      const {width, height} = window.getComputedStyle(this.menu, null)
-
-
-      if (e.pageX + parseFloat(width) >= window.innerWidth) {
-
-        this.menu.style.left = window.innerWidth - parseFloat(width) + "px";
-
-      } else {
-
-        this.menu.style.left = e.pageX + "px";
-
-      }
-
-      if (e.pageY + parseFloat(height) >= window.innerHeight) {
-
-        this.menu.style.top = window.innerHeight - parseFloat(height) + "px";
-
-      } else {
-
-        this.menu.style.top = e.pageY + "px";
-
-      }
-
-      this.menu.style.visibility = "visible";
-
-    },
-
-    eventRun(event, params, id) {
-
-      if (
-
-          this.eventMap[event] && typeof this.eventMap[event][id] === "function" &&
-
-          !this.isEventStop(event)
-
-      ) {
-
-        this.eventMap[event][id](params);
-
-      }
-
-    },
-
-    isEventStop(event) {
-
-      return this.eventStopList.includes(event);
-
-    },
-
-    eventStop(events) {
-
-      this.eventStopList = this.eventStopList.concat(events);
-
-    },
-
-    reStartEvent(events) {
-
-      if (Array.isArray(events) && events.length) {
-
-        this.eventStopList = this.eventStopList.filter(
-            (i) => !events.includes(i)
-        );
-
-      } else {
-
-        this.eventStopList = [];
-
-      }
-
-    },
-
-    click(item) {
-
-      if (this.viewStatus.connectId) {
-
-        this.createLine(this.viewStatus.connectId, item.id, {
-
-          width: 4,
-
-          isDashed: true,
-
-        });
-
-        this.viewStatus.connectId = undefined;
-
-        this.clearConnect();
-
-      }
-
-      this.targetFocus(item);
-
-      this.eventRun(_EVENTS._CL, {item}, item.id);
-
-      // this.closeRestrict()
-
-    },
-
-    targetFocus(item) {
-
-      this.controller.updateForChange(
-          (i) => {
-
-            return {...i, f: i.id === item.id};
-
-          },
-
-          {tag: item.tag}
-      );
-
-      this.closeMenu(item);
-
-    },
-
-    undo() {
-
-      //undo期间不可以使用aider辅助线，因为会导致死循环！
-
-      //限制视图同步数据导致异常备份
-
-      this.changeRestrictResizeStop(true);
-
-      this.changeRestrictDragStop(true);
-
-      if (!this.viewStatus.aider) {
-
-        this.controller.undo().then(() => {
-
-          this.syncPosition();
-
-          this.getAllData().map(item => {
-
-            this.eventRun(_EVENTS._RS, {item}, item.id);
-
-          })
-
-        });
-
-      }
-
-      return !this.viewStatus.aider;
-
-    },
-
-    syncPosition() {
-
-      this.renderData.map((i) => {
-
-        const right = this.parentWSelf - i.x - i.w;
-
-        const bottom = this.parentHSelf - i.y - i.h;
-
-        if (this.$refs[`VDR${i.id}`][0]) {
-
-          this.$refs[`VDR${i.id}`][0].left = i.x;
-
-          this.$refs[`VDR${i.id}`][0].top = i.y;
-
-          this.$refs[`VDR${i.id}`][0].right = right;
-
-          this.$refs[`VDR${i.id}`][0].bottom = bottom;
-
-        }
-
-        this.updateLinesForNode(i);
-
-      });
-
-      this.updateLine();
-
-      // this.closeRestrict()q
-
-    },
-
-    updateLinesForNode(args) {
-
-      const {x, w, y, h, id} = args;
-
-      const moveCenterX = x + w / 2;
-
-      const moveCenterY = y + h / 2;
-
-      const role = this.lines.checkRole(id);
-
-      const newCoordinate =
-
-          role === "A"
-
-              ? {x1: moveCenterX, y1: moveCenterY}
-
-              : {x3: moveCenterX, y3: moveCenterY};
-
-      this.lines.syncMove(id, newCoordinate);
-
-    },
-
-    clearAider() {
-
-      this.aiderLines = [];
-
-    },
-
-    clearRenderData() {
-
-      this.controller.clear()
-
-    },
-
-    clearHistory() {
-
-      this.controller.clearShots()
-
-    },
-
-    openAider() {
-
-      this.viewStatus.aider = true;
-
-    },
-
-    closeAider() {
-
-      this.viewStatus.aider = false;
-
-      this.clearAider();
-
-    },
-
-
-    //推荐辅助线
-
-    recommendAider(item, spaceNumber = 5, tipColor = "red") {
-
-      const {x, y, h, w} = item;
-
-      const basePosition = [
-
-        {value: x, label: _CONSTVARS._LS},
-
-        {value: x + w, label: _CONSTVARS._RS},
-
-        {value: y, label: _CONSTVARS._TS},
-
-        {value: y + h, label: _CONSTVARS._BS},
-
-      ];
-
-      if (this.viewStatus.aider) {
-
-        this.aiderLines = this.aiderLines.map((i) => {
-
-          const cur = JSON.parse(JSON.stringify(i));
-
-          basePosition.map((k, kIndex) => {
-
-            if (kIndex < 2) {
-
-              //base X
-
-              if (
-
-                  i.baseArrow === _CONSTVARS._X &&
-
-                  Math.floor(Math.abs(k.value - i.base)) <= spaceNumber
-
-              ) {
-
-                cur.lineColor = tipColor;
-
-                cur.response = true;
-
-                cur.space = Math.floor(k.value - i.base);
-
-                cur.inRange = k.value - i.base <= 0;
-
-                cur.position = k.label;
-
-              }
+                })
 
             } else {
 
-              //base Y
-
-              if (
-
-                  i.baseArrow === _CONSTVARS._Y &&
-
-                  Math.floor(Math.abs(k.value - i.base)) <= spaceNumber
-
-              ) {
-
-                cur.lineColor = tipColor;
-
-                cur.response = true;
-
-                cur.space = Math.floor(k.value - i.base);
-
-                cur.inRange = k.value - i.base <= 0;
-
-                cur.position = k.label;
-
-              }
+                throw new Error("放大参数需要是number");
 
             }
 
-          });
+        },
 
-          return cur;
+        narrow(px) {
 
-        });
+            if (typeof px === "number") {
 
-      }
+                this.controller.narrow(px);
 
-    },
+                this.syncPosition();
 
-    //自动吸附
+                this.getAllData().map(item => {
 
-    adsorption(params) {
+                    this.eventRun(_EVENTS._RS, {item}, item.id);
 
-      const rec = this.aiderLines.filter((i) => i.response);
+                })
 
-      const newBaseXRec = [];
+            } else {
 
-      const newBaseYRec = [];
-
-      rec.map((i) => {
-
-        if (i.baseArrow === _CONSTVARS._X) {
-
-          newBaseXRec.push(i);
-
-        } else if (i.baseArrow === _CONSTVARS._Y) {
-
-          newBaseYRec.push(i);
-
-        }
-
-      });
-
-      const XYRecs = [
-
-        {label: _CONSTVARS._X, value: newBaseXRec},
-
-        {label: _CONSTVARS._Y, value: newBaseYRec},
-
-      ];
-
-      XYRecs.map((i) => {
-
-        const {value, label} = i;
-
-        const length = value.length;
-
-        if (length) {
-
-          let currentMin = value[0].space;
-
-          let position = value[0];
-
-          for (let j = 0; j < length; j++) {
-
-            if (Math.abs(value[j].space) < Math.abs(currentMin)) {
-
-              currentMin = value[j].space;
-
-              position = value[j];
+                throw new Error("缩小参数需要是number");
 
             }
 
-          }
+        },
 
-          const {inRange, space} = position;
+        sharkHiddenNodes() {
 
-          if (label === _CONSTVARS._X) {
+            return this.renderData.filter((i) => i.v);
 
-            this.adsorptionX({id: params.id, inRange, space, x: params.x});
+        },
 
-          } else if (label === _CONSTVARS._Y) {
+        getAllData() {
 
-            this.adsorptionY({id: params.id, inRange, space, y: params.y});
+            return this.renderData;
 
-          }
+        },
 
-        }
+        getAllLines() {
 
-      });
+            return this.renderLines;
 
-    },
+        },
 
-    adsorptionBaseComputed(inRange, space, position) {
+        lineClick(item, event) {
 
-      return !inRange ? position - Math.abs(space) : position + Math.abs(space);
+            if (item.willDelete) {
 
-    },
+                this.lines.deleteById(item.id);
 
-    adsorptionChange(args, position) {
+                this.updateLine();
 
-      if ([_CONSTVARS._Y, _CONSTVARS._X].includes(position)) {
+            }
 
-        const {id, inRange, space} = args;
+            this.targetFocus({id: NaN, tag: this.tags[0]});
 
-        const adsorption = this.adsorptionBaseComputed(
-            inRange,
+            this.eventRun(_EVENTS._LC, {item, event}, item.id);
 
-            space,
+        },
 
-            args[position]
-        );
+        updateLine() {
 
-        this.controller.updateForChange(
-            (i) => {
+            this.calibration();
 
-              if (id === i.id) {
+            this.renderLines = this.lines.getLines();
 
-                return {...i, [position]: adsorption};
+        },
 
-              } else {
+        closeAnimation() {
 
-                return i;
+            this.viewStatus.animation = false;
 
-              }
+            this.lines.deleteAnimation();
 
-            },
+            this.renderLines = this.lines.getLines()
 
-            {tag: this.tags[0]}
-        );
+        },
 
-      }
+        openAnimation(speed = 30, buoyWidth = 10) {
 
-    },
+            this.viewStatus.animationSpeed = speed
 
-    adsorptionX(args) {
+            this.viewStatus.buoyWidth = buoyWidth
 
-      this.adsorptionChange(args, _CONSTVARS._X);
+            this.viewStatus.animation = true
 
-    },
+            if (this.viewStatus.animation) {
 
-    adsorptionY(args) {
+                this.renderLines = this.lines.computedLinePathTotal(speed, buoyWidth)
 
-      this.adsorptionChange(args, _CONSTVARS._Y);
+            }
 
-    },
+        },
 
-    //计算辅助线
+        createLine(aid, zid, params) {
 
-    aiderComputed(item) {
+            this.lines.createLine(aid, zid, params);
 
-      const {id} = item;
+            this.updateLine();
 
-      if (this.viewStatus.aider) {
+        },
 
-        this.clearAider();
+        removeHooks(fn) {
 
-        this.aider.computeAiderLines();
+            if (typeof fn === 'function') {
 
-        const lines = this.aider.getAiderLines();
+                this.renderKeyHooks = this.renderKeyHooks.filter(fn)
 
-        const container = document.getElementById(this.pid);
+            } else {
 
-        const {height, width} = window.getComputedStyle(container, null);
+                this.renderKeyHooks = []
 
-        this.renderData.map((i) => {
+            }
 
-          if (id !== i.id) {
+        },
 
-            const {xR, xL, yT, yB} = lines[String(i.id)];
+        firstBuildNode() {
 
-            const position = [xR, xL, yT, yB];
+            this.renderData.map(i => {
 
-            position.map((k, kIndex) => {
+                const list = JSON.parse(JSON.stringify(this.renderKeyHooks))
 
-              if (kIndex < 2) {
+                if (!list.includes(i.renderKey)) {
 
-                this.aiderLines.push({
+                    this.eventRun(_EVENTS._INIT, {item: i}, i.id)
 
-                  base: k,
+                    this.resp.createNameSpace(_RESPONSE_NAMESPACE + i.id)
 
-                  baseArrow: _CONSTVARS._X,
+                    this.renderKeyHooks.push(i.renderKey)
 
-                  id: i.id,
+                }
 
-                  x1: k,
+            })
 
-                  y1: 0,
+        },
 
-                  x2: k,
+        //todo:应该确保每次firstBuildNode都在执行结尾
 
-                  y2: parseFloat(height),
+        update(items) {
 
-                  lineColor: "",
+            this.renderData = this.controller.compare(this.renderData, items);
 
-                  response: false,
+            setTimeout(() => {
 
-                  space: undefined,
+                this.firstBuildNode()
 
-                  //inRange标识操作项的接触边是否在推荐线内，即 接触边的x小于推荐边
+            }, 0)
 
-                  inRange: undefined,
+        },
 
-                  position: undefined,
+        calibration() {
 
-                });
+            this.renderData.map((i) => this.updateLinesForNode(i));
 
-              } else {
+        },
 
-                this.aiderLines.push({
+        drawEach(item) {
 
-                  base: k,
+            const {c, m, tag, x, y, w, h, z, f = false} = item;
 
-                  baseArrow: _CONSTVARS._Y,
+            this.controller.updateForDraw({
 
-                  id: i.id,
+                c,
 
-                  x1: 0,
+                m,
 
-                  y1: k,
+                tag,
 
-                  x2: parseFloat(width),
+                x,
 
-                  y2: k,
+                y,
 
-                  lineColor: "",
+                w,
 
-                  response: false,
 
-                  space: undefined,
+                h,
 
-                  direction: undefined,
+                z,
 
-                  //inRange标识操作项的接触边是否在推荐线内，即 接触边的y小于推荐边
-
-                  inRange: undefined,
-
-                  position: undefined,
-
-                });
-
-              }
+                f,
 
             });
 
-          }
+        },
 
-        });
+        //绘制
 
-      }
+        draw(data) {
+
+            return new Promise((resolve) => {
+
+                setTimeout(() => {
+
+                    this.controller.onceDraw({data});
+
+                    this.targetFocus({id: NaN, tag: this.tags[0]});
+
+                    this.controller.syncOperation();
+
+                    this.controller.updateView()
+
+                }, 0)
+
+                resolve()
+
+            })
+
+        },
+
+        closeMenu(item) {
+
+            if (this.menu) {
+
+                if (this.viewStatus.closable) {
+
+                    this.menu.style.visibility = "hidden";
+
+                }
+
+                this.eventRun(_EVENTS._MEU, {item}, item.id);
+
+            }
+
+        },
+
+        onConnect(id, e) {
+
+            if (e) {
+
+                e.stopPropagation();
+
+                this.controller.onConnect(id);
+
+                this.viewStatus.connectId = id;
+
+                this.eventRun(_EVENTS._CS, {id, e}, id);
+
+            } else {
+
+                throw new Error("你需要在connect函数内传入事件参数");
+
+            }
+
+        },
+
+        clearBindConnect(id) {
+
+            this.lines.deleteByNodeId(id);
+
+            this.updateLine();
+
+        },
+
+        openCloseConnect(id, e) {
+
+            const willSet = this.lines.getWillDeleteLineParams();
+
+            this.closeConnectOperation(id, e, {
+
+                ...willSet,
+
+            });
+
+        },
+
+        getRef(id, fn) {
+
+            if (id && typeof fn === 'function') {
+
+                fn.call(this, this.$refs[id + 'ref'])
+
+            }
+
+            return this.$refs[id]
+
+        },
+
+        toCall(item) {
+
+            this.eventRun(_EVENTS._UP_MSG_CALLBACK, {item}, item.id);
+
+        },
+
+        menuClosable(bool) {
+
+            this.viewStatus.closable = !!bool
+
+        },
+
+        menuItemClick(item) {
+
+            console.log(item, ' menuItemClick(item)')
+
+            this.eventRun(_EVENTS._MIC, {item}, item.id);
+
+            this.eventRun(_EVENTS._MIC, {item}, _SCENE);
+
+        },
+
+        overCloseConnect(id, e) {
+
+            const normalParams = this.lines.getNormalLineParams();
+
+            this.closeConnectOperation(id, e, {
+
+                ...normalParams,
+
+            });
+
+        },
+
+        closeConnectOperation(id, e, lineParams) {
+
+            if (e) {
+
+                e.stopPropagation();
+
+                this.controller.closeConnect(id);
+
+                const lines = this.lines.findLineByNodeId(id);
+
+                lines.map((i) => {
+
+                    this.lines.buildLineParamsById(i.id, {
+
+                        ...lineParams,
+
+                    });
+
+                });
+
+                this.updateLine();
+
+            } else {
+
+                throw new Error("你需要在closeConnect函数内传入事件参数");
+
+            }
+
+        },
+
+        hasConnect() {
+
+            return this.controller.hasConnect();
+
+        },
+
+        clearConnect() {
+
+            this.controller.clearConnect();
+
+            this.eventRun(_EVENTS._CC, undefined, '_closeConnect');
+
+        },
+
+        //与updateComponent 作用相同，免检
+
+        updateComponentCheck(key, fn) {
+
+            if (typeof fn === 'function') {
+
+                this.controller.updateForChange(
+
+                    (i) => {
+
+                        if (!!key && key in i && key !== "renderData") {
+
+                            const value = fn(i)
+
+                            if (value.v === false) {
+
+                                this.removeHooks(p => i.renderKey !== p)
+
+                            }
+
+                            return {
+
+                                ...i,
+
+                                [key]: value
+
+                            };
+
+                        } else {
+
+                            return i
+
+                        }
+
+                    },
+
+                    {tag: this.tags[0]}
+
+                );
+
+                this.syncPosition();
+
+            }
+
+        },
+
+        // 向外暴露的更新方法，fn返回新的非数据即可  更新视图
+
+        updateComponent(key, fn, tag) {
+
+            if (typeof fn === "function") {
+
+                this.controller.updateForChange(
+
+                    (i) => {
+
+                        if (!!key && key in i && key !== "renderData") {
+
+                            const value = fn(i)
+
+                            if (value.v === false) {
+
+                                this.removeHooks(p => i.renderKey !== p)
+
+                            }
+
+                            return {
+
+                                ...i,
+
+                                [key]: value
+
+                            };
+
+                        } else {
+
+                            return i
+
+                        }
+
+                    },
+
+                    {tag}
+
+                );
+
+                this.syncPosition();
+
+            }
+
+        },
+
+        //复制节点
+
+        copyNode(nodeId) {
+
+            const originNodes = this.getAllData().filter(i => i.id === nodeId)
+
+            if (originNodes.length) {
+
+                originNodes.map(i => {
+
+                    this.controller.updateForCreate(i)
+
+                })
+
+            }
+
+        },
+
+        // 向外暴露的更新方法，fn返回新数据即可  更新数据
+
+        updateData(fn, tag) {
+
+            return new Promise((resolve) => {
+
+                let rc = undefined
+
+                this.controller.updateForChange(
+
+                    (i) => {
+
+                        if (fn(i)) {
+
+                            rc = fn(i) || {}
+
+                            return {...i, renderData: rc};
+
+                        } else {
+
+                            return i
+
+                        }
+
+                    },
+
+                    {tag}
+
+                );
+
+                resolve(rc)
+
+            })
+
+        },
+
+        //向外公布on方法与回调  操作
+
+        on(event, callback, id) {
+
+            const EVENTS = Object.values(_EVENTS);
+
+            if (EVENTS.includes(event)) {
+
+                if (typeof callback === "function") {
+
+                    //覆盖事件
+
+                    if (this.eventMap[event]) {
+
+                        this.eventMap[event][id] = callback
+
+                    } else {
+
+                        this.eventMap[event] = {}
+
+                        this.eventMap[event][id] = callback;
+
+                    }
+
+                    console.log(this.eventMap, 'this.eventMap')
+
+                }
+
+            }
+
+        },
+
+        getMsg(originFn, k, c) {
+
+            if (typeof c === 'function' && typeof originFn === 'function') {
+
+                const senders = this.getAllData().filter(originFn)
+
+                senders.map(i => {
+
+                    const a = this.resp.orientation(_RESPONSE_NAMESPACE + k.id)
+
+                    a && a.acceptRecipient(k.id)
+
+                        .directSender(i.id)
+
+                        .subscribe((params) => {
+
+                            c(params)
+
+                        })
+
+                    a && a.clear()
+
+                })
+
+            }
+
+        },
+
+        toMsg(item, fn, params) {
+
+            if (typeof fn === 'function') {
+
+                const targetIdS = this.getAllData().filter(fn)
+
+                if (targetIdS.length) {
+
+                    targetIdS.map(i => {
+
+                        this.resp.orientation(_RESPONSE_NAMESPACE + i.id)
+
+                            .createPromoter(String(item.id))
+
+                            .createRecipient(String(i.id))
+
+                            .message({
+
+                                params
+
+                            })
+
+                            .notify()
+
+                            .run({
+
+                                receiver: String(i.id),
+
+                                sender: String(item.id)
+
+                            })
+
+                    })
+
+                }
+
+            }
+
+        },
+
+        toSubscribe(e, c, id) {
+
+            //console.log(e, c, id, 'toS')
+
+            this.on(e, c, id);
+
+        },
+
+        areaClick(event) {
+
+            if (!this.viewStatus.inNode) {
+
+                this.clearConnect();
+
+                this.targetFocus({id: NaN, tag: this.tags[0]});
+
+                this.eventRun(_EVENTS._AC, {event}, '_areaClick');
+
+            }
+
+        },
+
+        syncLinePosition(fn, params, item) {
+
+            if (typeof fn === "function") {
+
+                const {left: x, top: y, height: h, width: w} = params;
+
+                this.updateLinesForNode({
+
+                    x,
+
+                    w,
+
+                    y,
+
+                    h,
+
+                    id: item.id,
+
+                });
+
+                fn();
+
+                this.renderLines = this.lines.getLines();
+
+            }
+
+        },
+
+        resizing(item, params) {
+
+            if (!this.viewStatus.restrict.restrictResizeStop) {
+
+                const {left: x, top: y, height: h, width: w} = params;
+
+                this.syncLinePosition(
+
+                    () => {
+
+                        this.updateItemForStaticData({w, h, f: true}, item, false);
+
+                        this.aiderComputed(item);
+
+                        this.recommendAider({x, y, w, h});
+
+                        this.eventRun(_EVENTS._RI, {item}, item.id);
+
+                    },
+
+                    params,
+
+                    item
+
+                );
+
+            }
+
+        },
+
+        dragging(item, params) {
+
+            if (!this.viewStatus.restrict.restrictDragStop) {
+
+                const {left: x, top: y, height: h, width: w} = params;
+
+                this.syncLinePosition(
+
+                    () => {
+
+                        this.updateItemForStaticData({x, y, f: true}, item, false);
+
+                        this.aiderComputed(item);
+
+                        this.recommendAider({x, y, w, h});
+
+                        this.eventStop([_EVENTS._HO, _EVENTS._LE]);
+
+                        this.eventRun(_EVENTS._DI, {item}, item.id);
+
+                    },
+
+                    params,
+
+                    item
+
+                );
+
+            }
+
+        },
+
+        precision(item, params) {
+
+            return (
+
+                Math.abs(item.x - params.left) < 5 && Math.abs(item.y - params.top) < 5
+
+            );
+
+        },
+
+        changeRestrictDragStop(state) {
+
+            this.viewStatus.restrict.restrictDragStop = !!state;
+
+        },
+
+        changeRestrictResizeStop(state) {
+
+            this.viewStatus.restrict.restrictResizeStop = !!state;
+
+        },
+
+        dragStop(item, params) {
+
+            console.log('dragStop')
+
+            if (!this.viewStatus.restrict.restrictDragStop) {
+
+                this.updateItemForStaticData(
+
+                    {w: params.width, h: params.height, x: params.left, y: params.top, f: true},
+
+                    item,
+
+                    true
+
+                );
+
+                this.adsorption({
+
+                    id: item.id,
+
+                    x: params.left,
+
+                    y: params.top,
+
+                    w: params.width,
+
+                    h: params.height,
+
+                });
+
+                this.clearAider();
+
+                this.eventRun(_EVENTS._DS, {item}, item.id);
+
+                this.reStartEvent([_EVENTS._HO, _EVENTS._LE]);
+
+            }
+
+            this.changeRestrictDragStop(false);
+
+            if (this.viewStatus.animation) {
+
+                this.closeAnimation()
+
+                this.openAnimation(this.viewStatus.animationSpeed, this.viewStatus.buoyWidth)
+
+            }
+
+        },
+
+        closeRestrict() {
+
+            this.changeRestrictDragStop(false);
+
+            this.changeRestrictResizeStop(false);
+
+        },
+
+        leave(item, event) {
+
+            this.viewStatus.inNode = false;
+
+            this.eventRun(_EVENTS._LE, {item, event}, item.id);
+
+        },
+
+        hover(item, event) {
+
+            this.viewStatus.inNode = true;
+
+            this.eventRun(_EVENTS._HO, {item, event}, item.id);
+
+        },
+
+        resizeStop(item, params) {
+
+            if (!this.viewStatus.restrict.restrictResizeStop) {
+
+                this.updateItemForStaticData(
+
+                    {w: params.width, h: params.height, x: params.left, y: params.top, f: true},
+
+                    item,
+
+                    true
+
+                );
+
+                this.clearAider();
+
+                this.eventRun(_EVENTS._RS, {item}, item.id);
+
+            }
+
+            this.changeRestrictResizeStop(false);
+
+            if (this.viewStatus.animation) {
+
+                this.closeAnimation()
+
+                this.openAnimation(this.viewStatus.animationSpeed, this.viewStatus.buoyWidth)
+
+            }
+
+        },
+
+        updateItemForStaticData(newItem, item, sync) {
+
+            this.controller.updateForChange(
+
+                (i) => {
+
+                    return i.id === item.id ? {...i, ...newItem} : i;
+
+                },
+
+                {tag: item.tag},
+
+                !!sync
+
+            );
+
+        },
+
+        computedParentScroll(id) {
+
+            let scrollX = document.getElementById(id).scrollLeft || 0
+
+            let scrollY = document.getElementById(id).scrollTop || 0
+
+            return {scrollX, scrollY}
+
+        },
+
+
+
+        contextmenu(item, e) {
+
+            this.closeMenu(item);
+
+            console.log(e, document.getElementById(item.providerContainerId || this.pid), 'e')
+
+            this.menu = document.getElementById(`menu${item.id}`);
+
+            const {width, height} = window.getComputedStyle(this.menu, null)
+
+
+
+            if (e.pageX + parseFloat(width) >= window.innerWidth) {
+
+                this.menu.style.left = window.innerWidth - parseFloat(width) + "px";
+
+            } else {
+
+                this.menu.style.left = e.pageX + "px";
+
+            }
+
+            if (e.pageY + parseFloat(height) >= window.innerHeight) {
+
+                this.menu.style.top = window.innerHeight - parseFloat(height) + "px";
+
+            } else {
+
+                this.menu.style.top = e.pageY + "px";
+
+            }
+
+            this.menu.style.visibility = "visible";
+
+        },
+
+        eventRun(event, params, id) {
+
+            if (
+
+                this.eventMap[event] && typeof this.eventMap[event][id] === "function" &&
+
+                !this.isEventStop(event)
+
+            ) {
+
+                this.eventMap[event][id](params);
+
+            }
+
+        },
+
+        isEventStop(event) {
+
+            return this.eventStopList.includes(event);
+
+        },
+
+        eventStop(events) {
+
+            this.eventStopList = this.eventStopList.concat(events);
+
+        },
+
+        reStartEvent(events) {
+
+            if (Array.isArray(events) && events.length) {
+
+                this.eventStopList = this.eventStopList.filter(
+
+                    (i) => !events.includes(i)
+
+                );
+
+            } else {
+
+                this.eventStopList = [];
+
+            }
+
+        },
+
+        click(item) {
+
+            if (this.viewStatus.connectId) {
+
+                this.createLine(this.viewStatus.connectId, item.id, {
+
+                    width: 4,
+
+                    isDashed: true,
+
+                });
+
+                this.viewStatus.connectId = undefined;
+
+                this.clearConnect();
+
+            }
+
+            this.targetFocus(item);
+
+            this.eventRun(_EVENTS._CL, {item}, item.id);
+
+            // this.closeRestrict()
+
+        },
+
+        targetFocus(item) {
+
+            console.log(item, 'itemtargetFocus')
+
+            this.controller.updateForChange(
+
+                (i) => {
+
+                    return {...i, f: i.id === item.id};
+
+                },
+
+                {tag: item.tag}
+
+            );
+
+            this.closeMenu(item);
+
+        },
+
+        undo() {
+
+            //undo期间不可以使用aider辅助线，因为会导致死循环！
+
+            //限制视图同步数据导致异常备份
+
+            this.changeRestrictResizeStop(true);
+
+            this.changeRestrictDragStop(true);
+
+            if (!this.viewStatus.aider) {
+
+                this.controller.undo().then(() => {
+
+                    this.syncPosition();
+
+                    this.getAllData().map(item => {
+
+                        this.eventRun(_EVENTS._RS, {item}, item.id);
+
+                    })
+
+                });
+
+            }
+
+            return !this.viewStatus.aider;
+
+        },
+
+        syncPosition() {
+
+            this.renderData.map((i) => {
+
+                const right = this.parentWSelf - i.x - i.w;
+
+                const bottom = this.parentHSelf - i.y - i.h;
+
+                if (this.$refs[`VDR${i.id}`][0]) {
+
+                    this.$refs[`VDR${i.id}`][0].left = i.x;
+
+                    this.$refs[`VDR${i.id}`][0].top = i.y;
+
+                    this.$refs[`VDR${i.id}`][0].right = right;
+
+                    this.$refs[`VDR${i.id}`][0].bottom = bottom;
+
+                }
+
+                this.updateLinesForNode(i);
+
+            });
+
+            this.updateLine();
+
+            // this.closeRestrict()q
+
+        },
+
+        updateLinesForNode(args) {
+
+            const {x, w, y, h, id} = args;
+
+            const moveCenterX = x + w / 2;
+
+            const moveCenterY = y + h / 2;
+
+            const role = this.lines.checkRole(id);
+
+            const newCoordinate =
+
+                role === "A"
+
+                    ? {x1: moveCenterX, y1: moveCenterY}
+
+                    : {x3: moveCenterX, y3: moveCenterY};
+
+            this.lines.syncMove(id, newCoordinate);
+
+        },
+
+        clearAider() {
+
+            this.aiderLines = [];
+
+        },
+
+        clearRenderData() {
+
+            this.controller.clear()
+
+        },
+
+        clearHistory() {
+
+            this.controller.clearShots()
+
+        },
+
+        openAider() {
+
+            this.viewStatus.aider = true;
+
+        },
+
+        closeAider() {
+
+            this.viewStatus.aider = false;
+
+            this.clearAider();
+
+        },
+
+
+
+        //推荐辅助线
+
+        recommendAider(item, spaceNumber = 5, tipColor = "red") {
+
+            const {x, y, h, w} = item;
+
+            const basePosition = [
+
+                {value: x, label: _CONSTVARS._LS},
+
+                {value: x + w, label: _CONSTVARS._RS},
+
+                {value: y, label: _CONSTVARS._TS},
+
+                {value: y + h, label: _CONSTVARS._BS},
+
+            ];
+
+            if (this.viewStatus.aider) {
+
+                this.aiderLines = this.aiderLines.map((i) => {
+
+                    const cur = JSON.parse(JSON.stringify(i));
+
+                    basePosition.map((k, kIndex) => {
+
+                        if (kIndex < 2) {
+
+                            //base X
+
+                            if (
+
+                                i.baseArrow === _CONSTVARS._X &&
+
+                                Math.floor(Math.abs(k.value - i.base)) <= spaceNumber
+
+                            ) {
+
+                                cur.lineColor = tipColor;
+
+                                cur.response = true;
+
+                                cur.space = Math.floor(k.value - i.base);
+
+                                cur.inRange = k.value - i.base <= 0;
+
+                                cur.position = k.label;
+
+                            }
+
+                        } else {
+
+                            //base Y
+
+                            if (
+
+                                i.baseArrow === _CONSTVARS._Y &&
+
+                                Math.floor(Math.abs(k.value - i.base)) <= spaceNumber
+
+                            ) {
+
+                                cur.lineColor = tipColor;
+
+                                cur.response = true;
+
+                                cur.space = Math.floor(k.value - i.base);
+
+                                cur.inRange = k.value - i.base <= 0;
+
+                                cur.position = k.label;
+
+                            }
+
+                        }
+
+                    });
+
+                    return cur;
+
+                });
+
+            }
+
+        },
+
+        //自动吸附
+
+        adsorption(params) {
+
+            const rec = this.aiderLines.filter((i) => i.response);
+
+            const newBaseXRec = [];
+
+            const newBaseYRec = [];
+
+            rec.map((i) => {
+
+                if (i.baseArrow === _CONSTVARS._X) {
+
+                    newBaseXRec.push(i);
+
+                } else if (i.baseArrow === _CONSTVARS._Y) {
+
+                    newBaseYRec.push(i);
+
+                }
+
+            });
+
+            const XYRecs = [
+
+                {label: _CONSTVARS._X, value: newBaseXRec},
+
+                {label: _CONSTVARS._Y, value: newBaseYRec},
+
+            ];
+
+            XYRecs.map((i) => {
+
+                const {value, label} = i;
+
+                const length = value.length;
+
+                if (length) {
+
+                    let currentMin = value[0].space;
+
+                    let position = value[0];
+
+                    for (let j = 0; j < length; j++) {
+
+                        if (Math.abs(value[j].space) < Math.abs(currentMin)) {
+
+                            currentMin = value[j].space;
+
+                            position = value[j];
+
+                        }
+
+                    }
+
+                    const {inRange, space} = position;
+
+                    if (label === _CONSTVARS._X) {
+
+                        this.adsorptionX({id: params.id, inRange, space, x: params.x});
+
+                    } else if (label === _CONSTVARS._Y) {
+
+                        this.adsorptionY({id: params.id, inRange, space, y: params.y});
+
+                    }
+
+                }
+
+            });
+
+        },
+
+        adsorptionBaseComputed(inRange, space, position) {
+
+            return !inRange ? position - Math.abs(space) : position + Math.abs(space);
+
+        },
+
+        adsorptionChange(args, position) {
+
+            if ([_CONSTVARS._Y, _CONSTVARS._X].includes(position)) {
+
+                const {id, inRange, space} = args;
+
+                const adsorption = this.adsorptionBaseComputed(
+
+                    inRange,
+
+                    space,
+
+                    args[position]
+
+                );
+
+                this.controller.updateForChange(
+
+                    (i) => {
+
+                        if (id === i.id) {
+
+                            return {...i, [position]: adsorption};
+
+                        } else {
+
+                            return i;
+
+                        }
+
+                    },
+
+                    {tag: this.tags[0]}
+
+                );
+
+            }
+
+        },
+
+        adsorptionX(args) {
+
+            this.adsorptionChange(args, _CONSTVARS._X);
+
+        },
+
+        adsorptionY(args) {
+
+            this.adsorptionChange(args, _CONSTVARS._Y);
+
+        },
+
+        //计算辅助线
+
+        aiderComputed(item) {
+
+            const {id} = item;
+
+            if (this.viewStatus.aider) {
+
+                this.clearAider();
+
+                this.aider.computeAiderLines();
+
+                const lines = this.aider.getAiderLines();
+
+                const container = document.getElementById(this.pid);
+
+                const {height, width} = window.getComputedStyle(container, null);
+
+                this.renderData.map((i) => {
+
+                    if (id !== i.id) {
+
+                        const {xR, xL, yT, yB} = lines[String(i.id)];
+
+                        const position = [xR, xL, yT, yB];
+
+                        position.map((k, kIndex) => {
+
+                            if (kIndex < 2) {
+
+                                this.aiderLines.push({
+
+                                    base: k,
+
+                                    baseArrow: _CONSTVARS._X,
+
+                                    id: i.id,
+
+                                    x1: k,
+
+                                    y1: 0,
+
+                                    x2: k,
+
+                                    y2: parseFloat(height),
+
+                                    lineColor: "",
+
+                                    response: false,
+
+                                    space: undefined,
+
+                                    //inRange标识操作项的接触边是否在推荐线内，即 接触边的x小于推荐边
+
+                                    inRange: undefined,
+
+                                    position: undefined,
+
+                                });
+
+                            } else {
+
+                                this.aiderLines.push({
+
+                                    base: k,
+
+                                    baseArrow: _CONSTVARS._Y,
+
+                                    id: i.id,
+
+                                    x1: 0,
+
+                                    y1: k,
+
+                                    x2: parseFloat(width),
+
+                                    y2: k,
+
+                                    lineColor: "",
+
+                                    response: false,
+
+                                    space: undefined,
+
+                                    direction: undefined,
+
+                                    //inRange标识操作项的接触边是否在推荐线内，即 接触边的y小于推荐边
+
+                                    inRange: undefined,
+
+                                    position: undefined,
+
+                                });
+
+                            }
+
+                        });
+
+                    }
+
+                });
+
+            }
+
+        },
+
+        del() {
+
+            this.controller.getRenderData().map((i) => {
+
+                this.controller.updateForDelete({id: i.id, tag: i.tag});
+
+            });
+
+        },
+
+        remove() {
+
+            if (this.controller) {
+
+                this.controller.remove();
+
+                this.clearInstance();
+
+            }
+
+        },
 
     },
-
-    del() {
-
-      this.controller.getRenderData().map((i) => {
-
-        this.controller.updateForDelete({id: i.id, tag: i.tag});
-
-      });
-
-    },
-
-    remove() {
-
-      if (this.controller) {
-
-        this.controller.remove();
-
-        this.clearInstance();
-
-      }
-
-    },
-
-  },
 
 };
 
 </script>
 
 
+
 <style scoped>
 
 .provider-class {
 
-  position: absolute;
+    position: absolute;
 
 }
+
 
 
 .svgC {
 
-  width: 100%;
+    width: 100%;
 
-  height: 100%;
+    height: 100%;
 
-  position: absolute;
+    position: absolute;
 
 }
+
 
 
 svg {
 
-  display: block;
+    display: block;
 
-  position: absolute;
+    position: absolute;
 
 }
+
 
 
 svg .line1 {
 
-  stroke-dasharray: 340;
+    stroke-dasharray: 340;
 
-  stroke-dashoffset: 40;
+    stroke-dashoffset: 40;
 
-  animation: dash 10s linear infinite forwards;
+    animation: dash 10s linear infinite forwards;
 
 }
+
 
 
 svg .line2 {
 
-  stroke-dasharray: 320;
+    stroke-dasharray: 320;
 
-  stroke-dashoffset: 320;
+    stroke-dashoffset: 320;
 
-  animation: dash2 10s linear infinite forwards;
+    animation: dash2 10s linear infinite forwards;
 
 }
+
 
 
 @keyframes dash {
 
-  from {
+    from {
 
-    stroke-dashoffset: 360;
+        stroke-dashoffset: 360;
 
-  }
+    }
 
-  to {
+    to {
 
-    stroke-dashoffset: 40;
+        stroke-dashoffset: 40;
 
-  }
+    }
 
 }
 
 
+
 @keyframes dash2 {
 
-  from {
+    from {
 
-    stroke-dashoffset: 280;
+        stroke-dashoffset: 280;
 
-  }
+    }
 
-  to {
+    to {
 
-    stroke-dashoffset: -40;
+        stroke-dashoffset: -40;
 
-  }
+    }
 
 }
 
