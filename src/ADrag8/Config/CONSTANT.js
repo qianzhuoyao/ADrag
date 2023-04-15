@@ -15,3 +15,25 @@ export const POSITION_MAP = {
     h: 'bottom',
     i: 'bottom-right'
 }
+export const BLOCK_TYPE = {
+    group: '__GROUP__',
+    fragment: '__FRAGMENT__',
+    container: '__CONTAINER__'
+}
+//操作误差
+export const OPERATING_DIFFERENCE = 2
+
+export const MOVE_STATUS = {
+    pending: '__pending__',
+    movable: '__movable__',
+    reject: '__reject__'
+}
+/**
+ * nodeClick
+ * nodeResize
+ * nodeResizeStart
+ * nodeDragging
+ * nodeDragStart
+ * nodeDragFinish
+ */
+export const EVENT_LIST = ['nodeClick', 'nodeResize', 'nodeResizeStart', 'nodeDragging', 'nodeDragStart', 'nodeDragFinish']

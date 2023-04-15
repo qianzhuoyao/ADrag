@@ -17,6 +17,7 @@ import Tools from '../Tools'
 import {DEFAULT_DEEP, DRAG_STATE, MAX_DEEP, RESIZE_STATE} from "@/ADrag8/Config/CONSTANT";
 import EventCallback from "@/ADrag8/Event/eventCallback";
 import {createDom} from "@/ADrag8/View";
+import {Container} from "@/ADrag8";
 
 export default class BaseParam {
     constructor() {
@@ -29,6 +30,7 @@ export default class BaseParam {
             $Width: 0,
             $Height: 0
         }
+        this.$Hide = true
         this.$DOM = null
         this.$Vertex = null
         this.$Deep = DEFAULT_DEEP
@@ -36,6 +38,8 @@ export default class BaseParam {
         this.$Draggable = true
         this.$CurrentOperationState = DRAG_STATE   //当前块的操作状态   有移动 drag 与 缩放 resize
         this.$Event = new EventCallback()
+        this.$Container = new Container()
+        this.$Lock = false
     }
 
     deepAddition() {
@@ -46,8 +50,28 @@ export default class BaseParam {
         }
     }
 
+    setContainer(container) {
+        if (container instanceof Container) {
+            this.$Container = container
+        }
+    }
+
+    removeContainer() {
+        this.$Container = new Container()
+    }
+
     setDOM(DOM) {
         this.$DOM = DOM
+    }
+
+    display() {
+        this.$Hide = false
+        this.$DOM.style.display = 'block'
+    }
+
+    hidden() {
+        this.$Hide = true
+        this.$DOM.style.display = 'none'
     }
 
     insertDom(DOM) {
@@ -78,10 +102,12 @@ export default class BaseParam {
     updateSize({width, height, alone = false}) {
         try {
             //console.log(width, height, 'updateSize')
-            if (Tools.listEachTruthIncludesZero([width, height]) || alone) {
-                this.$Size = {
-                    $Width: width || this.$Size.$Width,
-                    $Height: height || this.$Size.$Height
+            if (!this.$Lock) {
+                if (Tools.listEachTruthIncludesZero([width, height]) || alone) {
+                    this.$Size = {
+                        $Width: width || this.$Size.$Width,
+                        $Height: height || this.$Size.$Height
+                    }
                 }
             }
         } catch (e) {
@@ -93,22 +119,36 @@ export default class BaseParam {
         this.$Draggable = !!status
     }
 
+    /**
+     * 锁定,
+     */
+    lock() {
+        this.$Lock = true
+    }
+
+    unLock() {
+        this.$Lock = false
+    }
+
     updateFocus(newStatus) {
-        this.$Focus = !!newStatus
-        if (this.$Vertex) {
-            this.$Vertex.map(i => {
-                i.style.display = this.$Focus ? 'block' : 'none'
-            })
+        if (!this.$Lock) {
+            this.$Focus = !!newStatus
+            if (this.$Vertex) {
+                this.$Vertex.map(i => {
+                    i.style.display = this.$Focus ? 'block' : 'none'
+                })
+            }
         }
     }
 
     updatePosition({x, y, alone = false}) {
         try {
-            if (Tools.listEachTruthIncludesZero([x, y]) || alone) {
-                // console.log(x, y, 'updatePosition')
-                this.$Position = {
-                    $X: x || this.$Position.$X,
-                    $Y: y || this.$Position.$Y
+            if (!this.$Lock) {
+                if (Tools.listEachTruthIncludesZero([x, y]) || alone) {
+                    this.$Position = {
+                        $X: x || this.$Position.$X,
+                        $Y: y || this.$Position.$Y
+                    }
                 }
             }
         } catch (e) {

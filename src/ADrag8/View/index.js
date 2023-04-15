@@ -35,6 +35,19 @@ export const syncVertexPosition = (DOM, target, key) => {
         target.style.cursor = 'pointer'
     }
 }
+export const computeDomPositionAndSize = (DOM) => {
+    if (DOM instanceof HTMLElement) {
+        const {left, top, bottom, right} = DOM.getBoundingClientRect()
+        return {
+            width: Math.abs(right - left),
+            height: Math.abs(top - bottom),
+            left,
+            top,
+            bottom,
+            right
+        }
+    }
+}
 /**
  * 绘制顶点
  */

@@ -2,14 +2,13 @@ import Group from "@/ADrag8/Group";
 import Fragment from "@/ADrag8/Fragment";
 import Render from "@/ADrag8/Render";
 import {createMouseClick} from "@/ADrag8/Event/operation";
+import {BLOCK_TYPE} from "@/ADrag8/Config/CONSTANT";
+import {Container} from "@/ADrag8";
 
-const BLOCK_TYPE = {
-    group: '__GROUP__',
-    fragment: '__FRAGMENT__'
-}
 /**
  * const block = new Fragment()
  * const group = new Group().createChild(block)
+ * const container = new Container()
  * const render = new Render()
  * const scene = new Scene()
  * scene.createBlock(block)
@@ -21,7 +20,17 @@ export default class Scene {
         //组不会主动在视图内显示，它的内容应该一并在$Blocks内
         this.$Groups = []
         this.$Blocks = {}
+        this.$Containers = {}
+    }
 
+    createContainer(container) {
+        if (container instanceof Container) {
+            const key = `${BLOCK_TYPE.container}${this._Key++}`
+            container.setId(key)
+            this.$Containers[key] = {container, key}
+        } else {
+            throw new ReferenceError('createContainer container is not instance of Container')
+        }
     }
 
     /**
@@ -68,7 +77,7 @@ export default class Scene {
      * @param render 渲染器
      * @param openDefaultFocusEvent 开启默认的焦点模式
      */
-    mountBlocks(render, openDefaultFocusEvent = true) {
+    mount(render, openDefaultFocusEvent = true) {
         console.log(this.$Blocks, 'this.$Blocks')
         if (render instanceof Render) {
             render.load({

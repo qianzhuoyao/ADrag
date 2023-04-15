@@ -1,5 +1,6 @@
 <template>
     <div>
+        <div id="con" style="width: 500px;height: 500px;background: seagreen"></div>
         <div id="123" style="width: 400px;height: 400px;background: azure"></div>
         <div id="child">1231231</div>
     </div>
@@ -20,17 +21,22 @@ export default {
         const b = new ADRAG.Fragment()
         const r = new ADRAG.Render()
         const s = new ADRAG.Scene()
-        a.$BaseObserver.updateSize({width: 100, height: 100})
-        b.$BaseObserver.updateSize({width: 100, height: 100})
+        const c2 = new ADRAG.Container(document.getElementById('con'))
         s.createBlock(a)
         s.createBlock(b)
-        s.mountBlocks(r)
-        a.$BaseObserver.updateFocus(true)
-        b.$BaseObserver.updateFocus(true)
+        s.createContainer(c2)
+        a.updateSize({width: 100, height: 100})
+        b.updateSize({width: 100, height: 100})
+        b.updatePosition({x: 20, y: 20})
+        a.updatePosition({x: 40, y: 40})
+        c2.pushBlocks([a, b])
+        s.mount(r)
+        a.updateFocus(true)
+        b.updateFocus(false)
         a.insertDom(document.getElementById('child'))
         a.getDom().style.background = '#1990ff'
         b.getDom().style.background = '#352562'
-        a.$BaseObserver.$Event.nodeClick(() => {
+        a.getCallback('nodeClick', () => {
             console.log('click', a)
         })
     }

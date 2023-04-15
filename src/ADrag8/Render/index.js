@@ -87,6 +87,20 @@ export default class Render {
         }
     }
 
+    checkBound(block) {
+        if (block instanceof Fragment) {
+            if (block.$BaseObserver.$Container.blockInContainer(block.$BaseObserver)._in) {
+                block.$BaseObserver.display()
+            } else {
+                block.$BaseObserver.hidden()
+            }
+        }
+    }
+
+    /**
+     * 加载
+     * @param blocks
+     */
     load({blocks}) {
         console.log(blocks, 'blocks')
         if (blocks) {
@@ -95,9 +109,11 @@ export default class Render {
                 const DOM = this.paint(i.block)
                 //同步到Fragment.$BaseObserver的$DOM
                 i.block.$BaseObserver.setDOM(DOM)
-                VertexDOMs = vertex(DOM, i.block.$Id)
+                VertexDOMs = vertex(DOM, i.block.$Id)//计算顶点
                 //同步到Fragment.$BaseObserver的顶点
                 i.block.$BaseObserver.setVertex(VertexDOMs)
+                //判断元素是否在容器内
+                this.checkBound(i.block)
                 const observer = additionDragEvent(DOM, {
                     down: params => {
                         //避免重读渲染vertex
@@ -141,10 +157,24 @@ export default class Render {
                         }
                     },
                     move: params => {
+                        /**
+                         * 边界判断 bound check
+                         */
+                        const {
+                            outBoundBottom,
+                            outBoundTop,
+                            outBoundRight,
+                            outBoundLeft
+                        } = i.block.$BaseObserver.$Container.calculateDynamicBound({
+                            x: params.x - offsetX,
+                            y: params.y - offsetY,
+                            width: i.block.$BaseObserver.$Size.$Width,
+                            height: i.block.$BaseObserver.$Size.$Height
+                        })
                         if (i.block.$BaseObserver.$CurrentOperationState === DRAG_STATE) {
                             i.block.$BaseObserver.updatePosition({
-                                x: params.x - offsetX,
-                                y: params.y - offsetY
+                                x: (outBoundLeft || outBoundRight) ? i.block.$BaseObserver.$Position.$X : (params.x - offsetX),
+                                y: (outBoundBottom || outBoundTop) ? i.block.$BaseObserver.$Position.$Y : (params.y - offsetY)
                             })
                             i.block.$BaseObserver.$Event.$Event.DRAGGING.map(eventItem => {
                                 eventItem()
