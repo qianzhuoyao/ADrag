@@ -15,72 +15,84 @@ export default class Render {
 
 
     /**
-     * 同步操作与数据
+     * 同步与限制操作与数据
      * @param event 鼠标
-     * @param base baseParams
+     * @param base Fragment
      * @param position 位置
      * @param tip 按下时的位置记录
      * */
     sync(event, base, position, tip) {
         if (base instanceof Fragment) {
+            //限制操作在container内生效
+            const {
+                outBoundBottom,
+                outBoundTop,
+                outBoundRight,
+                outBoundLeft
+            } = base.$BaseObserver.$Container.calculateDynamicBound({
+                x: event.pageX,
+                y: event.pageY,
+                width: 0,
+                height: 0
+            })
             if (position === POSITION_MAP.e) {
                 base.$BaseObserver.updateSize({
-                    width: tip.$X + tip.$Width - event.pageX,
+                    width: outBoundLeft ? base.$BaseObserver.$Size.$Width : tip.$X + tip.$Width - event.pageX,
                     alone: true
                 })
                 base.$BaseObserver.updatePosition({
-                    x: event.pageX,
+                    x: outBoundLeft ? base.$BaseObserver.$Position.$X : event.pageX,
                     alone: true
                 })
             } else if (position === POSITION_MAP.f) {
                 base.$BaseObserver.updateSize({
-                    width: event.pageX - tip.$X,
+                    width: outBoundRight ? base.$BaseObserver.$Size.$Width : event.pageX - tip.$X,
                     alone: true
                 })
             } else if (position === POSITION_MAP.b) {
                 base.$BaseObserver.updateSize({
-                    height: tip.$Y + tip.$Height - event.pageY,
+                    height: outBoundTop ? base.$BaseObserver.$Size.$Height : tip.$Y + tip.$Height - event.pageY,
                     alone: true
                 })
                 base.$BaseObserver.updatePosition({
-                    y: event.pageY,
+                    y: outBoundTop ? base.$BaseObserver.$Position.$Y : event.pageY,
                     alone: true
                 })
             } else if (position === POSITION_MAP.h) {
                 base.$BaseObserver.updateSize({
-                    height: event.pageY - tip.$Y,
+                    height: outBoundBottom ? base.$BaseObserver.$Size.$Height : event.pageY - tip.$Y,
                     alone: true
                 })
             } else if (position === POSITION_MAP.a) {
                 base.$BaseObserver.updateSize({
-                    width: tip.$X + tip.$Width - event.pageX,
-                    height: tip.$Y + tip.$Height - event.pageY,
+                    width: outBoundLeft ? base.$BaseObserver.$Size.$Width : tip.$X + tip.$Width - event.pageX,
+                    height: outBoundTop ? base.$BaseObserver.$Size.$Height : tip.$Y + tip.$Height - event.pageY,
                 })
                 base.$BaseObserver.updatePosition({
-                    x: event.pageX,
-                    y: event.pageY,
+                    x: outBoundLeft ? base.$BaseObserver.$Position.$X : event.pageX,
+                    y: outBoundTop ? base.$BaseObserver.$Position.$Y : event.pageY,
                 })
             } else if (position === POSITION_MAP.c) {
                 base.$BaseObserver.updateSize({
-                    width: event.pageX - tip.$X,
-                    height: tip.$Y + tip.$Height - event.pageY,
+                    width: outBoundRight ? base.$BaseObserver.$Size.$Width : event.pageX - tip.$X,
+                    height: outBoundTop ? base.$BaseObserver.$Size.$Height : tip.$Y + tip.$Height - event.pageY,
                 })
                 base.$BaseObserver.updatePosition({
-                    y: event.pageY,
+                    y: outBoundTop ? base.$BaseObserver.$Position.$Y : event.pageY,
                     alone: true
                 })
             } else if (position === POSITION_MAP.i) {
                 base.$BaseObserver.updateSize({
-                    width: event.pageX - tip.$X,
-                    height: event.pageY - tip.$Y,
+                    width: outBoundRight ? base.$BaseObserver.$Size.$Width : event.pageX - tip.$X,
+                    height: outBoundBottom ? base.$BaseObserver.$Size.$Height : event.pageY - tip.$Y,
                 })
             } else if (position === POSITION_MAP.g) {
                 base.$BaseObserver.updateSize({
-                    width: tip.$X + tip.$Width - event.pageX,
-                    height: event.pageY - tip.$Y,
+                    width: outBoundLeft ? base.$BaseObserver.$Size.$Width : tip.$X + tip.$Width - event.pageX,
+                    height: outBoundBottom ? base.$BaseObserver.$Size.$Height : event.pageY - tip.$Y,
                 })
                 base.$BaseObserver.updatePosition({
-                    x: event.pageX,
+                    x: outBoundLeft ? base.$BaseObserver.$Position.$X : event.pageX,
                     alone: true
                 })
             }
@@ -160,33 +172,40 @@ export default class Render {
                         /**
                          * 边界判断 bound check
                          */
+                        console.log(i.block.$BaseObserver.$Size, 'i.block.$BaseObserver.$Size')
                         const {
                             outBoundBottom,
                             outBoundTop,
                             outBoundRight,
-                            outBoundLeft
+                            outBoundLeft,
                         } = i.block.$BaseObserver.$Container.calculateDynamicBound({
                             x: params.x - offsetX,
                             y: params.y - offsetY,
                             width: i.block.$BaseObserver.$Size.$Width,
                             height: i.block.$BaseObserver.$Size.$Height
                         })
+                        /**
+                         * 限制拖动
+                         */
                         if (i.block.$BaseObserver.$CurrentOperationState === DRAG_STATE) {
                             i.block.$BaseObserver.updatePosition({
                                 x: (outBoundLeft || outBoundRight) ? i.block.$BaseObserver.$Position.$X : (params.x - offsetX),
                                 y: (outBoundBottom || outBoundTop) ? i.block.$BaseObserver.$Position.$Y : (params.y - offsetY)
                             })
+                            //拖拽事件回调执行
                             i.block.$BaseObserver.$Event.$Event.DRAGGING.map(eventItem => {
                                 eventItem()
                             })
                             // i.block.dragMoving(params)
                         } else if (i.block.$BaseObserver.$CurrentOperationState === RESIZE_STATE) {
                             const targetPosition = targetVertex.dataset.position
+                            //此时同步尺寸与数据
                             this.sync(params.event, i.block, targetPosition, this._block)
                             //同步顶点的位置
                             VertexDOMs.map((item, key) => {
                                 syncVertexPosition(DOM, item, key)
                             })
+                            //尺寸更改事件回调执行
                             i.block.$BaseObserver.$Event.$Event.RESIZING.map(eventItem => {
                                 eventItem()
                             })
@@ -195,6 +214,7 @@ export default class Render {
                         this.paint(i.block)
                     },
                     over: params => {
+                        //鼠标放起，流程结束
                         i.block.dragFinished(params)
                         i.block.$BaseObserver.$Event.$Event.DRAG_FINISH.map(eventItem => {
                             eventItem()
