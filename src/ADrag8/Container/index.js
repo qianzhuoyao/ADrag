@@ -13,6 +13,18 @@ export default class Container {
         this._Children = []
     }
 
+    toJSON() {
+        return {
+            _ID: this._ID,
+            DOM_ID: this.$ContainerDom.id,
+            width: this.$ContainerWidth,
+            height: this.$ContainerHeight,
+            left: this.$ContainerLeft,
+            top: this.$ContainerTop,
+            childrenIds: this._Children.map(i => i.getId())
+        }
+    }
+
     setId(ID) {
         this._ID = ID
     }

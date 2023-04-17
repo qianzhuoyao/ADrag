@@ -10,6 +10,14 @@ export default class Fragment {
 
     }
 
+    toJSON() {
+        return {
+            id: this.$Id,
+            pack: this.$Pack,
+            base: this.$BaseObserver.toJSON()
+        }
+    }
+
     insertCustomPack(pack) {
         this.$Pack = pack
     }
@@ -40,7 +48,7 @@ export default class Fragment {
      * nodeDragFinish
      */
     getCallback(eventName, fn) {
-        if(typeof  this.$BaseObserver.$Event[eventName]==="function"){
+        if (typeof this.$BaseObserver.$Event[eventName] === "function") {
             this.$BaseObserver.$Event[eventName](fn)
         }
     }
@@ -65,27 +73,7 @@ export default class Fragment {
         this.$Id = id
     }
 
-    startDraggingSubscription(callback) {
-        if (typeof callback === "function") {
-            callback()
-        }
-    }
-
-    resizing(callback) {
-        if (typeof callback === "function") {
-            callback()
-        }
-    }
-
-    dragMoving(callback) {
-        if (typeof callback === "function") {
-            callback()
-        }
-    }
-
-    dragFinished(callback) {
-        if (typeof callback === "function") {
-            callback()
-        }
+    getId() {
+        return this.$Id
     }
 }

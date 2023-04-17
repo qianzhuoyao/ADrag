@@ -8,3 +8,4 @@ export const listEachTruthIncludesZero = (list) => {
     }
 }
 export const isFunc = (a) => typeof a === "function"
+export const paramsAllArray = (paramsList) => Array.isArray(paramsList) && paramsList.every(p => Array.isArray(p))

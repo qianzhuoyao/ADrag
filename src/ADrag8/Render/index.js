@@ -124,12 +124,15 @@ export default class Render {
                 VertexDOMs = vertex(DOM, i.block.$Id)//计算顶点
                 //同步到Fragment.$BaseObserver的顶点
                 i.block.$BaseObserver.setVertex(VertexDOMs)
-                //判断元素是否在容器内
+                //判断元素是否在容器内再决定其是否可以渲染
                 this.checkBound(i.block)
+                //开启事件订阅
                 const observer = additionDragEvent(DOM, {
+                    //按下事件订阅回调
                     down: params => {
-                        //避免重读渲染vertex
+                        //避免重读渲染block
                         if (!this.renderedIds.includes(i.block.$Id)) {
+                            //顶点操作，用来区分拖拽与尺寸更改
                             VertexDOMs.map(item => {
                                 //展示顶点
                                 //区分事件拖拽与缩放
@@ -168,6 +171,7 @@ export default class Render {
                             offsetY = offset.offsetY
                         }
                     },
+                    //移动事件订阅回调
                     move: params => {
                         /**
                          * 边界判断 bound check
@@ -213,9 +217,9 @@ export default class Render {
                         }
                         this.paint(i.block)
                     },
-                    over: params => {
-                        //鼠标放起，流程结束
-                        i.block.dragFinished(params)
+                    //鼠标抬起订阅回调
+                    over: () => {
+                        //鼠标放起，流程结束,触发结束事件
                         i.block.$BaseObserver.$Event.$Event.DRAG_FINISH.map(eventItem => {
                             eventItem()
                         })
@@ -233,7 +237,7 @@ export default class Render {
 
     //状态更改得重新paint,不然可能draggable不生效 绘制
     paint(block) {
-        //console.log(block, 'paint')
+        //若block已经被渲染，怎不在创建，在原先dom上操作
         let DOM
         if (!this._createdDom.includes(block.$Id)) {
             DOM = createDom(block.$Id)

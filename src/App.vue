@@ -37,7 +37,7 @@ export default {
         a.getDom().style.background = '#1990ff'
         b.getDom().style.background = '#352562'
         a.getCallback('nodeClick', () => {
-            console.log('click', a)
+            console.log('click', s.toJSON(), a)
         })
     }
 

@@ -1,16 +1,8 @@
 /**
  * 基础属性
- * 在其内部所有属性更改时触发回调subscription
- *
- * const BP = new BaseParam()
- * //订阅
- * BP.subscription(item=>{
- *     console.log(item)
- * })
- * //触发
- * BP.updatePosition(XX)
- * BP.updateSize(XX)
- * BP.updateFocus()
+ * 它不会被fragment继承,因为fragment更倾向数据的更新而不是视图
+ * 而BaseParam更倾向视图的更新而不是数据
+ * 他们是并联的
  *
  */
 import Tools from '../Tools'
@@ -40,6 +32,20 @@ export default class BaseParam {
         this.$Event = new EventCallback()
         this.$Container = new Container()
         this.$Lock = false
+    }
+
+    toJSON() {
+        return {
+            zIndex: this.$Deep,
+            container: this.$Container.toJSON(),
+            draggable: this.$Draggable,
+            focus: this.$Focus,
+            x: this.$Position.$X,
+            y: this.$Position.$Y,
+            width: this.$Size.$Width,
+            height: this.$Size.$Height,
+            lock: this.$Lock
+        }
     }
 
     deepAddition() {
@@ -91,6 +97,10 @@ export default class BaseParam {
 
     deepLower() {
         this.$Deep--
+    }
+
+    initDeep(deep) {
+        this.$Deep = deep
     }
 
     updateCOS(state) {

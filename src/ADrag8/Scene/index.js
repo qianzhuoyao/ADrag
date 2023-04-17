@@ -4,6 +4,8 @@ import Render from "@/ADrag8/Render";
 import {createMouseClick} from "@/ADrag8/Event/operation";
 import {BLOCK_TYPE} from "@/ADrag8/Config/CONSTANT";
 import {Container} from "@/ADrag8";
+import CanvasRender from "@/ADrag8/Render/canvasRender";
+import {paramsAllArray} from "@/ADrag8/Tools/typeCheck";
 
 /**
  * const block = new Fragment()
@@ -17,10 +19,11 @@ import {Container} from "@/ADrag8";
 export default class Scene {
     constructor() {
         this._Key = 0
-        //组不会主动在视图内显示，它的内容应该一并在$Blocks内
+        //组不会额外在视图内显示，它的内容应该一并在$Blocks内，它是一类数据集
         this.$Groups = []
         this.$Blocks = {}
         this.$Containers = {}
+        this.$CanvasModule = null
     }
 
     createContainer(container) {
@@ -78,12 +81,87 @@ export default class Scene {
      * @param openDefaultFocusEvent 开启默认的焦点模式
      */
     mount(render, openDefaultFocusEvent = true) {
-        console.log(this.$Blocks, 'this.$Blocks')
         if (render instanceof Render) {
             render.load({
                 blocks: this.$Blocks
             })
             openDefaultFocusEvent && this.loadDefaultEvent()
+        }
+    }
+
+    /**
+     * 转json
+     * @param toStr
+     * @returns {{Blocks: *[], Groups: *[], Containers: *[]}|string}
+     */
+    toJSON(toStr = false) {
+        const res = {
+            Containers: Object.values(this.$Containers).map(i => {
+                return i.container.toJSON()
+            }),
+            Blocks: Object.values(this.$Blocks).map(i => {
+                return i.block.toJSON()
+            }),
+            Groups: this.$Groups.map(i => {
+                return i.toJSON()
+            })
+        }
+        if (toStr) {
+            return JSON.stringify(res)
+        } else {
+            return res
+        }
+
+    }
+
+    /**
+     * 加载json 配置项
+     * @param sceneJSON
+     */
+    loadJSON(sceneJSON) {
+        try {
+            if (sceneJSON) {
+                const {Containers, Blocks, Groups} = sceneJSON
+                if (paramsAllArray([Containers, Blocks, Groups])) {
+                    Blocks.map(i => {
+                        const block = new Fragment()
+                        block.insertCustomPack(i.pack)
+                        block.setId(i.id)
+                        block.$BaseObserver.initDeep(i.zIndex)
+                        block.$BaseObserver.updateFocus(i.base.focus)
+                        block.$BaseObserver.updateSize({width: i.base.width, height: i.base.height, alone: true})
+                        block.$BaseObserver.updatePosition({x: i.base.x, y: i.base.y, alone: true})
+                        block.$BaseObserver.updateDraggable(i.base.draggable)
+                        i.base.lock ? block.$BaseObserver.lock() : block.$BaseObserver.unLock()
+                        this.createBlock(block)
+                    })
+                    Containers.map(i => {
+                        const containerBlock = []
+                        const container = new Container(document.getElementById(i.DOM_ID))
+                        container.setId(i._ID)
+                        containerBlock.push(this.$Blocks[i._ID])
+                        container.pushBlocks(containerBlock)
+                        this.createContainer(container)
+                    })
+                    Groups.map(i => {
+                        const group = new Group(i.id)
+                        group.setDesc(i.desc)
+                        i.children.map(child => {
+                            group.appendChild(this.$Blocks[child.id])
+                        })
+                        this.createGroup(group)
+                    })
+                }
+            }
+        } catch (e) {
+            console.error(e)
+        }
+    }
+
+    mountCanvas(canvasRender) {
+        if (canvasRender instanceof CanvasRender) {
+            //挂在canvasRender
+            console.log('canvas')
         }
     }
 }
