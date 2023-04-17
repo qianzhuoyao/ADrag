@@ -5,12 +5,11 @@
  * 他们是并联的
  *
  */
-import Tools from '../Tools'
 import {DEFAULT_DEEP, DRAG_STATE, MAX_DEEP, RESIZE_STATE} from "@/ADrag8/Config/CONSTANT";
 import EventCallback from "@/ADrag8/Event/eventCallback";
 import {createDom} from "@/ADrag8/View";
 import {Container} from "@/ADrag8";
-
+import {listEachTruthIncludesZero} from '@/ADrag8/Tools/typeCheck'
 export default class BaseParam {
     constructor() {
         this._callback = null
@@ -32,6 +31,10 @@ export default class BaseParam {
         this.$Event = new EventCallback()
         this.$Container = new Container()
         this.$Lock = false
+    }
+
+    getHide() {
+        return this.$Hide
     }
 
     toJSON() {
@@ -113,7 +116,7 @@ export default class BaseParam {
         try {
             //console.log(width, height, 'updateSize')
             if (!this.$Lock) {
-                if (Tools.listEachTruthIncludesZero([width, height]) || alone) {
+                if (listEachTruthIncludesZero([width, height]) || alone) {
                     this.$Size = {
                         $Width: width || this.$Size.$Width,
                         $Height: height || this.$Size.$Height
@@ -154,7 +157,7 @@ export default class BaseParam {
     updatePosition({x, y, alone = false}) {
         try {
             if (!this.$Lock) {
-                if (Tools.listEachTruthIncludesZero([x, y]) || alone) {
+                if (listEachTruthIncludesZero([x, y]) || alone) {
                     this.$Position = {
                         $X: x || this.$Position.$X,
                         $Y: y || this.$Position.$Y

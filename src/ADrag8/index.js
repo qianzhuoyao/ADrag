@@ -5,11 +5,4 @@ import Render from "@/ADrag8/Render";
 import Container from "@/ADrag8/Container";
 import CanvasRender from "@/ADrag8/Render/canvasRender";
 
-export {
-    Container,
-    Scene,
-    Render,
-    Fragment,
-    Group,
-    CanvasRender
-}
+export { Container, Scene, Render, Fragment, Group, CanvasRender };

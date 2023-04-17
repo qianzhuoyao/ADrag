@@ -5,7 +5,10 @@ import {computeOffset} from "@/ADrag8/Tools/compute";
 import {DRAG_STATE, POSITION_MAP, RESIZE_STATE} from "@/ADrag8/Config/CONSTANT";
 import {Fragment} from "@/ADrag8";
 
-
+/**
+ * 渲染block
+ * 并在其中混入事件
+ */
 export default class Render {
     constructor() {
         this._createdDom = []
@@ -176,7 +179,6 @@ export default class Render {
                         /**
                          * 边界判断 bound check
                          */
-                        console.log(i.block.$BaseObserver.$Size, 'i.block.$BaseObserver.$Size')
                         const {
                             outBoundBottom,
                             outBoundTop,
