@@ -16,7 +16,6 @@ export default {
         return {};
     },
     mounted() {
-        // new Select().provider('123')
         const a = new ADRAG.Fragment()
         const b = new ADRAG.Fragment()
         const r = new ADRAG.Render()

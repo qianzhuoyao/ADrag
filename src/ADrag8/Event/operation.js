@@ -141,6 +141,11 @@ export const createMouseDown = (DOM, fn, options = false) => {
     DOM.addEventListener("mousedown", fn, options);
   }
 };
+export const createMouseMove = (DOM, fn, options = false) => {
+  if (DOM instanceof HTMLElement && typeof fn === "function") {
+    DOM.addEventListener("mousemove", fn, options);
+  }
+};
 export const createMouseClick = (DOM, fn, options = false) => {
   if (DOM instanceof HTMLElement && typeof fn === "function") {
     DOM.addEventListener("click", fn, options);

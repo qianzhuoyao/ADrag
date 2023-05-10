@@ -1,32 +1,32 @@
-export const VERTEX_CLASS = "__VERTEX__CLASS__";
-export const DRAG_STATE = "__DRAG__";
-export const RESIZE_STATE = "__RESIZE__";
+export const VERTEX_CLASS = "VERTEX_CLASS.__VERTEX__CLASS__";
+export const DRAG_STATE = Symbol.for("DRAG_STATE.__DRAG__");
+export const RESIZE_STATE = Symbol.for("RESIZE_STATE.__RESIZE__");
 export const BOUND_LENGTH = 4;
 export const DEFAULT_DEEP = 10;
 export const MAX_VALUE = 999999;
 export const MAX_DEEP = MAX_VALUE;
 export const POSITION_MAP = {
-  a: "top-left",
-  b: "top",
-  c: "top-right",
-  e: "left",
-  f: "right",
-  g: "bottom-left",
-  h: "bottom",
-  i: "bottom-right",
+    a: "POSITION_MAP.top-left",
+    b: "POSITION_MAP.top",
+    c: "POSITION_MAP.top-right",
+    e: "POSITION_MAP.left",
+    f: "POSITION_MAP.right",
+    g: "POSITION_MAP.bottom-left",
+    h: "POSITION_MAP.bottom",
+    i: "POSITION_MAP.bottom-right",
 };
 export const BLOCK_TYPE = {
-  group: "__GROUP__",
-  fragment: "__FRAGMENT__",
-  container: "__CONTAINER__",
+    group: Symbol.for("BLOCK_TYPE.__GROUP__"),
+    fragment: Symbol.for("BLOCK_TYPE.__FRAGMENT__"),
+    container: Symbol.for("BLOCK_TYPE.__CONTAINER__"),
 };
 //操作误差
 export const OPERATING_DIFFERENCE = 2;
 
 export const MOVE_STATUS = {
-  pending: "__pending__",
-  movable: "__movable__",
-  reject: "__reject__",
+    pending: Symbol.for("MOVE_STATUS.__pending__"),
+    movable: Symbol.for("MOVE_STATUS.__movable__"),
+    reject: Symbol.for("MOVE_STATUS.__reject__"),
 };
 /**
  * nodeClick
@@ -37,10 +37,10 @@ export const MOVE_STATUS = {
  * nodeDragFinish
  */
 export const EVENT_LIST = [
-  "nodeClick",
-  "nodeResize",
-  "nodeResizeStart",
-  "nodeDragging",
-  "nodeDragStart",
-  "nodeDragFinish",
+    "nodeClick",
+    "nodeResize",
+    "nodeResizeStart",
+    "nodeDragging",
+    "nodeDragStart",
+    "nodeDragFinish",
 ];

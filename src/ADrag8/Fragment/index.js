@@ -1,77 +1,55 @@
 import BaseParam from "@/ADrag8/BaseParam";
 
-export default class Fragment {
-  constructor() {
-    this.$Id = undefined;
-    this.$Pack = null;
-    this.$BaseObserver = new BaseParam();
-    this.$BaseObserver.updatePosition({ x: 0, y: 0 });
-    this.$BaseObserver.updateSize({ width: 0, height: 0 });
-  }
-
-  toJSON() {
-    return {
-      id: this.$Id,
-      pack: this.$Pack,
-      base: this.$BaseObserver.toJSON(),
-    };
-  }
-
-  insertCustomPack(pack) {
-    this.$Pack = pack;
-  }
-
-  removeContainer() {
-    this.$BaseObserver.removeContainer();
-  }
-
-  setContainer(container) {
-    this.$BaseObserver.setContainer(container);
-  }
-
-  getDom() {
-    return this.$BaseObserver.$DOM;
-  }
-
-  /**
-   * 事件回调
-   * @param eventName
-   * @param fn
-   * eventName includes =
-   * nodeClick
-   * nodeResize
-   * nodeResizeStart
-   * nodeDragging
-   * nodeDragStart
-   * nodeDragFinish
-   */
-  getCallback(eventName, fn) {
-    if (typeof this.$BaseObserver.$Event[eventName] === "function") {
-      this.$BaseObserver.$Event[eventName](fn);
+export default class Fragment extends BaseParam {
+    constructor() {
+        super()
+        this.$Id = undefined;
+        this.$Pack = null;
+        // this.$BaseObserver = new BaseParam();
+        this.updatePosition({x: 0, y: 0});
+        this.updateSize({width: 0, height: 0});
     }
-  }
 
-  updateSize({ width, height, alone }) {
-    this.$BaseObserver.updateSize({ width, height, alone });
-  }
+    fragmentToJSON() {
+        return {
+            id: this.$Id,
+            pack: this.$Pack,
+            base: this.toJSON()
+        };
+    }
 
-  updatePosition({ x, y, alone }) {
-    this.$BaseObserver.updatePosition({ x, y, alone });
-  }
+    insertCustomPack(pack) {
+        this.$Pack = pack;
+    }
 
-  updateFocus(focus) {
-    this.$BaseObserver.updateFocus(focus);
-  }
 
-  insertDom(DOM) {
-    this.$BaseObserver.insertDom(DOM);
-  }
+    getDom() {
+        return this.$DOM;
+    }
 
-  setId(id) {
-    this.$Id = id;
-  }
+    /**
+     * 事件回调
+     * @param eventName
+     * @param fn
+     * eventName includes =
+     * nodeClick
+     * nodeResize
+     * nodeResizeStart
+     * nodeDragging
+     * nodeDragStart
+     * nodeDragFinish
+     */
+    getCallback(eventName, fn) {
+        if (typeof this.$Event[eventName] === "function") {
+            this.$Event[eventName](fn);
+        }
+    }
 
-  getId() {
-    return this.$Id;
-  }
+    setId(id) {
+        this.$Id = id;
+    }
+
+    getId() {
+        return this.$Id;
+    }
 }
