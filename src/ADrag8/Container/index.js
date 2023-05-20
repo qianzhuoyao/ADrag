@@ -99,19 +99,49 @@ export default class Container {
      * @param y
      * @param width
      * @param height
-     * @returns {{outBoundRight: boolean, outBoundTop: boolean, _In: boolean, outBoundBottom: boolean, outBoundLeft: boolean}}
+     * @param base
+     * @returns {Promise<unknown>}
      */
-    calculateDynamicBound({x, y, width, height}) {
+    calculateDynamicBound({x, y, width, height, base}) {
+        let baseX, baseY, baseWidth, baseHeight;
+        if (base instanceof Fragment) {
+            baseX = base.$Position.$X
+            baseY = base.$Position.$Y
+            baseWidth = base.$Size.$Width
+            baseHeight = base.$Size.$Height
+        }
         const {left, top, right, bottom} = computeDomPositionAndSize(
             this.$ContainerDom
         );
         return {
-            outBoundLeft: x <= left,
-            outBoundRight: x + width >= right,
-            outBoundTop: y <= top,
-            outBoundBottom: y + height >= bottom,
-            _In: x > left && x + width < right && y > top && y + height < bottom,
-        };
+            left, top, right, bottom,
+            outBoundLeft: (x <= left) && (baseX <= left),
+            outBoundRight: (x + width >= right) && (baseX + baseWidth >= right),
+            outBoundTop: (y <= top) && (baseY <= top),
+            outBoundBottom: (y + height >= bottom) && (baseY + baseHeight >= bottom),
+            _In: (x > left && x + width < right && y > top && y + height < bottom)
+                && (baseX > left && baseX + baseWidth < right && baseY > top && baseY + baseHeight < bottom),
+        }
+    }
+
+    /**
+     * 纠正误差
+     * @param key  x,y,w,h
+     * @param value value
+     */
+    correct(key, value) {
+        if (['x', 'y', 'w', 'h'].includes(key)) {
+            const {left, top, right, bottom} = computeDomPositionAndSize(
+                this.$ContainerDom
+            );
+            const map = {
+                x: value < left ? left : value,
+                y: value < top ? top : value,
+                w: value < (right - left) ? value : (right - left),
+                h: value < (bottom - top) ? value : (bottom - top)
+            }
+            return map[key]
+        }
     }
 
     setSize({width, height}) {

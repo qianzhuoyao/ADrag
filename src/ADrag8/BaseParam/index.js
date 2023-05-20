@@ -1,10 +1,4 @@
-/**
- * 基础属性
- * 它不会被fragment继承,因为fragment更倾向数据的更新而不是视图
- * 而BaseParam更倾向视图的更新而不是数据
- * 他们是并联的
- *
- */
+
 import {DEFAULT_DEEP, DRAG_STATE, MAX_DEEP, RESIZE_STATE} from "@/ADrag8/Config/CONSTANT";
 import EventCallback from "@/ADrag8/Event/eventCallback";
 import {createDom} from "@/ADrag8/View";

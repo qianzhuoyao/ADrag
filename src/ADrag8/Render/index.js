@@ -31,76 +31,85 @@ export default class Render {
                 outBoundBottom,
                 outBoundTop,
                 outBoundRight,
-                outBoundLeft
+                outBoundLeft,
+                left, top, right, bottom
             } = base.$Container.calculateDynamicBound({
                 x: event.pageX,
                 y: event.pageY,
                 width: 0,
-                height: 0
+                height: 0,
+                base
             })
+            const initX = tip.$X + tip.$Width
+            const initY = tip.$Y + tip.$Height
+            const rightX = base.$Size.$Width + base.$Position.$X
+            const bottomY = base.$Size.$Height + base.$Position.$Y
             if (position === POSITION_MAP.e) {
+
                 base.updateSize({
-                    width: outBoundLeft ? base.$Size.$Width : tip.$X + tip.$Width - event.pageX,
+                    width: outBoundLeft ? (rightX - left) : (tip.$X + tip.$Width - event.pageX),
                     alone: true
                 })
                 base.updatePosition({
-                    x: outBoundLeft ? base.$Position.$X : event.pageX,
+                    x: (outBoundLeft || event.pageX >= rightX) ? (outBoundLeft ? left : (event.pageX >= rightX ? initX : event.pageX)) : event.pageX,
                     alone: true
                 })
             } else if (position === POSITION_MAP.f) {
                 base.updateSize({
-                    width: outBoundRight ? base.$Size.$Width : event.pageX - tip.$X,
+                    width: outBoundRight ? (right - base.$Position.$X) : (event.pageX - tip.$X),
                     alone: true
                 })
             } else if (position === POSITION_MAP.b) {
                 base.updateSize({
-                    height: outBoundTop ? base.$Size.$Height : tip.$Y + tip.$Height - event.pageY,
+                    height: outBoundTop ? (bottomY - top) : (tip.$Y + tip.$Height - event.pageY),
                     alone: true
                 })
                 base.updatePosition({
-                    y: outBoundTop ? base.$Position.$Y : event.pageY,
+                    y: (outBoundTop || event.pageY >= initY) ? (outBoundTop ? top : (event.pageY >= initY ? initY : event.pageY)) : event.pageY,
                     alone: true
                 })
             } else if (position === POSITION_MAP.h) {
                 base.updateSize({
-                    height: outBoundBottom ? base.$Size.$Height : event.pageY - tip.$Y,
+                    height: outBoundBottom ? (bottom - base.$Position.$Y) : (event.pageY - tip.$Y),
                     alone: true
                 })
             } else if (position === POSITION_MAP.a) {
                 base.updateSize({
-                    width: outBoundLeft ? base.$Size.$Width : tip.$X + tip.$Width - event.pageX,
-                    height: outBoundTop ? base.$Size.$Height : tip.$Y + tip.$Height - event.pageY,
+                    width: outBoundLeft ? (rightX - left) : (tip.$X + tip.$Width - event.pageX),
+                    height: outBoundTop ? (bottomY - top) : (tip.$Y + tip.$Height - event.pageY),
                 })
                 base.updatePosition({
-                    x: outBoundLeft ? base.$Position.$X : event.pageX,
-                    y: outBoundTop ? base.$Position.$Y : event.pageY,
+                    x: (outBoundLeft || event.pageX >= rightX) ? (outBoundLeft ? left : (event.pageX >= rightX ? initX : event.pageX)) : event.pageX,
+                    y: (outBoundTop || event.pageY >= initY) ? (outBoundTop ? top : (event.pageY >= initY ? initY : event.pageY)) : event.pageY,
                 })
             } else if (position === POSITION_MAP.c) {
                 base.updateSize({
-                    width: outBoundRight ? base.$Size.$Width : event.pageX - tip.$X,
-                    height: outBoundTop ? base.$Size.$Height : tip.$Y + tip.$Height - event.pageY,
+                    width: outBoundRight ? (right - base.$Position.$X) : (event.pageX - tip.$X),
+                    height: outBoundTop ? (bottomY - top) : (tip.$Y + tip.$Height - event.pageY),
                 })
                 base.updatePosition({
-                    y: outBoundTop ? base.$Position.$Y : event.pageY,
+                    y: (outBoundTop || event.pageY >= initY) ? (outBoundTop ? top : (event.pageY >= initY ? initY : event.pageY)) : event.pageY,
                     alone: true
                 })
             } else if (position === POSITION_MAP.i) {
                 base.updateSize({
-                    width: outBoundRight ? base.$Size.$Width : event.pageX - tip.$X,
-                    height: outBoundBottom ? base.$Size.$Height : event.pageY - tip.$Y,
+                    width: outBoundRight ? (right - base.$Position.$X) : (event.pageX - tip.$X),
+                    height: outBoundBottom ? (bottom - base.$Position.$Y) : (event.pageY - tip.$Y),
                 })
             } else if (position === POSITION_MAP.g) {
                 base.updateSize({
-                    width: outBoundLeft ? base.$Size.$Width : tip.$X + tip.$Width - event.pageX,
-                    height: outBoundBottom ? base.$Size.$Height : event.pageY - tip.$Y,
+                    width: outBoundLeft ? (rightX - left) : (tip.$X + tip.$Width - event.pageX),
+                    height: outBoundBottom ? (bottom - base.$Position.$Y) : (event.pageY - tip.$Y),
                 })
                 base.updatePosition({
-                    x: outBoundLeft ? base.$Position.$X : event.pageX,
+                    x: (outBoundLeft || event.pageX >= rightX) ? (outBoundLeft ? left : (event.pageX >= rightX ? initX : event.pageX)) : event.pageX,
                     alone: true
                 })
             }
+
         }
     }
+
 
     checkBound(block) {
         if (block instanceof Fragment) {
@@ -147,6 +156,7 @@ export default class Render {
                                     })
                                 })
                                 createMouseDown(DOM, () => {
+                                    i.block.updateFocus(true)
                                     i.block.updateCOS(DRAG_STATE)
                                     this._block = {
                                         ...i.block.$Position,
@@ -179,24 +189,18 @@ export default class Render {
                         /**
                          * 边界判断 bound check
                          */
-                        const {
-                            outBoundBottom,
-                            outBoundTop,
-                            outBoundRight,
-                            outBoundLeft,
-                        } = i.block.$Container.calculateDynamicBound({
-                            x: params.x - offsetX,
-                            y: params.y - offsetY,
-                            width: i.block.$Size.$Width,
-                            height: i.block.$Size.$Height
-                        })
-                        /**
-                         * 限制拖动
-                         */
+                        const {outBoundLeft, outBoundRight, outBoundBottom, outBoundTop, left, top, right, bottom,} =
+                            i.block.$Container.calculateDynamicBound({
+                                x: params.x - offsetX,
+                                y: params.y - offsetY,
+                                width: i.block.$Size.$Width,
+                                height: i.block.$Size.$Height,
+                                base: i.block,
+                            })
                         if (i.block.$CurrentOperationState === DRAG_STATE) {
                             i.block.updatePosition({
-                                x: (outBoundLeft || outBoundRight) ? i.block.$Position.$X : (params.x - offsetX),
-                                y: (outBoundBottom || outBoundTop) ? i.block.$Position.$Y : (params.y - offsetY)
+                                x: (outBoundLeft || outBoundRight) ? (outBoundLeft ? left : (outBoundRight ? (right - i.block.$Size.$Width) : i.block.$Position.$X)) : (params.x - offsetX),
+                                y: (outBoundBottom || outBoundTop) ? (outBoundTop ? top : (outBoundBottom ? (bottom - i.block.$Size.$Height) : i.block.$Position.$Y)) : (params.y - offsetY)
                             })
                             //拖拽事件回调执行
                             i.block.$Event.$Event.DRAGGING.map(eventItem => {
@@ -236,6 +240,7 @@ export default class Render {
             })
         }
     }
+
 
     //状态更改得重新paint,不然可能draggable不生效 绘制
     paint(block) {
