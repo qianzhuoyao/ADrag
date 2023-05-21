@@ -1,7 +1,7 @@
 import Group from "@/ADrag8/Group";
 import Fragment from "@/ADrag8/Fragment";
 import Render from "@/ADrag8/Render";
-import {createMouseClick} from "@/ADrag8/Event/operation";
+import {createMouseDown} from "@/ADrag8/Event/operation";
 import {BLOCK_TYPE} from "@/ADrag8/Config/CONSTANT";
 import {Container} from "@/ADrag8";
 import {paramsAllArray} from "@/ADrag8/Tools/typeCheck";
@@ -67,7 +67,7 @@ export default class Scene {
      * 加载默认背景点击事件
      */
     loadDefaultEvent() {
-        createMouseClick(
+        createMouseDown(
             document.body,
             () => {
                 Object.values(this.$Blocks).map((i) => {
@@ -81,14 +81,14 @@ export default class Scene {
 
     /**
      * 加载完事件并将fragment挂在到视图上
-     * @param render 渲染器
-     * @param openDefaultFocusEvent 开启默认的焦点模式
+     * @param render
+     * @param openDefaultFocusEvent
      */
     mount(render, openDefaultFocusEvent = true) {
         if (render instanceof Render) {
             render.load({
                 blocks: this.$Blocks,
-            });
+            }, render);
             openDefaultFocusEvent && this.loadDefaultEvent();
         }
     }

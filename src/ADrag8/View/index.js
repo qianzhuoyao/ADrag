@@ -1,5 +1,5 @@
 import {computeVertex, positionMap} from "@/ADrag8/Tools/compute";
-import {BOUND_LENGTH, VERTEX_CLASS} from "@/ADrag8/Config/CONSTANT";
+import {BOUND_LENGTH, VERTEX_BORDER_TYPE, VERTEX_CLASS} from "@/ADrag8/Config/CONSTANT";
 
 export const createDom = (id, parent = document.body, blockName = "div") => {
     const DOM = document.createElement(blockName);
@@ -31,7 +31,7 @@ export const syncVertexPosition = (DOM, target, key) => {
         target.style.top = Object.values(Vertex)[key][1] + "px";
         target.style.width = BOUND_LENGTH + "px";
         target.style.height = BOUND_LENGTH + "px";
-        target.style.border = "1px solid";
+        target.style.border = VERTEX_BORDER_TYPE;
         target.style.cursor = "pointer";
     }
 };
@@ -48,6 +48,7 @@ export const computeDomPositionAndSize = (DOM) => {
         };
     }
 };
+
 /**
  * 绘制顶点
  */
@@ -68,7 +69,7 @@ export const vertex = (DOM, tag) => {
             VDom.style.top = Object.values(Vertex)[i][1] + "px";
             VDom.style.width = boundLength + "px";
             VDom.style.height = boundLength + "px";
-            VDom.style.border = "1px solid";
+            VDom.style.border = VERTEX_BORDER_TYPE;
             VDom.style.cursor = "pointer";
             //默认隐藏
             VDom.style.display = "none";
@@ -76,3 +77,4 @@ export const vertex = (DOM, tag) => {
     }
     return DOMList;
 };
+

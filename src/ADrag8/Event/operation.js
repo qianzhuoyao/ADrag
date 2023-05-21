@@ -78,7 +78,7 @@ const modify = (
     }
 };
 
-export const additionDragEvent = (DOM, {down, move, over, moveSuspend}) => {
+export const additionDragEvent = (DOM, {down, move, over, moveSuspend, throttle}) => {
     if (DOM instanceof HTMLElement) {
         let moveStream = null
         const origin = fromEvent(DOM, "mousedown");
@@ -89,7 +89,7 @@ export const additionDragEvent = (DOM, {down, move, over, moveSuspend}) => {
                 map((downEventParam) => {
                     typeof down === "function" && down(downEventParam);
                     return mover.pipe(
-                        throttleTime(0),
+                        throttleTime(throttle || 0),
                         takeWhile(() => {
                             return isFunc(moveSuspend) ? moveSuspend(moveStream) : true
                         }),

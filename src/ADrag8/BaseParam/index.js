@@ -1,9 +1,9 @@
-
 import {DEFAULT_DEEP, DRAG_STATE, MAX_DEEP, RESIZE_STATE} from "@/ADrag8/Config/CONSTANT";
 import EventCallback from "@/ADrag8/Event/eventCallback";
 import {createDom} from "@/ADrag8/View";
 import {Container} from "@/ADrag8";
 import {listEachTruthIncludesZero} from '@/ADrag8/Tools/typeCheck'
+
 export default class BaseParam {
     constructor() {
         this._callback = null
@@ -144,6 +144,9 @@ export default class BaseParam {
                 this.$Vertex.map(i => {
                     i.style.display = this.$Focus ? 'block' : 'none'
                 })
+                if (this.$DOM) {
+                    this.$DOM.style.border = this.$Focus ? "1px dashed #e1e1e1" : ""
+                }
             }
         }
     }

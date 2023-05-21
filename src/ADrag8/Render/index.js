@@ -18,13 +18,13 @@ export default class Render {
 
 
     /**
-     * 同步与限制操作与数据
+     * 限制范围
      * @param event 鼠标
      * @param base Fragment
      * @param position 位置
      * @param tip 按下时的位置记录
      * */
-    sync(event, base, position, tip) {
+    restrictedRange(event, base, position, tip) {
         if (base instanceof Fragment) {
             //限制操作在container内生效
             const {
@@ -40,8 +40,8 @@ export default class Render {
                 height: 0,
                 base
             })
-            const initX = tip.$X + tip.$Width
-            const initY = tip.$Y + tip.$Height
+            const initTipX = tip.$X + tip.$Width
+            const initTipY = tip.$Y + tip.$Height
             const rightX = base.$Size.$Width + base.$Position.$X
             const bottomY = base.$Size.$Height + base.$Position.$Y
             if (position === POSITION_MAP.e) {
@@ -51,7 +51,7 @@ export default class Render {
                     alone: true
                 })
                 base.updatePosition({
-                    x: (outBoundLeft || event.pageX >= rightX) ? (outBoundLeft ? left : (event.pageX >= rightX ? initX : event.pageX)) : event.pageX,
+                    x: (outBoundLeft || event.pageX >= rightX) ? (outBoundLeft ? left : (event.pageX >= rightX ? initTipX : event.pageX)) : event.pageX,
                     alone: true
                 })
             } else if (position === POSITION_MAP.f) {
@@ -65,7 +65,7 @@ export default class Render {
                     alone: true
                 })
                 base.updatePosition({
-                    y: (outBoundTop || event.pageY >= initY) ? (outBoundTop ? top : (event.pageY >= initY ? initY : event.pageY)) : event.pageY,
+                    y: (outBoundTop || event.pageY >= initTipY) ? (outBoundTop ? top : (event.pageY >= initTipY ? initTipY : event.pageY)) : event.pageY,
                     alone: true
                 })
             } else if (position === POSITION_MAP.h) {
@@ -79,8 +79,8 @@ export default class Render {
                     height: outBoundTop ? (bottomY - top) : (tip.$Y + tip.$Height - event.pageY),
                 })
                 base.updatePosition({
-                    x: (outBoundLeft || event.pageX >= rightX) ? (outBoundLeft ? left : (event.pageX >= rightX ? initX : event.pageX)) : event.pageX,
-                    y: (outBoundTop || event.pageY >= initY) ? (outBoundTop ? top : (event.pageY >= initY ? initY : event.pageY)) : event.pageY,
+                    x: (outBoundLeft || event.pageX >= rightX) ? (outBoundLeft ? left : (event.pageX >= rightX ? initTipX : event.pageX)) : event.pageX,
+                    y: (outBoundTop || event.pageY >= initTipY) ? (outBoundTop ? top : (event.pageY >= initTipY ? initTipY : event.pageY)) : event.pageY,
                 })
             } else if (position === POSITION_MAP.c) {
                 base.updateSize({
@@ -88,7 +88,7 @@ export default class Render {
                     height: outBoundTop ? (bottomY - top) : (tip.$Y + tip.$Height - event.pageY),
                 })
                 base.updatePosition({
-                    y: (outBoundTop || event.pageY >= initY) ? (outBoundTop ? top : (event.pageY >= initY ? initY : event.pageY)) : event.pageY,
+                    y: (outBoundTop || event.pageY >= initTipY) ? (outBoundTop ? top : (event.pageY >= initTipY ? initTipY : event.pageY)) : event.pageY,
                     alone: true
                 })
             } else if (position === POSITION_MAP.i) {
@@ -102,7 +102,7 @@ export default class Render {
                     height: outBoundBottom ? (bottom - base.$Position.$Y) : (event.pageY - tip.$Y),
                 })
                 base.updatePosition({
-                    x: (outBoundLeft || event.pageX >= rightX) ? (outBoundLeft ? left : (event.pageX >= rightX ? initX : event.pageX)) : event.pageX,
+                    x: (outBoundLeft || event.pageX >= rightX) ? (outBoundLeft ? left : (event.pageX >= rightX ? initTipX : event.pageX)) : event.pageX,
                     alone: true
                 })
             }
@@ -124,11 +124,13 @@ export default class Render {
     /**
      * 加载
      * @param blocks
+     * @param _render
      */
-    load({blocks}) {
-        console.log(blocks, 'blocks')
+    load({blocks}, _render) {
+        console.log(blocks,_render, 'blocks')
         if (blocks) {
             Object.values(blocks).map(i => {
+                i.block.rendered(_render)
                 let offsetX = 0, offsetY = 0, VertexDOMs = [], targetVertex = null;
                 const DOM = this.paint(i.block)
                 //同步到Fragment.$BaseObserver的$DOM
@@ -142,6 +144,10 @@ export default class Render {
                 const observer = additionDragEvent(DOM, {
                     //按下事件订阅回调
                     down: params => {
+                        if (params.button === 0) {
+                            i.block.updateFocus(true)
+                            i.block.$DOM.style.cursor = "grab"
+                        }
                         //避免重读渲染block
                         if (!this.renderedIds.includes(i.block.$Id)) {
                             //顶点操作，用来区分拖拽与尺寸更改
@@ -156,7 +162,6 @@ export default class Render {
                                     })
                                 })
                                 createMouseDown(DOM, () => {
-                                    i.block.updateFocus(true)
                                     i.block.updateCOS(DRAG_STATE)
                                     this._block = {
                                         ...i.block.$Position,
@@ -166,6 +171,7 @@ export default class Render {
                                         eventItem()
                                     })
                                 }, true)
+
                             })
                             createMouseClick(DOM, () => {
                                 i.block.updateFocus(true)
@@ -186,6 +192,11 @@ export default class Render {
                     },
                     //移动事件订阅回调
                     move: params => {
+                        console.log(params, 'moveparams')
+                        //按键判断
+                        if (params.event.buttons !== 1) {
+                            return
+                        }
                         /**
                          * 边界判断 bound check
                          */
@@ -210,7 +221,7 @@ export default class Render {
                         } else if (i.block.$CurrentOperationState === RESIZE_STATE) {
                             const targetPosition = targetVertex.dataset.position
                             //此时同步尺寸与数据
-                            this.sync(params.event, i.block, targetPosition, this._block)
+                            this.restrictedRange(params.event, i.block, targetPosition, this._block)
                             //同步顶点的位置
                             VertexDOMs.map((item, key) => {
                                 syncVertexPosition(DOM, item, key)
@@ -226,6 +237,7 @@ export default class Render {
                     //鼠标抬起订阅回调
                     over: () => {
                         //鼠标放起，流程结束,触发结束事件
+                        i.block.$DOM.style.cursor = ""
                         i.block.$Event.$Event.DRAG_FINISH.map(eventItem => {
                             eventItem()
                         })

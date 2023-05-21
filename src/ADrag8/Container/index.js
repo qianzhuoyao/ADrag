@@ -1,5 +1,6 @@
 import {Fragment} from "@/ADrag8";
 import {computeDomPositionAndSize} from "@/ADrag8/View";
+import {additionDragEvent} from "@/ADrag8/Event/operation";
 
 export default class Container {
     constructor(containerDom = document.body) {
@@ -12,6 +13,52 @@ export default class Container {
         this.$ContainerLeft = computeDomPositionAndSize(this.$ContainerDom).left;
         this.$ContainerTop = computeDomPositionAndSize(this.$ContainerDom).top;
         this._Children = [];
+
+        this.grabAndMoveChildren()
+    }
+
+    grabAndMoveChildren() {
+        this.$ContainerDom.oncontextmenu = function () {
+            return false;
+        }
+        this.$ContainerDom.style.overflow = "hidden"
+        const initState = {
+            x: undefined,
+            y: undefined
+        }
+        let preChildren = []
+        additionDragEvent(this.$ContainerDom, {
+            down: params => {
+                console.log(params, this._Children, 'con')
+                if (params.buttons === 2) {
+                    this.$ContainerDom.style.cursor = "grab"
+                    initState.x = params.pageX
+                    initState.y = params.pageY
+                    preChildren = this._Children.map(i => {
+                        return {
+                            x: i.$Position.$X,
+                            y: i.$Position.$Y
+                        }
+                    })
+                }
+            },
+            move: evt => {
+                if (evt.event.buttons === 2) {
+                    console.log(evt, initState, preChildren, 'evt')
+                    this._Children.map((i, k) => {
+                        i.updatePosition({
+                            x: preChildren[k].x + evt.x - initState.x,
+                            y: preChildren[k].y + evt.y - initState.y,
+                            alone: true
+                        })
+                        i._Render.paint(i)
+                    })
+                }
+            },
+            over: () => {
+                this.$ContainerDom.style.cursor = ""
+            }
+        })
     }
 
     toJSON() {
@@ -100,7 +147,7 @@ export default class Container {
      * @param width
      * @param height
      * @param base
-     * @returns {Promise<unknown>}
+     * @returns {{outBoundRight: boolean, top, outBoundTop: boolean, left, _In: boolean, bottom, outBoundBottom: boolean, outBoundLeft: boolean, right}}
      */
     calculateDynamicBound({x, y, width, height, base}) {
         let baseX, baseY, baseWidth, baseHeight;

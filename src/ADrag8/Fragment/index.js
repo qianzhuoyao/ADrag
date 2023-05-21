@@ -1,10 +1,12 @@
 import BaseParam from "@/ADrag8/BaseParam";
+import {Render} from "@/ADrag8";
 
 export default class Fragment extends BaseParam {
     constructor() {
         super()
         this.$Id = undefined;
         this.$Pack = null;
+        this._Render = null;
         // this.$BaseObserver = new BaseParam();
         this.updatePosition({x: 0, y: 0});
         this.updateSize({width: 0, height: 0});
@@ -22,6 +24,15 @@ export default class Fragment extends BaseParam {
         this.$Pack = pack;
     }
 
+    rendered(render) {
+        if (render instanceof Render) {
+            this._Render = render
+        }
+    }
+
+    getRender() {
+        return Object.freeze(this._Render)
+    }
 
     getDom() {
         return this.$DOM;
