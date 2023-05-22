@@ -24,10 +24,23 @@ export default class Fragment extends BaseParam {
         this.$Pack = pack;
     }
 
+    //移除块
+    remove() {
+        //更新数据
+        this._Render.emitRemove(this.$Id)
+    }
+
     rendered(render) {
         if (render instanceof Render) {
             this._Render = render
         }
+    }
+
+    /**
+     * 调用render 重绘
+     */
+    reDraw() {
+        this._Render.paint(this)
     }
 
     getRender() {
@@ -38,27 +51,11 @@ export default class Fragment extends BaseParam {
         return this.$DOM;
     }
 
-    /**
-     * 事件回调
-     * @param eventName
-     * @param fn
-     * eventName includes =
-     * nodeClick
-     * nodeResize
-     * nodeResizeStart
-     * nodeDragging
-     * nodeDragStart
-     * nodeDragFinish
-     */
-    getCallback(eventName, fn) {
-        if (typeof this.$Event[eventName] === "function") {
-            this.$Event[eventName](fn);
-        }
-    }
 
     setId(id) {
         this.$Id = id;
     }
+
 
     getId() {
         return this.$Id;

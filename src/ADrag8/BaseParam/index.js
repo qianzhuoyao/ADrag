@@ -4,8 +4,9 @@ import {createDom} from "@/ADrag8/View";
 import {Container} from "@/ADrag8";
 import {listEachTruthIncludesZero} from '@/ADrag8/Tools/typeCheck'
 
-export default class BaseParam {
+export default class BaseParam extends EventCallback {
     constructor() {
+        super()
         this._callback = null
         this.$Position = {
             $X: 0,
@@ -22,7 +23,6 @@ export default class BaseParam {
         this.$Focus = false
         this.$Draggable = true
         this.$CurrentOperationState = DRAG_STATE   //当前块的操作状态   有移动 drag 与 缩放 resize
-        this.$Event = new EventCallback()
         this.$Container = new Container()
         this.$Lock = false
     }

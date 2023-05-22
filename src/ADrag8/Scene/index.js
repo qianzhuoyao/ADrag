@@ -5,6 +5,7 @@ import {createMouseDown} from "@/ADrag8/Event/operation";
 import {BLOCK_TYPE} from "@/ADrag8/Config/CONSTANT";
 import {Container} from "@/ADrag8";
 import {paramsAllArray} from "@/ADrag8/Tools/typeCheck";
+import EventCallback from "@/ADrag8/Event/eventCallback";
 
 /**
  * const block = new Fragment()
@@ -15,13 +16,15 @@ import {paramsAllArray} from "@/ADrag8/Tools/typeCheck";
  * scene.createBlock(block)
  * scene.renderBlock(render)
  */
-export default class Scene {
+export default class Scene extends EventCallback {
     constructor() {
+        super()
         this._Key = 0;
         //组不会额外在视图内显示，它的内容应该一并在$Blocks内，它是一类数据集
         this.$Groups = [];
         this.$Blocks = {};
         this.$Containers = {};
+        this._Render = null
         this.$CanvasModule = null;
     }
 
@@ -89,6 +92,15 @@ export default class Scene {
             render.load({
                 blocks: this.$Blocks,
             }, render);
+            this._Render = render
+            this._Render.syncRemove(({id}) => {
+                console.log(arguments, id, this.$Blocks, this.$Blocks[id], 'this.$Blocks[removeId]')
+                if (id in this.$Blocks) {
+                    this.$Blocks[id].block.$Cycle.DESTROYED.map(eventItem => eventItem())
+                    this.$Blocks[id].block.$DOM.remove()
+                    delete this.$Blocks[id]
+                }
+            })
             openDefaultFocusEvent && this.loadDefaultEvent();
         }
     }

@@ -1,16 +1,17 @@
 import {createDom, syncVertexPosition, vertex} from "@/ADrag8/View";
 import {additionDragEvent, clogDefaultDrag, createMouseClick, createMouseDown} from "@/ADrag8/Event/operation";
-import {takeWhile} from "rxjs";
 import {computeOffset} from "@/ADrag8/Tools/compute";
 import {DRAG_STATE, POSITION_MAP, RESIZE_STATE} from "@/ADrag8/Config/CONSTANT";
 import {Fragment} from "@/ADrag8";
+import {UpdateQueue} from "@/ADrag8/Emitter/updateQueue";
 
 /**
  * 渲染block
  * 并在其中混入事件
  */
-export default class Render {
+export default class Render extends UpdateQueue {
     constructor() {
+        super()
         this._createdDom = []
         this._block = null
         this.renderedIds = []
@@ -23,6 +24,7 @@ export default class Render {
      * @param base Fragment
      * @param position 位置
      * @param tip 按下时的位置记录
+     * todo:边界检测不存在时的操作
      * */
     restrictedRange(event, base, position, tip) {
         if (base instanceof Fragment) {
@@ -124,12 +126,13 @@ export default class Render {
     /**
      * 加载
      * @param blocks
-     * @param _render
+     * @param _render 渲染器 ，因为渲染器种类不唯一
      */
     load({blocks}, _render) {
-        console.log(blocks,_render, 'blocks')
+        console.log(blocks, _render, 'blocks')
         if (blocks) {
             Object.values(blocks).map(i => {
+                this.runCycleMounted(i.block)
                 i.block.rendered(_render)
                 let offsetX = 0, offsetY = 0, VertexDOMs = [], targetVertex = null;
                 const DOM = this.paint(i.block)
@@ -141,7 +144,7 @@ export default class Render {
                 //判断元素是否在容器内再决定其是否可以渲染
                 this.checkBound(i.block)
                 //开启事件订阅
-                const observer = additionDragEvent(DOM, {
+                additionDragEvent(DOM, {
                     //按下事件订阅回调
                     down: params => {
                         if (params.button === 0) {
@@ -157,7 +160,7 @@ export default class Render {
                                 createMouseDown(item, () => {
                                     i.block.updateCOS(RESIZE_STATE)
                                     targetVertex = item
-                                    i.block.$Event.$Event.RESIZE_START.map(eventItem => {
+                                    i.block.$Event.RESIZE_START.map(eventItem => {
                                         eventItem()
                                     })
                                 })
@@ -167,7 +170,7 @@ export default class Render {
                                         ...i.block.$Position,
                                         ...i.block.$Size
                                     }
-                                    i.block.$Event.$Event.DRAG_START.map(eventItem => {
+                                    i.block.$Event.DRAG_START.map(eventItem => {
                                         eventItem()
                                     })
                                 }, true)
@@ -175,7 +178,7 @@ export default class Render {
                             })
                             createMouseClick(DOM, () => {
                                 i.block.updateFocus(true)
-                                i.block.$Event.$Event.CLICK.map(eventItem => {
+                                i.block.$Event.CLICK.map(eventItem => {
                                     eventItem()
                                 })
                             })
@@ -209,12 +212,19 @@ export default class Render {
                                 base: i.block,
                             })
                         if (i.block.$CurrentOperationState === DRAG_STATE) {
-                            i.block.updatePosition({
-                                x: (outBoundLeft || outBoundRight) ? (outBoundLeft ? left : (outBoundRight ? (right - i.block.$Size.$Width) : i.block.$Position.$X)) : (params.x - offsetX),
-                                y: (outBoundBottom || outBoundTop) ? (outBoundTop ? top : (outBoundBottom ? (bottom - i.block.$Size.$Height) : i.block.$Position.$Y)) : (params.y - offsetY)
-                            })
+                            if (i.block.$Container.bound()) {
+                                i.block.updatePosition({
+                                    x: (outBoundLeft || outBoundRight) ? (outBoundLeft ? left : (outBoundRight ? (right - i.block.$Size.$Width) : i.block.$Position.$X)) : (params.x - offsetX),
+                                    y: (outBoundBottom || outBoundTop) ? (outBoundTop ? top : (outBoundBottom ? (bottom - i.block.$Size.$Height) : i.block.$Position.$Y)) : (params.y - offsetY)
+                                })
+                            } else {
+                                i.block.updatePosition({
+                                    x: (params.x - offsetX),
+                                    y: (params.y - offsetY)
+                                })
+                            }
                             //拖拽事件回调执行
-                            i.block.$Event.$Event.DRAGGING.map(eventItem => {
+                            i.block.$Event.DRAGGING.map(eventItem => {
                                 eventItem()
                             })
                             // i.block.dragMoving(params)
@@ -222,37 +232,46 @@ export default class Render {
                             const targetPosition = targetVertex.dataset.position
                             //此时同步尺寸与数据
                             this.restrictedRange(params.event, i.block, targetPosition, this._block)
+
                             //同步顶点的位置
                             VertexDOMs.map((item, key) => {
                                 syncVertexPosition(DOM, item, key)
                             })
                             //尺寸更改事件回调执行
-                            i.block.$Event.$Event.RESIZING.map(eventItem => {
+                            i.block.$Event.RESIZING.map(eventItem => {
                                 eventItem()
                             })
                             // i.block.resizing(params)
                         }
                         this.paint(i.block)
                     },
+                    //此时禁止按下事件
+                    moveSuspend: () => i.block.$Draggable,
                     //鼠标抬起订阅回调
                     over: () => {
                         //鼠标放起，流程结束,触发结束事件
                         i.block.$DOM.style.cursor = ""
-                        i.block.$Event.$Event.DRAG_FINISH.map(eventItem => {
+                        i.block.$Event.DRAG_FINISH.map(eventItem => {
                             eventItem()
                         })
                     }
                 })
-                if (observer) {
-                    //此时禁止按下事件
-                    observer.mover.pipe(
-                        takeWhile(() => i.block.$Draggable)
-                    )
-                }
             })
         }
     }
 
+    runCycleUpdated(block) {
+        console.log(block, 'd')
+        block.$Cycle.UPDATED.map(eventItem => {
+            eventItem()
+        })
+    }
+
+    runCycleMounted(block) {
+        block.$Cycle.MOUNTED.map(eventItem => {
+            eventItem()
+        })
+    }
 
     //状态更改得重新paint,不然可能draggable不生效 绘制
     paint(block) {
@@ -270,6 +289,7 @@ export default class Render {
         DOM.style.width = block.$Size.$Width + 'px'
         DOM.style.height = block.$Size.$Height + 'px'
         DOM.style.zIndex = `${block.$Deep}`
+        this.runCycleUpdated(block)
         return DOM
     }
 }

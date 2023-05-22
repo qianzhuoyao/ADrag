@@ -5,7 +5,10 @@ export const RESIZE_STATE = Symbol.for("RESIZE_STATE.__RESIZE__");
 export const BOUND_LENGTH = 4;
 export const DEFAULT_DEEP = 10;
 export const VERTEX_BORDER_TYPE="1px solid #e1e1e1"
-export const MAX_VALUE = 999999;
+
+export const CONTAINER_MODEL_MOVE=Symbol.for("CONTAINER_MODEL_MOVE")
+export const CONTAINER_MODEL_STATIC=Symbol.for('CONTAINER_MODEL_STATIC')
+export const MAX_VALUE = 999;
 export const MAX_DEEP = MAX_VALUE;
 export const POSITION_MAP = {
     a: "POSITION_MAP.top-left",

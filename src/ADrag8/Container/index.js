@@ -1,6 +1,7 @@
 import {Fragment} from "@/ADrag8";
 import {computeDomPositionAndSize} from "@/ADrag8/View";
 import {additionDragEvent} from "@/ADrag8/Event/operation";
+import {CONTAINER_MODEL_MOVE, CONTAINER_MODEL_STATIC} from "@/ADrag8/Config/CONSTANT";
 
 export default class Container {
     constructor(containerDom = document.body) {
@@ -13,8 +14,24 @@ export default class Container {
         this.$ContainerLeft = computeDomPositionAndSize(this.$ContainerDom).left;
         this.$ContainerTop = computeDomPositionAndSize(this.$ContainerDom).top;
         this._Children = [];
-
+        this._Model = CONTAINER_MODEL_STATIC  //static or move
         this.grabAndMoveChildren()
+    }
+
+    setMoveModel() {
+        this._Model = CONTAINER_MODEL_MOVE
+    }
+
+    /**
+     * 是否存在边界检测
+     * @returns {boolean}
+     */
+    bound() {
+        return this._Model === CONTAINER_MODEL_STATIC
+    }
+
+    setStaticModel() {
+        this._Model = CONTAINER_MODEL_STATIC
     }
 
     grabAndMoveChildren() {
@@ -31,7 +48,12 @@ export default class Container {
             down: params => {
                 console.log(params, this._Children, 'con')
                 if (params.buttons === 2) {
-                    this.$ContainerDom.style.cursor = "grab"
+                    //指针样式
+                    if (this._Model === CONTAINER_MODEL_MOVE) {
+                        this.$ContainerDom.style.cursor = "grab"
+                    } else {
+                        this.$ContainerDom.style.cursor = ""
+                    }
                     initState.x = params.pageX
                     initState.y = params.pageY
                     preChildren = this._Children.map(i => {
@@ -42,6 +64,10 @@ export default class Container {
                     })
                 }
             },
+            moveSuspend: () => {
+                this.$ContainerDom.style.cursor = "auto"
+                return this._Model === CONTAINER_MODEL_MOVE
+            },
             move: evt => {
                 if (evt.event.buttons === 2) {
                     console.log(evt, initState, preChildren, 'evt')
@@ -51,12 +77,13 @@ export default class Container {
                             y: preChildren[k].y + evt.y - initState.y,
                             alone: true
                         })
-                        i._Render.paint(i)
+                        i.reDraw()
                     })
                 }
             },
             over: () => {
-                this.$ContainerDom.style.cursor = ""
+                console.log('over')
+                this.$ContainerDom.style.cursor = "auto"
             }
         })
     }

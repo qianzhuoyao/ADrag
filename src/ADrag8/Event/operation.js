@@ -90,16 +90,16 @@ export const additionDragEvent = (DOM, {down, move, over, moveSuspend, throttle}
                     typeof down === "function" && down(downEventParam);
                     return mover.pipe(
                         throttleTime(throttle || 0),
-                        takeWhile(() => {
-                            return isFunc(moveSuspend) ? moveSuspend(moveStream) : true
-                        }),
                         takeUntil(
                             upper.pipe(
                                 map((upEventParam) => {
                                     typeof over === "function" && over(upEventParam);
                                 })
                             )
-                        )
+                        ),
+                        takeWhile(() => {
+                            return isFunc(moveSuspend) ? moveSuspend(moveStream) : true
+                        })
                     );
                 }),
                 concatAll(),
